@@ -1,4 +1,200 @@
 @extends('newmaster')
+@section('page-title', 'Penerimaan Barang')
+@section('css')
+{{-- Tampilan baru (gaya newSML / purchasing purchaseOrder). Hanya visual: id, onclick, dan
+     alur halaman tidak berubah. Tab tetap seperti semula. --}}
+<link rel="stylesheet" href="{!! URL::asset('public/css/scrollbar-autohide.css') !!}?v={{ @filemtime(base_path('public/css/scrollbar-autohide.css')) ?: '1' }}">
+<link rel="stylesheet" href="{!! URL::asset('public/css/master-list.css') !!}?v={{ @filemtime(base_path('public/css/master-list.css')) ?: '1' }}">
+<link rel="stylesheet" href="{!! URL::asset('public/css/wms-tampilan-baru.css') !!}?v={{ @filemtime(base_path('public/css/wms-tampilan-baru.css')) ?: '1' }}">
+{{-- Tab + tabel daftar disamakan dengan newSML purchasing/newpo.blade.php (menu yang sama).
+     Tanpa filter tanggal dan tanpa geser/sembunyikan kolom (report-table.js). --}}
+<style>
+  .po-table-wrap table.dataTable thead th,
+  .po-table-wrap table.dataTable tbody td {
+    white-space: nowrap;
+  }
+
+  .custom-tabs {
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 2px;
+    background-color: #f1f3f5;
+    border-radius: 20px;
+    padding: 3px;
+  }
+
+  .custom-tabs .nav-link {
+    display: inline-block !important;
+    padding: 5px 16px !important;
+    font-size: 0.75rem !important;
+    border: none;
+    border-radius: 17px;
+    color: #495057;
+    background: transparent;
+    font-weight: 600;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .custom-tabs .nav-link:hover {
+    background: transparent;
+    color: #007bff;
+  }
+
+  .custom-tabs .nav-link.active {
+    background: #007bff;
+    border-color: #007bff;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 123, 255, .35);
+  }
+
+  .tab-card {
+    display: block !important;
+    align-items: flex-start !important;
+    padding: 0 !important;
+    border: none !important;
+    margin-bottom: 6px !important;
+  }
+
+  .tab-card .card-body {
+    padding: 5px 10px !important;
+  }
+
+  #content { padding-top: 12px; }
+
+  /* Kartu: di newSML gayanya datang dari rule .card global layout-nya (latar putih, sudut 12px,
+     garis 1.5px); layout ajcwms memakai .card Bootstrap, jadi ditulis di sini untuk #page1. */
+  #page1 .card {
+    display: block !important;
+    align-items: stretch !important;
+    padding: 0 !important;
+    text-align: left !important;
+    cursor: default !important;
+    background: var(--white, #fff);
+    border-radius: var(--radius, 12px);
+    border: 1.5px solid var(--border, #e5e7eb);
+  }
+
+  #page1 .card.tab-card { border: none !important; }
+
+  /* ---------- Gaya dasar tabel daftar (.data-table) - di newSML ada di layout-nya ---------- */
+  #page1 .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  #page1 .data-table thead th {
+    background: #f9fafb;
+    padding: 11px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--text-muted, #6b7280);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--border, #e5e7eb);
+  }
+
+  #page1 .data-table tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f3f4f6;
+    color: var(--text-main, #1f2937);
+  }
+
+  #page1 .data-table tbody tr:last-child td { border-bottom: none; }
+  #page1 .data-table tbody tr:hover td { background: #f9fafb; }
+
+  /* ---------- Kolom Aksi - tombol kecil warna pastel ---------- */
+  #tabel td:first-child:not([colspan]),
+  #tabel_pembelian td:first-child:not([colspan]) {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #tabel td:first-child .btn,
+  #tabel_pembelian td:first-child .btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    font-size: 13px;
+    border: 1px solid transparent;
+    box-shadow: none;
+    transition: all .12s ease;
+  }
+
+  #tabel td:first-child .btn:hover,
+  #tabel_pembelian td:first-child .btn:hover {
+    filter: brightness(0.97);
+    transform: translateY(-1px);
+  }
+
+  #tabel td:first-child .btn-success, #tabel_pembelian td:first-child .btn-success { color: #16a34a; border-color: #cdebd7; background: #e7f7ed; }
+  #tabel td:first-child .btn-warning, #tabel_pembelian td:first-child .btn-warning { color: #b45309; border-color: #fbe3bd; background: #fef3e0; }
+  #tabel td:first-child .btn-primary, #tabel_pembelian td:first-child .btn-primary { color: #2563eb; border-color: #cfdcff; background: #e8edff; }
+  #tabel td:first-child .btn-danger,  #tabel_pembelian td:first-child .btn-danger  { color: #dc2626; border-color: #f7cfcf; background: #fdeaea; }
+  #tabel td:first-child .btn-info,    #tabel_pembelian td:first-child .btn-info    { color: #0891b2; border-color: #a5f3fc; background: #ecfeff; }
+
+  /* Tombol di kolom Actions baru muncul saat barisnya di-hover. */
+  table.data-table.po-aksi-hover tbody td:first-child .btn {
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity .12s ease;
+  }
+  table.data-table.po-aksi-hover tbody tr:hover td:first-child .btn {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  /* Dropdown "Tampilkan" (jumlah baris per halaman) di toolbar. */
+  .po-len-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--rt-card);
+    border: 1.5px solid var(--rt-border);
+    border-radius: 8px;
+    padding: 5px 12px;
+  }
+
+  .po-len-wrap label {
+    margin: 0;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--rt-ink-soft);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    white-space: nowrap;
+  }
+
+  .po-len-inp {
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--rt-ink);
+    outline: none;
+    cursor: pointer;
+    padding: 2px 20px 2px 0;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231D2130' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right center;
+  }
+
+  #tabel, #tabel_pembelian {
+    min-width: 100%;
+  }
+</style>
+@endsection
 @section('buttons')
   <!-- <li class="nav-item">
     <button style="margin-right: 5px;" class="btn btn-primary btn-sm" type="button"   onclick="buttonAdd()" ><i class="bi bi-plus-lg"></i></button>
@@ -17,10 +213,7 @@
 
 
 @section('content')
-<div class="container-fluid">
-<h1>Penerimaan Barang</h1>
-<!-- <button onclick="loadAll()">tes</button> -->
-</div>
+{{-- Judul "Penerimaan Barang" sekarang di bar atas layout (page-title). --}}
 
 
 
@@ -33,7 +226,7 @@
 <div id="tempPrintContainer" style="display:none">
 
 </div>
-<div class="container-fluid">
+<div id="page1" class="container-fluid">
   <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
   <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
 
@@ -47,25 +240,42 @@
 
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-  <div class="card">
-    <div class="card-header">
-      <div class="row">
-        <nav style="width: 100%;">
-          <div class="nav nav-tabs col-12" id="nav-tab" role="tablist">
-            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true" style="color: black;">Outstanding PO</a>
-            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false" style="color: black;">Penerimaan Barang</a>
-          </div>
-        </nav>
+  <div class="card mb-3 tab-card">
+    <div class="card-body">
+      <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
+        <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab"
+           aria-controls="nav-home" aria-selected="true">
+          Outstanding PO
+        </a>
+        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab"
+           aria-controls="nav-profile" aria-selected="false">
+          Penerimaan Barang
+        </a>
       </div>
     </div>
-    <div class="card-body" >
+  </div>
+  <div class="card">
+    <div class="card-body" style="padding:0;">
       <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
           <div class="row">
-            <div class="col-12" style="overflow:auto;">
-              <div class="container-fluid">
+           <div class="col-md-12">
+              <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
+                <div class="po-toolbar">
+                  <input type="search" id="npoSearch1" class="po-search-inp" placeholder="Cari data">
+                  <div class="po-len-wrap">
+                    <label for="npoLen1">Tampilkan</label>
+                    <select id="npoLen1" class="po-len-inp">
+                      <option value="10">10</option>
+                      <option value="25">25</option>
+                      <option value="50">50</option>
+                      <option value="100">100</option>
+                      <option value="-1">Semua</option>
+                    </select>
+                  </div>
+                </div>
 
-                    <table id="tabel" class="table table-bordered table-striped"  >
+                    <table id="tabel" class="data-table po-aksi-hover">
                       <thead class="text-center">
                         <tr>
                           <th scope="col">Actions</th>
@@ -103,8 +313,8 @@
                         <tr id="tr{!! $j  !!}" onclick="">
                         <!-- <tr id="tr{!! $j  !!}" onclick="tesclick({{$j}} , {{$tempPo[$j]}})"> -->
                         <td>
-                          <button style="" class="btn btn-warning btn-sm" type="button"   onclick="buttonDetail({{$j}}, {{$tempPo[$j]}})" ><i class="bi bi-info-lg"></i></button>
-                          <button style="" class="btn btn-success btn-sm" type="button"   onclick="buttonAdd({{$j}}, {{$tempPo[$j]}})" ><i class="bi bi-bag-plus-fill"></i></button>
+                          <button style="" class="btn btn-warning btn-sm" type="button" title="Detail" onclick="buttonDetail({{$j}}, {{$tempPo[$j]}})" ><i class="bi bi-info-lg"></i></button>
+                          <button style="" class="btn btn-primary btn-sm" type="button" title="Terima" onclick="buttonAdd({{$j}}, {{$tempPo[$j]}})" ><i class="bi bi-plus"></i></button>
                         </td>
                             <td>{{ $tempPo[$j][0]->NoBukti}}</td>
                             <td>{!! date("Y/m/d", strtotime($tempPo[$j][0]->TANGGAL)) !!}</td>
@@ -125,8 +335,22 @@
         </div>
         <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
           <div class="row">
-            <div class="col-12" style="overflow:auto;">
-              <table id="tabel_pembelian" class="table table-bordered table-striped"  >
+            <div class="col-md-12">
+              <div class="container-fluid col-sm-12" style="padding:0; margin:0; width:100%;">
+                <div class="po-toolbar">
+                  <input type="search" id="npoSearch2" class="po-search-inp" placeholder="Cari data">
+                  <div class="po-len-wrap">
+                    <label for="npoLen2">Tampilkan</label>
+                    <select id="npoLen2" class="po-len-inp">
+                      <option value="10">10</option>
+                      <option value="25">25</option>
+                      <option value="50">50</option>
+                      <option value="100">100</option>
+                      <option value="-1">Semua</option>
+                    </select>
+                  </div>
+                </div>
+              <table id="tabel_pembelian" class="data-table po-aksi-hover">
                 <thead class="text-center">
                   <tr>
                     <th>Actions</th>
@@ -142,10 +366,10 @@
                     @for ($j = 0; $j < count($tempPembelian1); $j++)
                     <tr>
                       <td>
-                        <button style="" class="btn btn-warning btn-sm" type="button"   onclick="detailPembelian({{$j}},{{$tempPembelian1[$j]}})" ><i class="bi bi-info-lg"></i></button>
-                        <button class="btn btn-success btn-sm" type="button" onclick="buttonEditPembelian('{{ $tempPembelian1[$j][0]->NoBukti}}')"><i class="bi bi-pen"></i></button>
+                        <button style="" class="btn btn-warning btn-sm" type="button" title="Detail" onclick="detailPembelian({{$j}},{{$tempPembelian1[$j]}})" ><i class="bi bi-info-lg"></i></button>
+                        <button class="btn btn-success btn-sm" type="button" title="Edit" onclick="buttonEditPembelian('{{ $tempPembelian1[$j][0]->NoBukti}}')"><i class="bi bi-pen"></i></button>
 
-                        <button style="" class="btn btn-primary btn-sm" type="button"   onclick="buttonPrintPembelian('{{$tempPembelian1[$j][0]->NoBukti}}')" ><i class="bi bi-printer"></i></button>
+                        <button style="" class="btn btn-primary btn-sm" type="button" title="Cetak" onclick="buttonPrintPembelian('{{$tempPembelian1[$j][0]->NoBukti}}')" ><i class="bi bi-printer"></i></button>
                       </td>
                       <!-- <td colspan="7">Tidak ada data po ditemukan.</td> -->
                       <td>{{ $tempPembelian1[$j][0]->NoBukti}}</td>
@@ -164,6 +388,7 @@
                   </tr>
                 </tfoot>
               </table>
+              </div>
             </div>
           </div>
         </div>
@@ -183,7 +408,7 @@
 
 
 <!-- start modal add -->
-<div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade wms-baru wms-baru-modal" id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content rounded-4">
       <div class="modal-header">
@@ -192,92 +417,35 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" id="formBsGrid">
         <!-- <h1>Tes Modal</h1> -->
         <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
         <input type="hidden" name="noUrut" id="input_add_noUrut" value="{!! csrf_token() !!}" />
-        <div class="container-fluid">
-          <div class="row">
+        <div class="bs-form">
+          <label for="input_add_nobukti">No Bukti</label>
+          <input type="text" class="form-control" id="input_add_nobukti" placeholder="Surat Jln" disabled>
 
+          <label for="input_add_tanggal">Tanggal</label>
+          <input type="date" class="form-control" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" >
 
-            <div class="col-12">
-              <div class="form-group">
-                <label>No Bukti</label>
-              </div>
-            </div>
-            <div class="col-12">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_add_nobukti" placeholder="Surat Jln" disabled>
-              </div>
-            </div>
-            <div class="col-12">
-              <div class="form-group">
-                <label>Tanggal</label>
-              </div>
-            </div>
-            <div class="col-12">
-              <div class="form-group">
-                <input type="date" class="form-control" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" >
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-12">
-              <div class="form-group">
-                <label>Nomor PO</label>
-              </div>
-            </div>
-            <div class="col-12">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_add_nomorpo" placeholder="Nomor PO" required disabled>
-              </div>
-            </div>
-            <div class="col-12">
-              <div class="form-group">
-                <label>Gudang</label>
-              </div>
-            </div>
-            <div class="col-12">
-              <div class="form-group">
-              <select id="input_add_gudang" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
-                @foreach ($gudang as $g)
-                <option value="{{ $g->KODEGDG }}">{{ $g->KODEGDG }} {{ $g->NAMA }}</option>
-                @endforeach
-              </select>
-            </div>
-          </div>
+          <label for="input_add_nomorpo">Nomor PO</label>
+          <input type="text" class="form-control" id="input_add_nomorpo" placeholder="Nomor PO" required disabled>
+
+          <label for="input_add_gudang">Gudang</label>
+          <select id="input_add_gudang" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+            @foreach ($gudang as $g)
+            <option value="{{ $g->KODEGDG }}">{{ $g->KODEGDG }} {{ $g->NAMA }}</option>
+            @endforeach
+          </select>
+
+          <label for="input_add_suratjalansupp">Surat Jln Supp</label>
+          <input type="text" autocomplete="off" class="form-control" id="input_add_suratjalansupp" placeholder="Surat Jln" required>
+
+          <label for="input_add_nokend">No. Kend / Sopir</label>
+          <input type="text" autocomplete="off" class="form-control" id="input_add_nokend" placeholder="No Kend / Sopir" required>
         </div>
-        <div class="row">
-          <div class="col-12">
-            <div class="form-group">
-              <label>Surat Jln Supp</label>
-            </div>
-          </div>
-          <div class="col-12">
-            <div class="form-group">
-              <input type="text" autocomplete="off" class="form-control" id="input_add_suratjalansupp" placeholder="Surat Jln" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-12">
-            <div class="form-group">
-              <label>No. Kend / Sopir</label>
-            </div>
-          </div>
-          <div class="col-12">
-            <div class="form-group">
-              <input type="text" autocomplete="off" class="form-control" id="input_add_nokend" placeholder="No Kend / Sopir" required>
-            </div>
-          </div>
-        </div>
-        </div>
-
-
-
       </div>
-        <div class="container-fluid" style="overflow-x: auto;">
+        <div class="container-fluid wms-scroll wms-modal-tabel px-4" style="overflow-x: auto;">
 
               <table id="addTable" class="table table-bordered table-striped"  >
                 <thead class="text-center">
@@ -319,7 +487,7 @@
 
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-        <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+        <button type="button" class="btn btn-primary" onclick="submitAdd()">Simpan</button>
       </div>
     </div>
   </div>
@@ -328,7 +496,7 @@
 <!-- End modal add-->
 
 <!-- start modal detail -->
-<div class="modal fade" id="detail" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade wms-baru wms-baru-modal" id="detail" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -337,56 +505,19 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
-        <!-- <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" /> -->
-        <div class="container-fluid">
-          <div class="row">
-            <!-- <div class="col-12">
-              <h5 id="detailDate">Tanggal :</h5>
-            </div>
-            <div class="col-12">
-              <h5 id="detailSupp">Supplier :</h5>
-            </div>
-            <div class="col-12">
-              <h5 id="detailKodeSupp">No. PO :</h5> -->
-            </div>
+      <div class="modal-body" id="formBsGrid">
+        <div class="bs-form">
+          <label for="detailDate">Tanggal</label>
+          <input type="date" class="form-control" id="detailDate" value="{!! date('Y-m-d') !!}" disabled>
 
-          </div>
-          <div class="row">
-            <div class="col-12">
-              <div class="form-group">
-                <label>Tanggal</label>
-              </div>
-            </div>
-            <div class="col-12">
-              <div class="form-group">
-                <input type="date" class="form-control" id="detailDate" value="{!! date('Y-m-d') !!}" disabled>
-              </div>
-            </div>
-            <div class="col-12">
-              <div class="form-group">
-                <label>Supplier</label>
-              </div>
-            </div>
-            <div class="col-12">
-              <div class="form-group">
-                <input type="text" class="form-control" id="detailSupp" placeholder="" disabled>
-              </div>
-            </div>
-            <div class="col-12">
-              <div class="form-group">
-                <label>Kode Supp</label>
-              </div>
-            </div>
-            <div class="col-12">
-              <div class="form-group">
-                <input type="text" class="form-control" id="detailKodeSupp" placeholder="" disabled>
-              </div>
-            </div>
-          </div>
+          <label for="detailSupp">Supplier</label>
+          <input type="text" class="form-control" id="detailSupp" placeholder="" disabled>
+
+          <label for="detailKodeSupp">Kode Supp</label>
+          <input type="text" class="form-control" id="detailKodeSupp" placeholder="" disabled>
         </div>
-        <div class="container-fluid" style="overflow-x: auto;">
+      </div>
+        <div class="container-fluid wms-scroll wms-modal-tabel px-4" style="overflow-x: auto;">
 
               <table id="detailTable" class="table table-bordered table-striped"  >
                 <thead class="text-center">
@@ -429,7 +560,7 @@
 
 
 <!-- start modal detail -->
-<div class="modal fade" id="detailPembelian" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade wms-baru wms-baru-modal" id="detailPembelian" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -438,78 +569,24 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
-        <!-- <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" /> -->
-        <div class="container-fluid">
-          <!-- <div class="row">
-            <div class="col-12">
+      <div class="modal-body" id="formBsGrid">
+        <div class="bs-form">
+          <label for="detailPembelianNoPO">No PO</label>
+          <input type="text" class="form-control" id="detailPembelianNoPO" disabled>
 
-              <h5 id="detailPembelianNoPO">Kode Supplier :</h5>
-            </div>
-            <div class="col-12">
-              <h5 id="detailPembelianSupp">Supplier :</h5>
-            </div>
-            <div class="col-12">
-              <h5 id="detailPembelianDate">Tanggal :</h5>
-            </div>
-          </div> -->
-          <div class="row">
-            <!-- <div class="col-12">
-              <h5 id="detailPembelianFakturSupp">Keterangan :</h5>
-            </div>
-            <div class="col-12">
-              <h5 id="detailPembelianKeterangan">FakturSupp :</h5>
-            </div> -->
+          <label for="detailPembelianSupp">Supplier</label>
+          <input type="text" class="form-control" id="detailPembelianSupp" disabled>
 
-            <!-- <div class="row"> -->
-              <div class="col-12">
+          <label for="detailPembelianDate">Tanggal</label>
+          <input type="date" class="form-control" id="detailPembelianDate" value="{!! date('Y-m-d') !!}" disabled >
 
-                  <h5 id="">No PO</h5>
-              </div>
-              <div class="col-12">
+          <label for="detailPembelianFakturSupp">Keterangan</label>
+          <input type="text" autocomplete="off" class="form-control" id="detailPembelianFakturSupp"   disabled >
 
-                  <input type="text" class="form-control" id="detailPembelianNoPO" disabled>
-              </div>
-              <div class="col-12">
-                <h5 id="">Supplier</h5>
-              </div>
-              <div class="col-12">
-                <input type="text" class="form-control" id="detailPembelianSupp" disabled>
-              </div>
-              <div class="col-12">
-
-                <h5 id="">Tanggal</h5>
-              </div>
-              <div class="col-12">
-
-                  <input type="date" class="form-control" id="detailPembelianDate" value="{!! date('Y-m-d') !!}" disabled >
-              </div>
-            <!-- </div> -->
-            <!-- <div class="row"> -->
-
-
-              <div class="col-12">
-                <h5 id="">Keterangan</h5>
-              </div>
-              <div class="col-12">
-                <input type="text" autocomplete="off" class="form-control" id="detailPembelianFakturSupp"   disabled >
-              </div>
-
-
-              <div class="col-12">
-                <h5 id="">FakturSupp</h5>
-              </div>
-              <div class="col-12">
-                <input type="text" autocomplete="off" class="form-control" id="detailPembelianKeterangan"   disabled >
-              </div>
-
-
-            <!-- </div> -->
-
-          </div>
+          <label for="detailPembelianKeterangan">FakturSupp</label>
+          <input type="text" autocomplete="off" class="form-control" id="detailPembelianKeterangan"   disabled >
         </div>
-        <div class="container-fluid mt-4" style="overflow: auto">
+        <div class="container-fluid wms-scroll wms-modal-tabel px-0" style="overflow: auto">
 
               <table id="detailPembelianTable" class="table table-bordered table-striped"  >
                 <thead class="text-center">
@@ -552,7 +629,7 @@
 <!-- End modal detail-->
 
 <!-- start modal editpembelian  -->
-<div class="modal fade" id="editPembelian" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade wms-baru wms-baru-modal" id="editPembelian" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                                                             <!-- tes max width -->
   <div class="modal-dialog modal-xl modal-dialog-centered" role="document" style="">
     <div class="modal-content">
@@ -562,238 +639,88 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
-        <!-- <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" /> -->
-        <div class="container-fluid">
-          <div class="row">
-            <div class="col-12">
+      <div class="modal-body" id="formBsGrid">
+        <div class="bs-form">
+          <label for="editPembelianNoPO">No PO</label>
+          <input type="text" class="form-control" id="editPembelianNoPO" disabled>
 
-                <h5 id="">No PO</h5>
-            </div>
-            <div class="col-12">
+          <label for="editPembelianSupp">Supplier</label>
+          <input type="text" class="form-control" id="editPembelianSupp" disabled>
 
-                <input type="text" class="form-control" id="editPembelianNoPO" disabled>
-            </div>
-            <div class="col-12">
-              <h5 id="">Supplier</h5>
-            </div>
-            <div class="col-12">
-              <input type="text" class="form-control" id="editPembelianSupp" disabled>
-            </div>
-            <div class="col-12">
+          <label for="editPembelianDate">Tanggal</label>
+          <input type="date" class="form-control" id="editPembelianDate" value="{!! date('Y-m-d') !!}" disabled >
 
-              <h5 id="">Tanggal</h5>
-            </div>
-            <div class="col-12">
+          <label for="editPembelianFakturSupp">Keterangan</label>
+          <input type="text" autocomplete="off" class="form-control" id="editPembelianFakturSupp" >
 
-                <input type="date" class="form-control" id="editPembelianDate" value="{!! date('Y-m-d') !!}" disabled >
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-12">
-              <h5 id="">Keterangan</h5>
-            </div>
-            <div class="col-12">
-              <input type="text" autocomplete="off" class="form-control" id="editPembelianFakturSupp" >
-            </div>
-            <div class="col-12">
-              <h5 id="">FakturSupp</h5>
-            </div>
-            <div class="col-12">
-              <input type="text" autocomplete="off" class="form-control" id="editPembelianKeterangan" >
-            </div>
-
-          </div>
-        </div>
-        <div class="container-fluid mt-2">
-          <div class="row ">
-            <div class="col-md-12 text-right">
-            <button type="button" class="btn btn-primary" onclick="showPembelianAdd()" class="btn btn-secondary"  >Add Item</button>
-            <!-- <button type="button" class="btn btn-primary" onclick="resetDetailPembelian('SML/LPB/00197/0323','SML/PO/00302/0223')" class="btn btn-secondary"  >reset</button> -->
-            <button type="button" class="btn btn-success" onclick="saveKetFaktur()">Save Faktur & Ket</button>
+          <label for="editPembelianKeterangan">FakturSupp</label>
+          <input type="text" autocomplete="off" class="form-control" id="editPembelianKeterangan" >
         </div>
 
+        <div class="d-flex justify-content-end mt-3" style="gap: 8px;">
+          <button type="button" class="btn btn-primary" onclick="showPembelianAdd()">Add Item</button>
+          <!-- <button type="button" class="btn btn-primary" onclick="resetDetailPembelian('SML/LPB/00197/0323','SML/PO/00302/0223')" class="btn btn-secondary"  >reset</button> -->
+          <button type="button" class="btn btn-success" onclick="saveKetFaktur()">Save Faktur & Ket</button>
         </div>
-      </div>
 
-      <div id="formPembelianAdd" class="container-fluid showhide">
-        <div class="line"></div>
-        <div class="row">
-          <div class="col-12">
-
-            <h4>Add Item</h4>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-12">
-            <label>Pilih Barang</label>
-          </div>
-          <div class="col-12">
-            <div class="form-group">
-            <select onchange="changeSelectBarang()" id="editPembelianAddSelect" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
+        <div id="formPembelianAdd" class="form-card mt-3 showhide">
+          <div class="form-card-title">Add Item</div>
+          <div class="bs-form">
+            <label for="editPembelianAddSelect">Pilih Barang</label>
+            <select onchange="changeSelectBarang()" id="editPembelianAddSelect" class="form-control form-select-lg mb-3 bs-full" aria-label=".form-select-lg example">
             </select>
-          </div>
-        </div>
-        </div>
-        <div class="row">
-          <div class="col-12">
-            <div class="form-group">
-            <label>Kode Barang</label>
-          </div>
-          </div>
-          <div class="col-12">
-            <input id="editPembelianInputAddKode" type="text" class="form-control" disabled>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-12">
-            <div class="form-group">
-            <label>Nama Barang</label>
-          </div>
-          </div>
-          <div class="col-12">
-            <input id="editPembelianInputAddNamaBarang" type="text" class="form-control" disabled>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-12">
-            <div class="form-group">
-            <label>Qty</label>
-          </div>
-          </div>
-          <div class="col-12">
-            <input id="editPembelianInputAddQty" type="number" value=0.00 class="form-control">
-          </div>
-          <div class="col-12">
-            <div class="form-group">
-            <label>Satuan</label>
-          </div>
-          </div>
-          <div class="col-12">
 
-              <input type="text" id="editPembelianInputAddSatuan" value="PCS" class="form-control" disabled>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-12">
-            <label>Qty PO</label>
-          </div>
-          <div class="col-12">
+            <label for="editPembelianInputAddKode">Kode Barang</label>
+            <input id="editPembelianInputAddKode" type="text" class="form-control" disabled>
+
+            <label for="editPembelianInputAddNamaBarang">Nama Barang</label>
+            <input id="editPembelianInputAddNamaBarang" type="text" class="form-control" disabled>
+
+            <label for="editPembelianInputAddQty">Qty</label>
+            <input id="editPembelianInputAddQty" type="number" value=0.00 class="form-control">
+
+            <label for="editPembelianInputAddSatuan">Satuan</label>
+            <input type="text" id="editPembelianInputAddSatuan" value="PCS" class="form-control" disabled>
+
+            <label for="editPembelianInputAddQtyPO">Qty PO</label>
             <input id="editPembelianInputAddQtyPO" type="number" value=0.00 class="form-control" disabled>
-          </div>
-          <div class="col-12">
-            <label>Qty OS</label>
-          </div>
-          <div class="col-12">
+
+            <label for="editPembelianInputAddQtyOS">Qty OS</label>
             <input id="editPembelianInputAddQtyOS" type="number" value=0.00 class="form-control" disabled>
           </div>
-        </div>
-
-
-        <div class="container-fluid mt-2">
-          <div class="row ">
-            <div class="col-md-12 text-right">
-              <button type="button" class="btn btn-secondary" onclick="buttonBatalShowHide()" >Batal</button>
-
-              <button type="button" onclick="submitPembelianAdd()" class="btn btn-primary" >Add Item</button>
-            </div>
-
-          </div>
-      </div>
-        <div class="d-flex justify-content-end">
-
-
-        </div>
-        <div class="line"></div>
-        </div>
-
-
-
-        <div id="formPembelianEdit" class="container-fluid showhide">
-          <div class="line"></div>
-          <div class="row">
-            <div class="col-12">
-
-              <h4>Edit Item</h4>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-12">
-              <div class="form-group">
-              <label>Kode Barang</label>
-            </div>
-            </div>
-            <div class="col-12">
-              <input id="editPembelianInputEditKode" type="text" class="form-control" disabled>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-12">
-              <div class="form-group">
-              <label>Nama Barang</label>
-            </div>
-            </div>
-            <div class="col-12">
-              <input id="editPembelianInputEditNamaBarang" type="text" class="form-control" disabled>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-12">
-              <div class="form-group">
-              <label>Qty</label>
-            </div>
-            </div>
-            <div class="col-12">
-              <input id="editPembelianInputEditQty" type="number" value=0.00 class="form-control">
-            </div>
-            <div class="col-12">
-              <div class="form-group">
-              <label>Satuan</label>
-            </div>
-            </div>
-            <div class="col-12">
-
-                <input type="text" id="editPembelianInputEditSatuan" value="PCS" class="form-control" disabled>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-12">
-              <label>Qty PO</label>
-            </div>
-            <div class="col-12">
-              <input id="editPembelianInputEditQtyPO" type="number" value=0.00 class="form-control" disabled>
-            </div>
-            <div class="col-12">
-              <label></label>
-
-            </div>
-            <!-- <div class="col-2">
-            </div> -->
-          </div>
-
-
-          <div class="container-fluid mt-2">
-            <div class="row ">
-              <div class="col-md-12 text-right">
-                <button type="button" class="btn btn-secondary" onclick="buttonBatalShowHide()" >Batal</button>
-
-          <button type="button" class="btn btn-success" onclick="submitPembelianEdit()" >Edit Item</button>
-          </div>
-
+          <div class="d-flex justify-content-end mt-3" style="gap: 8px;">
+            <button type="button" class="btn btn-secondary" onclick="buttonBatalShowHide()" >Batal</button>
+            <button type="button" onclick="submitPembelianAdd()" class="btn btn-primary" >Add Item</button>
           </div>
         </div>
-          <div class="d-flex justify-content-end">
 
+        <div id="formPembelianEdit" class="form-card mt-3 showhide">
+          <div class="form-card-title">Edit Item</div>
+          <div class="bs-form">
+            <label for="editPembelianInputEditKode">Kode Barang</label>
+            <input id="editPembelianInputEditKode" type="text" class="form-control" disabled>
 
+            <label for="editPembelianInputEditNamaBarang">Nama Barang</label>
+            <input id="editPembelianInputEditNamaBarang" type="text" class="form-control" disabled>
+
+            <label for="editPembelianInputEditQty">Qty</label>
+            <input id="editPembelianInputEditQty" type="number" value=0.00 class="form-control">
+
+            <label for="editPembelianInputEditSatuan">Satuan</label>
+            <input type="text" id="editPembelianInputEditSatuan" value="PCS" class="form-control" disabled>
+
+            <label for="editPembelianInputEditQtyPO">Qty PO</label>
+            <input id="editPembelianInputEditQtyPO" type="number" value=0.00 class="form-control" disabled>
           </div>
-          <div class="line"></div>
+          <div class="d-flex justify-content-end mt-3" style="gap: 8px;">
+            <button type="button" class="btn btn-secondary" onclick="buttonBatalShowHide()" >Batal</button>
+            <button type="button" class="btn btn-success" onclick="submitPembelianEdit()" >Edit Item</button>
           </div>
+        </div>
 
-        <div class="container-fluid" style="overflow:auto;">
+        <div class="container-fluid wms-scroll wms-modal-tabel px-0" style="overflow:auto;">
 
-              <table id="editPembelianTable" class="table table-bordered table-striped mt-5"  >
+              <table id="editPembelianTable" class="table table-bordered table-striped"  >
                 <thead class="text-center">
                   <tr>
                     <th scope="col">Kode Barang</th>
@@ -841,7 +768,7 @@
 
           <div class="modal-footer showhide">
             <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-            <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+            <button type="button" class="btn btn-primary" onclick="submitAdd()">Simpan</button>
           </div> -->
           <!-- <div class="modal-footer">
             <button type="button" class="btn btn-primary" onclick="saveKetFaktur()">Save1</button>
@@ -854,7 +781,7 @@
 <!-- End modal editpembelian-->
 
 <!-- start modal editpembelian  -->
-<div class="modal fade" id="formPrint" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade wms-baru wms-baru-modal" id="formPrint" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                                                             <!-- tes max width -->
   <div class="modal-dialog modal-xl modal-dialog-centered" role="document" style="">
     <div class="modal-content">
@@ -864,59 +791,27 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
-        <!-- <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" /> -->
-        <div class="container-fluid">
-          <div class="row">
-            <div class="col-12">
+      <div class="modal-body" id="formBsGrid">
+        <div class="bs-form">
+          <label for="printPembelianNoPO">No PO</label>
+          <input type="text" class="form-control" id="printPembelianNoPO" disabled>
 
-                <h5 id="">No PO</h5>
-            </div>
-            <div class="col-12">
+          <label for="printPembelianSupp">Supplier</label>
+          <input type="text" class="form-control" id="printPembelianSupp" disabled>
 
-                <input type="text" class="form-control" id="printPembelianNoPO" disabled>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-12">
-              <h5 id="">Supplier</h5>
-            </div>
-            <div class="col-12">
-              <input type="text" class="form-control" id="printPembelianSupp" disabled>
-            </div>
-            <div class="col-12">
+          <label for="printPembelianDate">Tanggal</label>
+          <input type="date" class="form-control" id="printPembelianDate" value="{!! date('Y-m-d') !!}" disabled >
 
-              <h5 id="">Tanggal</h5>
-            </div>
-            <div class="col-12">
+          <label for="printPembelianFakturSupp">Keterangan</label>
+          <input type="text" class="form-control" id="printPembelianFakturSupp" autocomplete="off" disabled>
 
-                <input type="date" class="form-control" id="printPembelianDate" value="{!! date('Y-m-d') !!}" disabled >
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-12">
-              <h5 id="">Keterangan</h5>
-            </div>
-            <div class="col-12">
-              <input type="text" class="form-control" id="printPembelianFakturSupp" autocomplete="off" disabled>
-            </div>
-            <div class="col-12">
-              <h5 id="">FakturSupp</h5>
-            </div>
-            <div class="col-12">
-              <input type="text" class="form-control" id="printPembelianKeterangan" autocomplete="off" disabled>
-            </div>
-
-          </div>
+          <label for="printPembelianKeterangan">FakturSupp</label>
+          <input type="text" class="form-control" id="printPembelianKeterangan" autocomplete="off" disabled>
         </div>
-        <div class="container-fluid mt-2">
 
-      </div>
+        <div class="container-fluid wms-scroll wms-modal-tabel px-0" style="overflow:auto;">
 
-        <div class="container-fluid" style="overflow:auto;">
-
-              <table id="printPembelianTable" class="table table-bordered table-striped mt-5"  >
+              <table id="printPembelianTable" class="table table-bordered table-striped"  >
                 <thead class="text-center">
                   <tr>
                     <th scope="col">v</th>
@@ -948,22 +843,11 @@
 
 
 
-        <div class="container-fluid">
-          <div class="row">
-            <div class="col-12 text-right">
-              <label>Jumlah Print</label>
-              <input type="number" style="max-width: 50px" value=1 class="text-right" id="input_print_jumlahprint" >
-            </div>
-            <!-- <div class="col-2">
-
-
-            </div> -->
-            <!-- <div class="col-1">
-                <input type="number" value=1 class="form-control text-right" id="input_print_jumlahprint" >
-            </div> -->
-
-          </div>
-
+        <div class="d-flex justify-content-end mt-3">
+          <span class="wms-jumlah-print">
+            <label for="input_print_jumlahprint" class="mb-0">Jumlah Print</label>
+            <input type="number" value=1 class="text-right" id="input_print_jumlahprint" >
+          </span>
         </div>
           </div>
 
@@ -974,7 +858,7 @@
 
           <div class="modal-footer showhide">
             <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-            <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
+            <button type="button" class="btn btn-primary" onclick="submitAdd()">Simpan</button>
           </div> -->
           <div class="modal-footer">
             <button type="button" class="btn btn-primary" onclick="submitPrint()">Print</button>
@@ -1032,22 +916,116 @@
 
     let dataPrint = []
 
-    $(document).ready(function(){
-      $("#tabel").DataTable({'order': [[1, 'asc']], "lengthChange": false, "paging": false , "columnDefs": [
-    { "type": "date", "targets": [2] },
-    {  "className": "text-center", "targets": [0] }, { "targets": [0] ,  'orderable' : false}
+    // ── Tampilan tabel daftar (disamakan dengan newSML purchasing/newpo) ──────────────
+    // Urutan & columnDefs tetap seperti semula; yang ditambah hanya tampilan: kotak search +
+    // "Tampilkan" di toolbar, kotak scroll .po-table-wrap, info + halaman di bawah.
+    let npoPanjangHalaman = { 1: 10, 2: 10 }
 
-  ]});
-    });
-    $(document).ready(function(){
-      $("#tabel_pembelian").DataTable({
-    'order': [[1, 'asc']]
-  , "lengthChange": false, "paging": false , "columnDefs": [
-    { "type": "date", "targets": [2] },
-    {  "className": "text-center", "targets": [0] }, { "targets": [0] ,  'orderable' : false}
-    // {"order": [[ 1, 'desc' ]]},
+    function npoOpsiTabel (urut) {
+      return {
+        'order': [[1, 'asc']],
+        "lengthChange": false,
+        "pageLength": npoPanjangHalaman[urut],
+        "columnDefs": [
+          { "type": "date", "targets": [2] },
+          { "className": "text-center", "targets": [0] }, { "targets": [0], 'orderable': false }
+        ],
+        dom: "<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+        language: {
+          emptyTable: 'Tidak ada data',
+          zeroRecords: 'Tidak ada data yang cocok dengan pencarian'
+        },
+        drawCallback: function () {
+          // ditunda 0ms supaya DOM pagination sudah terpasang saat diukur
+          setTimeout(npoAturTinggiTabel, 0)
+        }
+      }
+    }
 
-  ]});
+    // Kotak scroll tabel setinggi sisa ruang di #content, jadi yang discroll hanya isi tabel.
+    function npoAturTinggiTabel () {
+      let area = document.getElementById('content')
+      let pane = document.querySelector('#myTabContent .tab-pane.active')
+      if (!area || !pane) { return }
+      let wrap = pane.querySelector('.po-table-wrap')
+      if (!wrap) { return }
+
+      wrap.style.maxHeight = 'none'
+
+      let padBawah = parseFloat(getComputedStyle(area).paddingBottom) || 0
+      let batasBawah = area.getBoundingClientRect().bottom - padBawah
+      let kotak = wrap.getBoundingClientRect()
+      let bawah = pane.getBoundingClientRect().bottom - kotak.bottom
+
+      let sisa = batasBawah - kotak.top - bawah - 4
+      wrap.style.maxHeight = Math.max(200, Math.floor(sisa)) + 'px'
+    }
+
+    // Kotak search & "Tampilkan" diikat sekali (tabel di-destroy + init ulang oleh loadAll()).
+    function npoIkatToolbar (urut) {
+      let tabelId = urut === 2 ? '#tabel_pembelian' : '#tabel'
+      let input = document.getElementById('npoSearch' + urut)
+      if (input && !input.dataset.rtBound) {
+        input.dataset.rtBound = '1'
+        input.addEventListener('input', function () {
+          $(tabelId).DataTable().search(input.value).draw()
+        })
+      }
+      let sel = document.getElementById('npoLen' + urut)
+      if (sel && !sel.dataset.rtBound) {
+        sel.dataset.rtBound = '1'
+        sel.value = String(npoPanjangHalaman[urut])
+        sel.addEventListener('change', function () {
+          let n = Number(sel.value)
+          npoPanjangHalaman[urut] = (n === -1 || n > 0) ? n : 10
+          $(tabelId).DataTable().page.len(npoPanjangHalaman[urut]).draw()
+        })
+      }
+      if (input && input.value) {
+        $(tabelId).DataTable().search(input.value).draw()
+      }
+    }
+
+    function npoInitTabel (urut) {
+      let tabelId = urut === 2 ? '#tabel_pembelian' : '#tabel'
+      $(tabelId).DataTable(npoOpsiTabel(urut))
+      npoIkatToolbar(urut)
+      npoAturTinggiTabel()
+    }
+
+    $('#nav-home-tab, #nav-profile-tab').on('shown.bs.tab', function () {
+      $($.fn.dataTable.tables(true)).DataTable().columns.adjust()
+      npoAturTinggiTabel()
+    })
+
+    let npoTimerResize = null
+    $(window).on('resize', function () {
+      if (npoTimerResize) { clearTimeout(npoTimerResize) }
+      npoTimerResize = setTimeout(npoAturTinggiTabel, 150)
+    })
+
+    // Dinonaktifkan 2026-10-19: init lama tanpa halaman/toolbar - diganti npoInitTabel() di bawah
+    // (urutan & columnDefs sama).
+    // $(document).ready(function(){
+    //   $("#tabel").DataTable({'order': [[1, 'asc']], "lengthChange": false, "paging": false , "columnDefs": [
+    // { "type": "date", "targets": [2] },
+    // {  "className": "text-center", "targets": [0] }, { "targets": [0] ,  'orderable' : false}
+    //
+    // ]});
+    // });
+    // $(document).ready(function(){
+    //   $("#tabel_pembelian").DataTable({
+    // 'order': [[1, 'asc']]
+    // , "lengthChange": false, "paging": false , "columnDefs": [
+    // { "type": "date", "targets": [2] },
+    // {  "className": "text-center", "targets": [0] }, { "targets": [0] ,  'orderable' : false}
+    // // {"order": [[ 1, 'desc' ]]},
+    //
+    // ]});
+    // });
+    $(document).ready(function(){
+      npoInitTabel(1)
+      npoInitTabel(2)
     });
 
     function detailPembelian1(index) {
@@ -1213,7 +1191,7 @@
             if (item[0].NAMACUSTSUPP) {
               NAMACUSTSUPP = item[0].NAMACUSTSUPP
             }
-            rowTabel += `<tr><td><button style="" class="btn btn-warning btn-sm" type="button"   onclick="buttonDetail1(${i})" ><i class="bi bi-info-lg"></i></button> <button style="" class="btn btn-success btn-sm" type="button"   onclick="buttonAdd1(${i})" ><i class="bi bi-bag-plus-fill"></i></td><td>${NoBukti}</td><td>${date1}</td><td>${NAMACUSTSUPP}</td><td>-</td><td>-</td></tr>`
+            rowTabel += `<tr><td><button style="" class="btn btn-warning btn-sm" type="button" title="Detail" onclick="buttonDetail1(${i})" ><i class="bi bi-info-lg"></i></button> <button style="" class="btn btn-primary btn-sm" type="button" title="Terima" onclick="buttonAdd1(${i})" ><i class="bi bi-plus"></i></button></td><td>${NoBukti}</td><td>${date1}</td><td>${NAMACUSTSUPP}</td><td>-</td><td>-</td></tr>`
 
           });
           document.getElementById("tabel_data").innerHTML = rowTabel
@@ -1225,11 +1203,12 @@
 
 
 
-        $("#tabel").DataTable({'order': [[1, 'asc']], "lengthChange": false, "paging": false , "columnDefs": [
-      { "type": "date", "targets": [2] },
-      {  "className": "text-center", "targets": [0] ,  'orderable' : false},
-
-    ]});
+    //     $("#tabel").DataTable({'order': [[1, 'asc']], "lengthChange": false, "paging": false , "columnDefs": [
+    //   { "type": "date", "targets": [2] },
+    //   {  "className": "text-center", "targets": [0] ,  'orderable' : false},
+    //
+    // ]});
+        npoInitTabel(1)
 
       //pembelian
       $('#tabel_pembelian').DataTable().destroy();
@@ -1302,14 +1281,15 @@
       // </tr>
       // @endfor
 
-      $("#tabel_pembelian").DataTable({
-    'order': [[1, 'asc']]
-  , "lengthChange": false, "paging": false , "columnDefs": [
-    { "type": "date", "targets": [2] },
-    {  "className": "text-center", "targets": [0] ,  'orderable' : false},
-    // {"order": [[ 1, 'desc' ]]},
-
-  ]});
+    //   $("#tabel_pembelian").DataTable({
+    // 'order': [[1, 'asc']]
+    // , "lengthChange": false, "paging": false , "columnDefs": [
+    // { "type": "date", "targets": [2] },
+    // {  "className": "text-center", "targets": [0] ,  'orderable' : false},
+    // // {"order": [[ 1, 'desc' ]]},
+    //
+    // ]});
+      npoInitTabel(2)
 
 
 

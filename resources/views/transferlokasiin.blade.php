@@ -1,10 +1,11 @@
 @extends('newmaster')
+@section('page-title', 'Transfer Lokasi In')
 @section('buttons')
 
 @endsection
 @section('content')
 <div class="container-fluid">
-<h1>Transfer Lokasi In</h1>
+{{-- <h1>Transfer Lokasi In</h1> - judul pindah ke header (page-title) --}}
 <!-- <button onclick="loadAll()">tes</button> -->
 </div>
 
@@ -27,25 +28,23 @@
 
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-  <div class="card">
-    <div class="card-header">
-      <div class="row">
-        <nav style="width: 100%;">
-          <div class="nav nav-tabs col-12" id="nav-tab" role="tablist">
-            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true" style="color: black;">Outstanding Transfer Lokasi In</a>
-            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false" style="color: black;">Transfer Lokasi In</a>
-          </div>
-        </nav>
+  <div class="card mb-3 tab-card">
+    <div class="card-body">
+      <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
+            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">Outstanding Transfer Lokasi In</a>
+            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">Transfer Lokasi In</a>
       </div>
     </div>
-    <div class="card-body" >
+  </div>
+  <div class="card wms-kartu">
+    <div class="card-body">
       <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
           <div class="row">
             <div class="col-12" style="overflow:auto;">
               <div class="container-fluid">
 
-                    <table id="tabel" class="table table-bordered table-striped"  >
+                    <table id="tabel" class="data-table po-aksi-hover"  >
                       <thead class="text-center">
                         <tr>
                           <th scope="col">Actions</th>
@@ -79,7 +78,7 @@
             <div class="col-12" style="overflow:auto;">
               <div class="container-fluid">
 
-                    <table id="tabelRetur" class="table table-bordered table-striped"  >
+                    <table id="tabelRetur" class="data-table po-aksi-hover"  >
                       <thead class="text-center">
                         <tr>
                           <th scope="col">Actions</th>

@@ -1,5 +1,69 @@
 <?php
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BarangJadiController;
+use App\Http\Controllers\BarcodeBarangController;
+use App\Http\Controllers\DashboardOpnameHarianController;
+use App\Http\Controllers\GantiPasswordController;
+use App\Http\Controllers\GudangController;
+use App\Http\Controllers\HitungStokController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\KartuStockGudangController;
+use App\Http\Controllers\LockPeriodeController;
+use App\Http\Controllers\NewMenuController;
+use App\Http\Controllers\NewOpnameGudangController;
+use App\Http\Controllers\NewPOController;
+use App\Http\Controllers\NewPenyerahanGudangController;
+use App\Http\Controllers\NewPenyerahanKonsiController;
+use App\Http\Controllers\NewPenyerahanSampleController;
+use App\Http\Controllers\NewPermintaanPersiapanBooController;
+use App\Http\Controllers\NewPermintaanPersiapanController;
+use App\Http\Controllers\NewPermintaanPersiapanNonSOController;
+use App\Http\Controllers\NewPickingController;
+use App\Http\Controllers\NewPutAwayController;
+use App\Http\Controllers\NewQCLPBController;
+use App\Http\Controllers\NewReturBeliController;
+use App\Http\Controllers\NewReturJualController;
+use App\Http\Controllers\NewReturSuratJalanController;
+use App\Http\Controllers\NewSetupPeriodeKerjaController;
+use App\Http\Controllers\NewTransferBarangController;
+use App\Http\Controllers\NewTransferGudangController;
+use App\Http\Controllers\NewUsersController;
+use App\Http\Controllers\OpnameGdg1Controller;
+use App\Http\Controllers\OpnameGdgInspeksiController;
+use App\Http\Controllers\PackingController;
+use App\Http\Controllers\PermintaanPenyerahanGudangController;
+use App\Http\Controllers\PermintaanUbahKemasanController;
+use App\Http\Controllers\PersiapanSpbController;
+use App\Http\Controllers\QCPickingController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReportKartuStokController;
+use App\Http\Controllers\ReportOpnameHarianController;
+use App\Http\Controllers\ReportOutDispatchController;
+use App\Http\Controllers\ReportOutReceivingController;
+use App\Http\Controllers\ReportPickSpbController;
+use App\Http\Controllers\ReportPickingController;
+use App\Http\Controllers\ReportPlPController;
+use App\Http\Controllers\ReportPutawayController;
+use App\Http\Controllers\ReportRelokasiController;
+use App\Http\Controllers\ReportSoSpbController;
+use App\Http\Controllers\ReportStokGudangController;
+use App\Http\Controllers\ReportStokLokasiController;
+use App\Http\Controllers\ReturSerahSampleController;
+use App\Http\Controllers\SetPemakaiController;
+use App\Http\Controllers\TerimaUbahKemasanController;
+use App\Http\Controllers\TesController;
+use App\Http\Controllers\TransferLokasiController;
+use App\Http\Controllers\TransferLokasiInController;
+use App\Http\Controllers\TransferLokasiOutController;
+use App\Http\Controllers\TransferLokasiSiteController;
+use App\Http\Controllers\UbahKemasanController;
+use App\Http\Controllers\UbahKemasanFinalisasiController;
+use App\Http\Controllers\UbahKemasanPickingController;
+use App\Http\Controllers\UsersController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -14,14 +78,14 @@ Auth::routes();
 
 
 
-Route::get('/cobacoba', 'ReportController@coba');
+Route::get('/cobacoba', [ReportController::class, 'coba']);
 //Login
-Route::get('/', 'AuthController@index');
-Route::post('/checkLogin', 'AuthController@authenticate');
-Route::post('/checkOnline', 'UsersController@checkOnline');
+Route::get('/', [AuthController::class, 'index']);
+Route::post('/checkLogin', [AuthController::class, 'authenticate']);
+Route::post('/checkOnline', [UsersController::class, 'checkOnline']);
 
-Route::get('/updateIdle', 'AuthController@updateIdle');
-Route::get('/logout', 'AuthController@logout')->middleware('auth');
+Route::get('/updateIdle', [AuthController::class, 'updateIdle']);
+Route::get('/logout', [AuthController::class, 'logout'])->middleware('auth');
 
 // Tes
 
@@ -33,464 +97,464 @@ Route::get('/newtes' , function(){
   return view('newtes');
 });
 
-Route::get('/home', 'HomeController@newIndex')->name('home'); // Tes New Home
+Route::get('/home', [HomeController::class, 'newIndex'])->name('home'); // Tes New Home
 
-Route::get('/tesnewpassword', 'UsersController@generateNewPassword');
+Route::get('/tesnewpassword', [UsersController::class, 'generateNewPassword']);
 
 Route::get('/testesprint' , function(){
   return view('cetak-spb');
 });
-Route::get('/testespicking' , 'NewPickingController@testestes');
+Route::get('/testespicking' , [NewPickingController::class, 'testestes']);
 
 // Route::get('/newmenu', 'NewMenuController@index');
-Route::get('/tablemenu', 'TesController@menu');
-Route::post('/addnewmenu', 'NewMenuController@addMenu');
-Route::post('/editnewmenu' , 'NewMenuController@editMenu');
-Route::post('/deletenewmenu' , 'NewMenuController@deleteMenu');
+Route::get('/tablemenu', [TesController::class, 'menu']);
+Route::post('/addnewmenu', [NewMenuController::class, 'addMenu']);
+Route::post('/editnewmenu' , [NewMenuController::class, 'editMenu']);
+Route::post('/deletenewmenu' , [NewMenuController::class, 'deleteMenu']);
 // Route::get('/newmenu1', 'TesController@index1');
-Route::get('/newpo' , 'NewPOController@index')->middleware('auth');
-Route::post('/addDBBeli', 'NewPOController@addDBBeli')->middleware('auth');
+Route::get('/newpo' , [NewPOController::class, 'index'])->middleware('auth');
+Route::post('/addDBBeli', [NewPOController::class, 'addDBBeli'])->middleware('auth');
 
-Route::post('/detailPO', 'NewPOController@getDetailPO')->middleware('auth');
-Route::post('/detailPembelian', 'NewPOController@getDetailPembelian')->middleware('auth');
-Route::get('/getNoBukti' , 'NewPOController@getNoBukti')->middleware('auth');
-Route::get('/getAksesNewPO' , 'NewPOController@getAkses')->middleware('auth');
-Route::get('/getAllPO' , 'NewPOController@getAllPO')->middleware('auth');
-Route::get('/getAllPembelian' , 'NewPOController@getAllPembelian')->middleware('auth');
-Route::post('/sp_beligudang', 'NewPOController@spBeliGudang')->middleware('auth');
-
-
-
-Route::get('/newsetupperiodekerja', 'NewSetupPeriodeKerjaController@index')->middleware('auth');
-Route::post('/newsetupperiodekerjaupdate' ,'NewSetupPeriodeKerjaController@updatePeriodeKerja')->middleware('auth');
+Route::post('/detailPO', [NewPOController::class, 'getDetailPO'])->middleware('auth');
+Route::post('/detailPembelian', [NewPOController::class, 'getDetailPembelian'])->middleware('auth');
+Route::get('/getNoBukti' , [NewPOController::class, 'getNoBukti'])->middleware('auth');
+Route::get('/getAksesNewPO' , [NewPOController::class, 'getAkses'])->middleware('auth');
+Route::get('/getAllPO' , [NewPOController::class, 'getAllPO'])->middleware('auth');
+Route::get('/getAllPembelian' , [NewPOController::class, 'getAllPembelian'])->middleware('auth');
+Route::post('/sp_beligudang', [NewPOController::class, 'spBeliGudang'])->middleware('auth');
 
 
-Route::post('/lockperiodecheck' , 'LockPeriodeController@check')->middleware('auth');
+
+Route::get('/newsetupperiodekerja', [NewSetupPeriodeKerjaController::class, 'index'])->middleware('auth');
+Route::post('/newsetupperiodekerjaupdate' ,[NewSetupPeriodeKerjaController::class, 'updatePeriodeKerja'])->middleware('auth');
+
+
+Route::post('/lockperiodecheck' , [LockPeriodeController::class, 'check'])->middleware('auth');
 
 
 
 
 //USERS
 
-Route::get('/users', 'NewUsersController@index')->middleware('auth');
-Route::post('/usersadd', 'NewUsersController@add')->middleware('auth');
-Route::get('/usersloadall', 'NewUsersController@loadAll')->middleware('auth');
-Route::post('/usersdetail', 'NewUsersController@detail')->middleware('auth');
-Route::post('/usersgantipassword', 'NewUsersController@gantiPassword')->middleware('auth');
-Route::post('/usersdelete', 'NewUsersController@delete')->middleware('auth');
-Route::post('/usersedit', 'NewUsersController@edit')->middleware('auth');
+Route::get('/users', [NewUsersController::class, 'index'])->middleware('auth');
+Route::post('/usersadd', [NewUsersController::class, 'add'])->middleware('auth');
+Route::get('/usersloadall', [NewUsersController::class, 'loadAll'])->middleware('auth');
+Route::post('/usersdetail', [NewUsersController::class, 'detail'])->middleware('auth');
+Route::post('/usersgantipassword', [NewUsersController::class, 'gantiPassword'])->middleware('auth');
+Route::post('/usersdelete', [NewUsersController::class, 'delete'])->middleware('auth');
+Route::post('/usersedit', [NewUsersController::class, 'edit'])->middleware('auth');
 
 // SET PEMAKAI
 // Route::get('/setpemakai', 'SetPemakaiController@index')->middleware('auth');
-Route::post('/setpemakailistakses', 'SetPemakaiController@listAkses')->middleware('auth');
-Route::post('/setpemakailistaksesreport', 'SetPemakaiController@listAksesReport')->middleware('auth');
-Route::post('/setpemakaiupdateakses', 'SetPemakaiController@spUpdateAkses')->middleware('auth');
-Route::post('/setpemakaiupdateaksesheader', 'SetPemakaiController@spUpdateAksesHeader')->middleware('auth');
-Route::post('/setpemakaiupdateaksesreport', 'SetPemakaiController@spUpdateAksesReport')->middleware('auth');
-Route::post('/setpemakaiupdateaksesreportheader', 'SetPemakaiController@spUpdateAksesReportHeader')->middleware('auth');
+Route::post('/setpemakailistakses', [SetPemakaiController::class, 'listAkses'])->middleware('auth');
+Route::post('/setpemakailistaksesreport', [SetPemakaiController::class, 'listAksesReport'])->middleware('auth');
+Route::post('/setpemakaiupdateakses', [SetPemakaiController::class, 'spUpdateAkses'])->middleware('auth');
+Route::post('/setpemakaiupdateaksesheader', [SetPemakaiController::class, 'spUpdateAksesHeader'])->middleware('auth');
+Route::post('/setpemakaiupdateaksesreport', [SetPemakaiController::class, 'spUpdateAksesReport'])->middleware('auth');
+Route::post('/setpemakaiupdateaksesreportheader', [SetPemakaiController::class, 'spUpdateAksesReportHeader'])->middleware('auth');
 
 
 // PERMINTAAN PERSIAPAN
-Route::get('/newpermintaanpersiapan' , 'NewPermintaanPersiapanController@index')->middleware('auth');
-Route::get('/newpermintaanpersiapanloadall' , 'NewPermintaanPersiapanController@loadAll')->middleware('auth');
-Route::get('/newpermintaanpersiapangetnobukti' , 'NewPermintaanPersiapanController@getNoBukti')->middleware('auth');
-Route::post('/newpermintaanpersiapanspadd' , 'NewPermintaanPersiapanController@spAdd')->middleware('auth');
-Route::get('/newpermintaanpersiapandetailpenerimaan' , 'NewPermintaanPersiapanController@detailPenerimaan')->middleware('auth');
-Route::post('/newpermintaanpersiapanspdelete' , 'NewPermintaanPersiapanController@spDelete')->middleware('auth');
-Route::get('/newpermintaanpersiapandetailpenerimaanperiod' , 'NewPermintaanPersiapanController@detailPenerimaanperiod')->middleware('auth');
-Route::post('/newpermintaanpersiapanspcheckreguler' , 'NewPermintaanPersiapanController@spCheckReguler')->middleware('auth');
+Route::get('/newpermintaanpersiapan' , [NewPermintaanPersiapanController::class, 'index'])->middleware('auth');
+Route::get('/newpermintaanpersiapanloadall' , [NewPermintaanPersiapanController::class, 'loadAll'])->middleware('auth');
+Route::get('/newpermintaanpersiapangetnobukti' , [NewPermintaanPersiapanController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/newpermintaanpersiapanspadd' , [NewPermintaanPersiapanController::class, 'spAdd'])->middleware('auth');
+Route::get('/newpermintaanpersiapandetailpenerimaan' , [NewPermintaanPersiapanController::class, 'detailPenerimaan'])->middleware('auth');
+Route::post('/newpermintaanpersiapanspdelete' , [NewPermintaanPersiapanController::class, 'spDelete'])->middleware('auth');
+Route::get('/newpermintaanpersiapandetailpenerimaanperiod' , [NewPermintaanPersiapanController::class, 'detailPenerimaanperiod'])->middleware('auth');
+Route::post('/newpermintaanpersiapanspcheckreguler' , [NewPermintaanPersiapanController::class, 'spCheckReguler'])->middleware('auth');
 
 
 
 // PERMINTAAN PERSIAPAN booking
-Route::get('/newpermintaanpersiapanboo' , 'NewPermintaanPersiapanBooController@index')->middleware('auth');
-Route::get('/newpermintaanpersiapanbooloadall' , 'NewPermintaanPersiapanBooController@loadAll')->middleware('auth');
-Route::get('/newpermintaanpersiapanboogetnobukti' , 'NewPermintaanPersiapanBooController@getNoBukti')->middleware('auth');
-Route::post('/newpermintaanpersiapanboospadd' , 'NewPermintaanPersiapanBooController@spAdd')->middleware('auth');
-Route::get('/newpermintaanpersiapanboodetailpenerimaan' , 'NewPermintaanPersiapanBooController@detailPenerimaan')->middleware('auth');
-Route::post('/newpermintaanpersiapanboospdelete' , 'NewPermintaanPersiapanBooController@spDelete')->middleware('auth');
-Route::get('/newpermintaanpersiapanboodetailpenerimaanperiod' , 'NewPermintaanPersiapanBooController@detailPenerimaanperiod')->middleware('auth');
-Route::post('/newpermintaanpersiapanboospcheckreguler' , 'NewPermintaanPersiapanBooController@spCheckReguler')->middleware('auth');
+Route::get('/newpermintaanpersiapanboo' , [NewPermintaanPersiapanBooController::class, 'index'])->middleware('auth');
+Route::get('/newpermintaanpersiapanbooloadall' , [NewPermintaanPersiapanBooController::class, 'loadAll'])->middleware('auth');
+Route::get('/newpermintaanpersiapanboogetnobukti' , [NewPermintaanPersiapanBooController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/newpermintaanpersiapanboospadd' , [NewPermintaanPersiapanBooController::class, 'spAdd'])->middleware('auth');
+Route::get('/newpermintaanpersiapanboodetailpenerimaan' , [NewPermintaanPersiapanBooController::class, 'detailPenerimaan'])->middleware('auth');
+Route::post('/newpermintaanpersiapanboospdelete' , [NewPermintaanPersiapanBooController::class, 'spDelete'])->middleware('auth');
+Route::get('/newpermintaanpersiapanboodetailpenerimaanperiod' , [NewPermintaanPersiapanBooController::class, 'detailPenerimaanperiod'])->middleware('auth');
+Route::post('/newpermintaanpersiapanboospcheckreguler' , [NewPermintaanPersiapanBooController::class, 'spCheckReguler'])->middleware('auth');
 
 // PERMINTAAN PERSIAPAN NON SO
-Route::get('/newpermintaanpersiapannonso' ,'NewPermintaanPersiapanNonSOController@index')->middleware('auth');
-Route::get('/newpermintaanpersiapannonsoloadall' ,'NewPermintaanPersiapanNonSOController@loadAll')->middleware('auth');
-Route::get('/newpermintaanpersiapannonsogetnobukti' , 'NewPermintaanPersiapanNonSOController@getNoBukti')->middleware('auth');
-Route::get('/newpermintaanpersiapannonsodetailpenerimaan' , 'NewPermintaanPersiapanNonSOController@detailPenerimaan')->middleware('auth');
-Route::post('/newpermintaanpersiapannonsospadd' , 'NewPermintaanPersiapanNonSOController@spAdd')->middleware('auth');
+Route::get('/newpermintaanpersiapannonso' ,[NewPermintaanPersiapanNonSOController::class, 'index'])->middleware('auth');
+Route::get('/newpermintaanpersiapannonsoloadall' ,[NewPermintaanPersiapanNonSOController::class, 'loadAll'])->middleware('auth');
+Route::get('/newpermintaanpersiapannonsogetnobukti' , [NewPermintaanPersiapanNonSOController::class, 'getNoBukti'])->middleware('auth');
+Route::get('/newpermintaanpersiapannonsodetailpenerimaan' , [NewPermintaanPersiapanNonSOController::class, 'detailPenerimaan'])->middleware('auth');
+Route::post('/newpermintaanpersiapannonsospadd' , [NewPermintaanPersiapanNonSOController::class, 'spAdd'])->middleware('auth');
 
 
 // QC LPB
-Route::get('/qclpb', 'NewQCLPBController@index')->middleware('auth');
-Route::post('/detailLPB', 'NewQCLPBController@detailLPB')->middleware('auth');
-Route::post('/detailQC', 'NewQCLPBController@detailQC')->middleware('auth');
-Route::post('/submitLPB', 'NewQCLPBController@submitLPB')->middleware('auth');
-Route::get('/getAksesQCLPB' , 'NewQCLPBController@getAkses')->middleware('auth');
-Route::get('/getAllLPB', 'NewQCLPBController@getAllLPB')->middleware('auth');
-Route::get('/getAllQC', 'NewQCLPBController@getAllQC')->middleware('auth');
+Route::get('/qclpb', [NewQCLPBController::class, 'index'])->middleware('auth');
+Route::post('/detailLPB', [NewQCLPBController::class, 'detailLPB'])->middleware('auth');
+Route::post('/detailQC', [NewQCLPBController::class, 'detailQC'])->middleware('auth');
+Route::post('/submitLPB', [NewQCLPBController::class, 'submitLPB'])->middleware('auth');
+Route::get('/getAksesQCLPB' , [NewQCLPBController::class, 'getAkses'])->middleware('auth');
+Route::get('/getAllLPB', [NewQCLPBController::class, 'getAllLPB'])->middleware('auth');
+Route::get('/getAllQC', [NewQCLPBController::class, 'getAllQC'])->middleware('auth');
 // RETUR JUAL
-Route::get('/newreturjual' , 'NewReturJualController@index')->middleware('auth');
-Route::get('/loadallreturjual' , 'NewReturJualController@loadall')->middleware('auth');
-Route::post('/detailoutstandingreturjual' , 'NewReturJualController@getDetailOutstanding')->middleware('auth');
-Route::post('/detailreturgudang' , 'NewReturJualController@getDetailReturGudang')->middleware('auth');
-Route::get('/getNoBuktiReturJual', 'NewReturJualController@getNoBukti')->middleware('auth');
-Route::post('/addReturJual' , 'NewReturJualController@addReturJual')->middleware('auth');
-Route::post('/koreksiReturJual' , 'NewReturJualController@spKoreksi')->middleware('auth');
-Route::post('/returjualkoreksiaddlist' , 'NewReturJualController@getKoreksiAddList')->middleware('auth');
+Route::get('/newreturjual' , [NewReturJualController::class, 'index'])->middleware('auth');
+Route::get('/loadallreturjual' , [NewReturJualController::class, 'loadall'])->middleware('auth');
+Route::post('/detailoutstandingreturjual' , [NewReturJualController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::post('/detailreturgudang' , [NewReturJualController::class, 'getDetailReturGudang'])->middleware('auth');
+Route::get('/getNoBuktiReturJual', [NewReturJualController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/addReturJual' , [NewReturJualController::class, 'addReturJual'])->middleware('auth');
+Route::post('/koreksiReturJual' , [NewReturJualController::class, 'spKoreksi'])->middleware('auth');
+Route::post('/returjualkoreksiaddlist' , [NewReturJualController::class, 'getKoreksiAddList'])->middleware('auth');
 // TRANSFER GUDANG
-Route::get('/transfergudang' , 'NewTransferGudangController@index')->middleware('auth');
-Route::get('/getnobuktitransfergudang', 'NewTransferGudangController@getNoBukti')->middleware('auth');
-Route::post('/detailoutstandingtransfergudang' , 'NewTransferGudangController@getDetailOutstanding')->middleware('auth');
-Route::post('/detailpenerimaantransfergudang' , 'NewTransferGudangController@getDetailPenerimaan')->middleware('auth');
-Route::post('/addTransferGudang' , 'NewTransferGudangController@addTransferGudang')->middleware('auth');
-Route::post('/transfergudangkoreksiaddlist', 'NewTransferGudangController@getKoreksiAddList')->middleware('auth');
-Route::get('/loadalltransfergudang' , 'NewTransferGudangController@loadAll')->middleware('auth');
-Route::post('/koreksiTransferGudang', 'NewTransferGudangController@spKoreksi')->middleware('auth');
+Route::get('/transfergudang' , [NewTransferGudangController::class, 'index'])->middleware('auth');
+Route::get('/getnobuktitransfergudang', [NewTransferGudangController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/detailoutstandingtransfergudang' , [NewTransferGudangController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::post('/detailpenerimaantransfergudang' , [NewTransferGudangController::class, 'getDetailPenerimaan'])->middleware('auth');
+Route::post('/addTransferGudang' , [NewTransferGudangController::class, 'addTransferGudang'])->middleware('auth');
+Route::post('/transfergudangkoreksiaddlist', [NewTransferGudangController::class, 'getKoreksiAddList'])->middleware('auth');
+Route::get('/loadalltransfergudang' , [NewTransferGudangController::class, 'loadAll'])->middleware('auth');
+Route::post('/koreksiTransferGudang', [NewTransferGudangController::class, 'spKoreksi'])->middleware('auth');
 // RETUR SURAT JALAN
-Route::get('/newretursuratjalan' , 'NewReturSuratJalanController@index')->middleware('auth');
-Route::get('/getnobuktiretursuratjalan' , 'NewReturSuratJalanController@getNoBukti')->middleware('auth');
-Route::post('/detailoutstandingretursuratjalan' , 'NewReturSuratJalanController@getDetailOutstanding')->middleware('auth');
-Route::post('/addSuratJalan' , 'NewReturSuratJalanController@addSuratJalan')->middleware('auth');
-Route::post('/detailpenerimaanretursuratjalan' , 'NewReturSuratJalanController@getDetailPenerimaan')->middleware('auth');
-Route::post('/suratjalankoreksiaddlist', 'NewReturSuratJalanController@getKoreksiAddList')->middleware('auth');
-Route::post('/koreksiSuratJalan' , 'NewReturSuratJalanController@spKoreksi')->middleware('auth');
-Route::get('/loadallsuratjalan' , 'NewReturSuratJalanController@loadAll')->middleware('auth');
+Route::get('/newretursuratjalan' , [NewReturSuratJalanController::class, 'index'])->middleware('auth');
+Route::get('/getnobuktiretursuratjalan' , [NewReturSuratJalanController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/detailoutstandingretursuratjalan' , [NewReturSuratJalanController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::post('/addSuratJalan' , [NewReturSuratJalanController::class, 'addSuratJalan'])->middleware('auth');
+Route::post('/detailpenerimaanretursuratjalan' , [NewReturSuratJalanController::class, 'getDetailPenerimaan'])->middleware('auth');
+Route::post('/suratjalankoreksiaddlist', [NewReturSuratJalanController::class, 'getKoreksiAddList'])->middleware('auth');
+Route::post('/koreksiSuratJalan' , [NewReturSuratJalanController::class, 'spKoreksi'])->middleware('auth');
+Route::get('/loadallsuratjalan' , [NewReturSuratJalanController::class, 'loadAll'])->middleware('auth');
 // TRANSFER BARANG
-Route::get('/newtransferbarang' , 'NewTransferBarangController@index')->middleware('auth');
-Route::get('/getnobuktitransferbarang' , 'NewTransferBarangController@getNoBukti')->middleware('auth');
-Route::post('/detailoutstandingtransferbarang', 'NewTransferBarangController@getDetailOutstanding')->middleware('auth');
-Route::post('/newAddTransferBarang', 'NewTransferBarangController@addTransferBarang')->middleware('auth');
-Route::post('/detailpenerimaantransferbarang', 'NewTransferBarangController@getDetailPenerimaan')->middleware('auth');
-Route::post('/transferbarangkoreksiaddlist' , 'NewTransferBarangController@getKoreksiAddList')->middleware('auth');
-Route::post('/koreksiTransferBarang' , 'NewTransferBarangController@spKoreksi')->middleware('auth');
-Route::get('/loadalltransferbarang' , 'NewTransferBarangController@loadAll')->middleware('auth');
+Route::get('/newtransferbarang' , [NewTransferBarangController::class, 'index'])->middleware('auth');
+Route::get('/getnobuktitransferbarang' , [NewTransferBarangController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/detailoutstandingtransferbarang', [NewTransferBarangController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::post('/newAddTransferBarang', [NewTransferBarangController::class, 'addTransferBarang'])->middleware('auth');
+Route::post('/detailpenerimaantransferbarang', [NewTransferBarangController::class, 'getDetailPenerimaan'])->middleware('auth');
+Route::post('/transferbarangkoreksiaddlist' , [NewTransferBarangController::class, 'getKoreksiAddList'])->middleware('auth');
+Route::post('/koreksiTransferBarang' , [NewTransferBarangController::class, 'spKoreksi'])->middleware('auth');
+Route::get('/loadalltransferbarang' , [NewTransferBarangController::class, 'loadAll'])->middleware('auth');
 
 // PENYERAHAN GUDANG
-Route::get('/penyerahangudang' , 'NewPenyerahanGudangController@index')->middleware('auth');
-Route::get('/getnobuktipenyerahangudang', 'NewPenyerahanGudangController@getNoBukti')->middleware('auth');
-Route::post('/detailoutstandingpenyerahangudang', 'NewPenyerahanGudangController@getDetailOutstanding')->middleware('auth');
-Route::post('/addpenyerahangudang' ,'NewPenyerahanGudangController@addPenyerahanGudang')->middleware('auth');
-Route::post('/detailpenerimaanpenyerahangudang' , 'NewPenyerahanGudangController@getDetailPenerimaan')->middleware('auth');
-Route::get('/loadallpenyerahangudang', 'NewPenyerahanGudangController@loadAll')->middleware('auth');
-Route::post('/penyerahangudangkoreksiaddlist' , 'NewPenyerahanGudangController@getKoreksiAddList')->middleware('auth');
-Route::post('/koreksipenyerahangudang', 'NewPenyerahanGudangController@spKoreksi')->middleware('auth');
+Route::get('/penyerahangudang' , [NewPenyerahanGudangController::class, 'index'])->middleware('auth');
+Route::get('/getnobuktipenyerahangudang', [NewPenyerahanGudangController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/detailoutstandingpenyerahangudang', [NewPenyerahanGudangController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::post('/addpenyerahangudang' ,[NewPenyerahanGudangController::class, 'addPenyerahanGudang'])->middleware('auth');
+Route::post('/detailpenerimaanpenyerahangudang' , [NewPenyerahanGudangController::class, 'getDetailPenerimaan'])->middleware('auth');
+Route::get('/loadallpenyerahangudang', [NewPenyerahanGudangController::class, 'loadAll'])->middleware('auth');
+Route::post('/penyerahangudangkoreksiaddlist' , [NewPenyerahanGudangController::class, 'getKoreksiAddList'])->middleware('auth');
+Route::post('/koreksipenyerahangudang', [NewPenyerahanGudangController::class, 'spKoreksi'])->middleware('auth');
 
 //PENYERAHAN SAMPLE
-Route::get('/penyerahansample', 'NewPenyerahanSampleController@index')->middleware('auth');
-Route::get('/getnobuktipenyerahansample' , 'NewPenyerahanSampleController@getNoBukti')->middleware('auth');
-Route::post('/detailoutstandingpenyerahansample' , 'NewPenyerahanSampleController@getDetailOutstanding')->middleware('auth');
-Route::post('/addpenyerahansample' , 'NewPenyerahanSampleController@spAdd')->middleware('auth');
-Route::get('/loadallpenyerahansample', 'NewPenyerahanSampleController@loadAll')->middleware('auth');
-Route::post('/detailpenerimaanpenyerahansample', 'NewPenyerahanSampleController@getDetailPenerimaan')->middleware('auth');
-Route::post('/penyerahansamplekoreksiaddlist', 'NewPenyerahanSampleController@getKoreksiAddList')->middleware('auth');
-Route::post('/koreksipenyerahansample', 'NewPenyerahanSampleController@spKoreksi')->middleware('auth');
-Route::post('/PrintSample' , 'NewPenyerahanSampleController@getDetailPenerimaan')->middleware('auth');
+Route::get('/penyerahansample', [NewPenyerahanSampleController::class, 'index'])->middleware('auth');
+Route::get('/getnobuktipenyerahansample' , [NewPenyerahanSampleController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/detailoutstandingpenyerahansample' , [NewPenyerahanSampleController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::post('/addpenyerahansample' , [NewPenyerahanSampleController::class, 'spAdd'])->middleware('auth');
+Route::get('/loadallpenyerahansample', [NewPenyerahanSampleController::class, 'loadAll'])->middleware('auth');
+Route::post('/detailpenerimaanpenyerahansample', [NewPenyerahanSampleController::class, 'getDetailPenerimaan'])->middleware('auth');
+Route::post('/penyerahansamplekoreksiaddlist', [NewPenyerahanSampleController::class, 'getKoreksiAddList'])->middleware('auth');
+Route::post('/koreksipenyerahansample', [NewPenyerahanSampleController::class, 'spKoreksi'])->middleware('auth');
+Route::post('/PrintSample' , [NewPenyerahanSampleController::class, 'getDetailPenerimaan'])->middleware('auth');
 
 //PENYERAHAN KONSI
-Route::get('/penyerahankonsi', 'NewPenyerahanKonsiController@index')->middleware('auth');
-Route::get('/getnobuktipenyerahankonsi' , 'NewPenyerahanKonsiController@getNoBukti')->middleware('auth');
-Route::post('/detailoutstandingpenyerahankonsi' , 'NewPenyerahanKonsiController@getDetailOutstanding')->middleware('auth');
-Route::post('/addpenyerahankonsi' , 'NewPenyerahanKonsiController@spAdd')->middleware('auth');
-Route::get('/loadallpenyerahankonsi', 'NewPenyerahanKonsiController@loadAll')->middleware('auth');
-Route::post('/detailpenerimaanpenyerahankonsi', 'NewPenyerahanKonsiController@getDetailPenerimaan')->middleware('auth');
-Route::post('/penyerahankonsikoreksiaddlist', 'NewPenyerahanKonsiController@getKoreksiAddList')->middleware('auth');
-Route::post('/koreksipenyerahankonsi', 'NewPenyerahanKonsiController@spKoreksi')->middleware('auth');
-Route::post('/PrintKonsi' , 'NewPenyerahanKonsiController@getDetailPenerimaan')->middleware('auth');
+Route::get('/penyerahankonsi', [NewPenyerahanKonsiController::class, 'index'])->middleware('auth');
+Route::get('/getnobuktipenyerahankonsi' , [NewPenyerahanKonsiController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/detailoutstandingpenyerahankonsi' , [NewPenyerahanKonsiController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::post('/addpenyerahankonsi' , [NewPenyerahanKonsiController::class, 'spAdd'])->middleware('auth');
+Route::get('/loadallpenyerahankonsi', [NewPenyerahanKonsiController::class, 'loadAll'])->middleware('auth');
+Route::post('/detailpenerimaanpenyerahankonsi', [NewPenyerahanKonsiController::class, 'getDetailPenerimaan'])->middleware('auth');
+Route::post('/penyerahankonsikoreksiaddlist', [NewPenyerahanKonsiController::class, 'getKoreksiAddList'])->middleware('auth');
+Route::post('/koreksipenyerahankonsi', [NewPenyerahanKonsiController::class, 'spKoreksi'])->middleware('auth');
+Route::post('/PrintKonsi' , [NewPenyerahanKonsiController::class, 'getDetailPenerimaan'])->middleware('auth');
 
 
 // UBAH KEMASAN
 // Route::get('/ubahkemasan', 'UbahKemasanController@index')->middleware('auth');
-Route::get('/getnobuktiubahkemasan' , 'UbahKemasanController@getNoBukti')->middleware('auth');
-Route::post('/detailoutstandingubahkemasan' , 'UbahKemasanController@getDetailOutstanding')->middleware('auth');
-Route::post('/detailpenerimaanubahkemasan', 'UbahKemasanController@getDetailPenerimaan')->middleware('auth');
-Route::post('/addubahkemasan' , 'UbahKemasanController@spAdd')->middleware('auth');
-Route::get('/loadallubahkemasan', 'UbahKemasanController@loadAll')->middleware('auth');
-Route::post('/koreksiubahkemasan', 'UbahKemasanController@spKoreksi')->middleware('auth');
+Route::get('/getnobuktiubahkemasan' , [UbahKemasanController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/detailoutstandingubahkemasan' , [UbahKemasanController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::post('/detailpenerimaanubahkemasan', [UbahKemasanController::class, 'getDetailPenerimaan'])->middleware('auth');
+Route::post('/addubahkemasan' , [UbahKemasanController::class, 'spAdd'])->middleware('auth');
+Route::get('/loadallubahkemasan', [UbahKemasanController::class, 'loadAll'])->middleware('auth');
+Route::post('/koreksiubahkemasan', [UbahKemasanController::class, 'spKoreksi'])->middleware('auth');
 
 
 
 // PERMINTAAN UBAH KEMASAN
 
-Route::get('/permintaanubahkemasan' , 'PermintaanUbahKemasanController@index')->middleware('auth');
-Route::get('/getnobuktipermintaanubahkemasan' , 'PermintaanUbahKemasanController@getNoBukti')->middleware('auth');
-Route::post('/permintaanubahkemasandetailpenerimaan' , 'PermintaanUbahKemasanController@detailPenerimaan')->middleware('auth');
-Route::post('/permintaanubahkemasandetailpenerimaanprint' , 'PermintaanUbahKemasanController@detailPenerimaanPrint')->middleware('auth');
-Route::get('/loadallpermintaanubahkemasan' , 'PermintaanUbahKemasanController@loadAll')->middleware('auth');
-Route::post('/permintaanubahkemasanspadd' , 'PermintaanUbahKemasanController@spAdd')->middleware('auth');
+Route::get('/permintaanubahkemasan' , [PermintaanUbahKemasanController::class, 'index'])->middleware('auth');
+Route::get('/getnobuktipermintaanubahkemasan' , [PermintaanUbahKemasanController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/permintaanubahkemasandetailpenerimaan' , [PermintaanUbahKemasanController::class, 'detailPenerimaan'])->middleware('auth');
+Route::post('/permintaanubahkemasandetailpenerimaanprint' , [PermintaanUbahKemasanController::class, 'detailPenerimaanPrint'])->middleware('auth');
+Route::get('/loadallpermintaanubahkemasan' , [PermintaanUbahKemasanController::class, 'loadAll'])->middleware('auth');
+Route::post('/permintaanubahkemasanspadd' , [PermintaanUbahKemasanController::class, 'spAdd'])->middleware('auth');
 
 // FINALISASI UBAH KEMASAN
-Route::get('/ubahkemasanfinalisasi', 'UbahKemasanFinalisasiController@index')->middleware('auth');
-Route::get('/getnobuktiubahkemasanfinalisasi' , 'UbahKemasanFinalisasiController@getNoBukti')->middleware('auth');
-Route::post('/detailoutstandingubahkemasanfinalisasi' , 'UbahKemasanFinalisasiController@getDetailOutstanding')->middleware('auth');
-Route::get('/loadallubahkemasanfinalisasi', 'UbahKemasanFinalisasiController@loadAll')->middleware('auth');
-Route::post('/addubahkemasanfinalisasi' , 'UbahKemasanFinalisasiController@spAdd')->middleware('auth');
+Route::get('/ubahkemasanfinalisasi', [UbahKemasanFinalisasiController::class, 'index'])->middleware('auth');
+Route::get('/getnobuktiubahkemasanfinalisasi' , [UbahKemasanFinalisasiController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/detailoutstandingubahkemasanfinalisasi' , [UbahKemasanFinalisasiController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::get('/loadallubahkemasanfinalisasi', [UbahKemasanFinalisasiController::class, 'loadAll'])->middleware('auth');
+Route::post('/addubahkemasanfinalisasi' , [UbahKemasanFinalisasiController::class, 'spAdd'])->middleware('auth');
 
 // UBAH KEMASAN PICKING
-Route::get('/pickinguk', 'UbahKemasanPickingController@index')->middleware('auth');
-Route::post('/detailoutstandingubahkemasanpicking' , 'UbahKemasanPickingController@getDetailOutstanding')->middleware('auth');
-Route::post('/detailpenerimaanubahkemasanpicking' , 'UbahKemasanPickingController@getDetailPenerimaan')->middleware('auth');
-Route::post('/detailoutstandingubahkemasanpickinginfo' , 'UbahKemasanPickingController@getDetailOutstandingInfo')->middleware('auth');
-Route::get('/loadallubahkemasanpicking', 'UbahKemasanPickingController@loadAll')->middleware('auth');
-Route::post('/ubahkemasanpickingspcekadd', 'UbahKemasanPickingController@spCheckAdd')->middleware('auth');
-Route::post('/ubahkemasanpickingspadd', 'UbahKemasanPickingController@spAdd')->middleware('auth');
+Route::get('/pickinguk', [UbahKemasanPickingController::class, 'index'])->middleware('auth');
+Route::post('/detailoutstandingubahkemasanpicking' , [UbahKemasanPickingController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::post('/detailpenerimaanubahkemasanpicking' , [UbahKemasanPickingController::class, 'getDetailPenerimaan'])->middleware('auth');
+Route::post('/detailoutstandingubahkemasanpickinginfo' , [UbahKemasanPickingController::class, 'getDetailOutstandingInfo'])->middleware('auth');
+Route::get('/loadallubahkemasanpicking', [UbahKemasanPickingController::class, 'loadAll'])->middleware('auth');
+Route::post('/ubahkemasanpickingspcekadd', [UbahKemasanPickingController::class, 'spCheckAdd'])->middleware('auth');
+Route::post('/ubahkemasanpickingspadd', [UbahKemasanPickingController::class, 'spAdd'])->middleware('auth');
 
 //TERIMA UBAH KEMASAN
-Route::get('/terimaubahkemasan', 'TerimaUbahKemasanController@index')->middleware('auth');
-Route::post('/detailoutstandingterimaubahkemasan' , 'TerimaUbahKemasanController@getDetailOutstanding')->middleware('auth');
-Route::post('/detailpenerimaanterimaubahkemasan', 'TerimaUbahKemasanController@getDetailPenerimaan')->middleware('auth');
-Route::get('/loadallterimaubahkemasan', 'TerimaUbahKemasanController@loadAll')->middleware('auth');
-Route::post('/addterimaubahkemasan' , 'TerimaUbahKemasanController@spAdd')->middleware('auth');
-Route::post('/koreksiterimaubahkemasan' , 'TerimaUbahKemasanController@spKoreksi')->middleware('auth');
+Route::get('/terimaubahkemasan', [TerimaUbahKemasanController::class, 'index'])->middleware('auth');
+Route::post('/detailoutstandingterimaubahkemasan' , [TerimaUbahKemasanController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::post('/detailpenerimaanterimaubahkemasan', [TerimaUbahKemasanController::class, 'getDetailPenerimaan'])->middleware('auth');
+Route::get('/loadallterimaubahkemasan', [TerimaUbahKemasanController::class, 'loadAll'])->middleware('auth');
+Route::post('/addterimaubahkemasan' , [TerimaUbahKemasanController::class, 'spAdd'])->middleware('auth');
+Route::post('/koreksiterimaubahkemasan' , [TerimaUbahKemasanController::class, 'spKoreksi'])->middleware('auth');
 
 // TRANSFER LOKASI SITE
 
-Route::get('/transferlokasisite' , 'TransferLokasiSiteController@index')->middleware('auth');
-Route::post('/transferlokasisiteceklokasiawal' , 'TransferLokasiSiteController@cekLokasiAwal')->middleware('auth');
-Route::post('/transferlokasisiteceklokasitujuan' , 'TransferLokasiSiteController@cekLokasiTujuan')->middleware('auth');
-Route::post('/transferlokasisitecekkodegdg' , 'TransferLokasiSiteController@cekKodeGdg')->middleware('auth');
-Route::get('/getnobuktitransferlokasisite' , 'TransferLokasiSiteController@getNoBukti')->middleware('auth');
-Route::post('/transferlokasisitespadd' , 'TransferLokasiSiteController@spAdd')->middleware('auth');
+Route::get('/transferlokasisite' , [TransferLokasiSiteController::class, 'index'])->middleware('auth');
+Route::post('/transferlokasisiteceklokasiawal' , [TransferLokasiSiteController::class, 'cekLokasiAwal'])->middleware('auth');
+Route::post('/transferlokasisiteceklokasitujuan' , [TransferLokasiSiteController::class, 'cekLokasiTujuan'])->middleware('auth');
+Route::post('/transferlokasisitecekkodegdg' , [TransferLokasiSiteController::class, 'cekKodeGdg'])->middleware('auth');
+Route::get('/getnobuktitransferlokasisite' , [TransferLokasiSiteController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/transferlokasisitespadd' , [TransferLokasiSiteController::class, 'spAdd'])->middleware('auth');
 
 
 
 
 
 //TRANSFER LOKASI IN
-Route::get('/transferlokasiin', 'TransferLokasiInController@index')->middleware('auth');
-Route::get('/loadalltransferlokasiin', 'TransferLokasiInController@loadAll')->middleware('auth');
-Route::post('/detailoutstandingtransferlokasiin' , 'TransferLokasiInController@getDetailOutstanding')->middleware('auth');
-Route::post('/detailpenerimaantransferlokasiin' , 'TransferLokasiInController@getDetailPenerimaan')->middleware('auth');
-Route::post('/addtransferlokasiin' , 'TransferLokasiInController@spAdd')->middleware('auth');
-Route::get('/getnobuktitransferlokasiin' , 'TransferLokasiInController@getNoBukti')->middleware('auth');
-Route::post('/koreksitransferlokasiin' , 'TransferLokasiInController@spKoreksi')->middleware('auth');
+Route::get('/transferlokasiin', [TransferLokasiInController::class, 'index'])->middleware('auth');
+Route::get('/loadalltransferlokasiin', [TransferLokasiInController::class, 'loadAll'])->middleware('auth');
+Route::post('/detailoutstandingtransferlokasiin' , [TransferLokasiInController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::post('/detailpenerimaantransferlokasiin' , [TransferLokasiInController::class, 'getDetailPenerimaan'])->middleware('auth');
+Route::post('/addtransferlokasiin' , [TransferLokasiInController::class, 'spAdd'])->middleware('auth');
+Route::get('/getnobuktitransferlokasiin' , [TransferLokasiInController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/koreksitransferlokasiin' , [TransferLokasiInController::class, 'spKoreksi'])->middleware('auth');
 
 //TRANSFER LOKASI
-Route::get('/transferlokasi', 'TransferLokasiController@index')->middleware('auth');
-Route::get('/transferlokasilistbarang' , 'TransferLokasiController@listBarang')->middleware('auth');
-Route::get('/transferlokasilistlokasi' , 'TransferLokasiController@listLokasi')->middleware('auth');
-Route::get('/getnobuktitransferlokasi' , 'TransferLokasiController@getNoBukti')->middleware('auth');
-Route::post('/transferlokasispadd' , 'TransferLokasiController@spAdd')->middleware('auth');
-Route::post('/transferlokasidetailpenerimaan' , 'TransferLokasiController@detailPenerimaan')->middleware('auth');
-Route::get('/loadalltransferlokasi' , 'TransferLokasiController@loadAll')->middleware('auth');
+Route::get('/transferlokasi', [TransferLokasiController::class, 'index'])->middleware('auth');
+Route::get('/transferlokasilistbarang' , [TransferLokasiController::class, 'listBarang'])->middleware('auth');
+Route::get('/transferlokasilistlokasi' , [TransferLokasiController::class, 'listLokasi'])->middleware('auth');
+Route::get('/getnobuktitransferlokasi' , [TransferLokasiController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/transferlokasispadd' , [TransferLokasiController::class, 'spAdd'])->middleware('auth');
+Route::post('/transferlokasidetailpenerimaan' , [TransferLokasiController::class, 'detailPenerimaan'])->middleware('auth');
+Route::get('/loadalltransferlokasi' , [TransferLokasiController::class, 'loadAll'])->middleware('auth');
 
 //TRANSFER LOKASI OUT
-Route::get('/transferlokasiout', 'TransferLokasiOutController@index')->middleware('auth');
-Route::get('/loadalltransferlokasiout', 'TransferLokasiOutController@loadAll')->middleware('auth');
-Route::get('/getnobuktitransferlokasiout' , 'TransferLokasiOutController@getNoBukti')->middleware('auth');
-Route::post('/detailoutstandingtransferlokasiout' , 'TransferLokasiOutController@getDetailOutstanding')->middleware('auth');
-Route::post('/addtransferlokasiout' , 'TransferLokasiOutController@spAdd')->middleware('auth');
-Route::post('/detailpenerimaantransferlokasiout' , 'TransferLokasiOutController@getDetailPenerimaan')->middleware('auth');
-Route::post('/koreksitransferlokasiout' , 'TransferLokasiOutController@spKoreksi')->middleware('auth');
+Route::get('/transferlokasiout', [TransferLokasiOutController::class, 'index'])->middleware('auth');
+Route::get('/loadalltransferlokasiout', [TransferLokasiOutController::class, 'loadAll'])->middleware('auth');
+Route::get('/getnobuktitransferlokasiout' , [TransferLokasiOutController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/detailoutstandingtransferlokasiout' , [TransferLokasiOutController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::post('/addtransferlokasiout' , [TransferLokasiOutController::class, 'spAdd'])->middleware('auth');
+Route::post('/detailpenerimaantransferlokasiout' , [TransferLokasiOutController::class, 'getDetailPenerimaan'])->middleware('auth');
+Route::post('/koreksitransferlokasiout' , [TransferLokasiOutController::class, 'spKoreksi'])->middleware('auth');
 
 
 // GANTI PASSWORD
-Route::get('/gantipassword' , 'GantiPasswordController@index')->middleware('auth');
-Route::post('/gantipassworduser' , 'GantiPasswordController@gantiPassword')->middleware('auth');
+Route::get('/gantipassword' , [GantiPasswordController::class, 'index'])->middleware('auth');
+Route::post('/gantipassworduser' , [GantiPasswordController::class, 'gantiPassword'])->middleware('auth');
 
 // PERMINTAAN PENYERAHAN GUDANG
 
-Route::get('/permintaanpenyerahangudang' , 'PermintaanPenyerahanGudangController@index')->middleware('auth');
-Route::get('/getnobuktipermintaanpenyerahangudang' , 'PermintaanPenyerahanGudangController@getNoBukti')->middleware('auth');
-Route::get('/permintaanpenyerahangudanglistbarang' , 'PermintaanPenyerahanGudangController@listBarang')->middleware('auth');
-Route::get('/permintaanpenyerahangudanglistgudang' , 'PermintaanPenyerahanGudangController@listGudang')->middleware('auth');
-Route::post('/permintaanpenyerahangudangdetailpenerimaan' , 'PermintaanPenyerahanGudangController@detailPenerimaan')->middleware('auth');
-Route::get('/loadallpermintaanpenyerahangudang' , 'PermintaanPenyerahanGudangController@loadAll')->middleware('auth');
-Route::post('/permintaanpenyerahangudangspadd' , 'PermintaanPenyerahanGudangController@spAdd')->middleware('auth');
+Route::get('/permintaanpenyerahangudang' , [PermintaanPenyerahanGudangController::class, 'index'])->middleware('auth');
+Route::get('/getnobuktipermintaanpenyerahangudang' , [PermintaanPenyerahanGudangController::class, 'getNoBukti'])->middleware('auth');
+Route::get('/permintaanpenyerahangudanglistbarang' , [PermintaanPenyerahanGudangController::class, 'listBarang'])->middleware('auth');
+Route::get('/permintaanpenyerahangudanglistgudang' , [PermintaanPenyerahanGudangController::class, 'listGudang'])->middleware('auth');
+Route::post('/permintaanpenyerahangudangdetailpenerimaan' , [PermintaanPenyerahanGudangController::class, 'detailPenerimaan'])->middleware('auth');
+Route::get('/loadallpermintaanpenyerahangudang' , [PermintaanPenyerahanGudangController::class, 'loadAll'])->middleware('auth');
+Route::post('/permintaanpenyerahangudangspadd' , [PermintaanPenyerahanGudangController::class, 'spAdd'])->middleware('auth');
 
 
 // RETUR Beli
-Route::get('/returbeli', 'NewReturBeliController@index')->middleware('auth');
-Route::post('/detailoutstandingreturbeli', 'NewReturBeliController@getDetailOutstanding')->middleware('auth');
-Route::get('/getnobuktireturbeli', 'NewReturBeliController@getNoBukti')->middleware('auth');
-Route::post('/addreturbeli', 'NewReturBeliController@spAdd')->middleware('auth');
-Route::post('/detailpenerimaanreturbeli' , 'NewReturBeliController@getDetailPenerimaan')->middleware('auth');
-Route::post('/returbelikoreksiaddlist', 'NewReturBeliController@getKoreksiAddList')->middleware('auth');
-Route::get('/loadallreturbeli', 'NewReturBeliController@loadall')->middleware('auth');
-Route::post('/koreksireturbeli', 'NewReturBeliController@spKoreksi')->middleware('auth');
+Route::get('/returbeli', [NewReturBeliController::class, 'index'])->middleware('auth');
+Route::post('/detailoutstandingreturbeli', [NewReturBeliController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::get('/getnobuktireturbeli', [NewReturBeliController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/addreturbeli', [NewReturBeliController::class, 'spAdd'])->middleware('auth');
+Route::post('/detailpenerimaanreturbeli' , [NewReturBeliController::class, 'getDetailPenerimaan'])->middleware('auth');
+Route::post('/returbelikoreksiaddlist', [NewReturBeliController::class, 'getKoreksiAddList'])->middleware('auth');
+Route::get('/loadallreturbeli', [NewReturBeliController::class, 'loadall'])->middleware('auth');
+Route::post('/koreksireturbeli', [NewReturBeliController::class, 'spKoreksi'])->middleware('auth');
 // KOREKSI STOCK GDG
-Route::get('/opnamegudang', 'NewOpnameGudangController@index')->middleware('auth');
-Route::post('/opnamegudangspcheck', 'NewOpnameGudangController@spcheck')->middleware('auth');
-Route::post('/detailitemopnamegudang', 'NewOpnameGudangController@getDetailItem')->middleware('auth');
-Route::get('/getnobuktiopnamegudang', 'NewOpnameGudangController@getNoBukti')->middleware('auth');
-Route::post('/addformopnamegudang', 'NewOpnameGudangController@addForm')->middleware('auth');
-Route::get('/loadallopnamegudang', 'NewOpnameGudangController@loadAll')->middleware('auth');
-Route::post('/getdetailpenerimaanopnamegudang', 'NewOpnameGudangController@getDetailPenerimaan')->middleware('auth');
+Route::get('/opnamegudang', [NewOpnameGudangController::class, 'index'])->middleware('auth');
+Route::post('/opnamegudangspcheck', [NewOpnameGudangController::class, 'spcheck'])->middleware('auth');
+Route::post('/detailitemopnamegudang', [NewOpnameGudangController::class, 'getDetailItem'])->middleware('auth');
+Route::get('/getnobuktiopnamegudang', [NewOpnameGudangController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/addformopnamegudang', [NewOpnameGudangController::class, 'addForm'])->middleware('auth');
+Route::get('/loadallopnamegudang', [NewOpnameGudangController::class, 'loadAll'])->middleware('auth');
+Route::post('/getdetailpenerimaanopnamegudang', [NewOpnameGudangController::class, 'getDetailPenerimaan'])->middleware('auth');
 //PUT AWAY
-Route::get('/putaway', 'NewPutAwayController@index')->middleware('auth');
-Route::post('/addputaway', 'NewPutAwayController@spAdd')->middleware('auth');
-Route::post('/checkaddputaway', 'NewPutAwayController@spCheckAdd')->middleware('auth');
-Route::post('/detailpenerimaanputaway' , 'NewPutAwayController@getDetailPenerimaan')->middleware('auth');
-Route::post('/koreksiputaway','NewPutAwayController@spKoreksi')->middleware('auth');
-Route::get('/loadallputaway', 'NewPutAwayController@loadAll')->middleware('auth');
+Route::get('/putaway', [NewPutAwayController::class, 'index'])->middleware('auth');
+Route::post('/addputaway', [NewPutAwayController::class, 'spAdd'])->middleware('auth');
+Route::post('/checkaddputaway', [NewPutAwayController::class, 'spCheckAdd'])->middleware('auth');
+Route::post('/detailpenerimaanputaway' , [NewPutAwayController::class, 'getDetailPenerimaan'])->middleware('auth');
+Route::post('/koreksiputaway',[NewPutAwayController::class, 'spKoreksi'])->middleware('auth');
+Route::get('/loadallputaway', [NewPutAwayController::class, 'loadAll'])->middleware('auth');
 
 // NEW PERMINTAAN VwPersiapan
-Route::get('/newpicking', 'NewPickingController@index')->middleware('auth');
-Route::post('/detailpenerimaanpicking' , 'NewPickingController@getDetailPenerimaan')->middleware('auth');
-Route::post('/addpicking', 'NewPickingController@spAdd')->middleware('auth');
-Route::post('/addpickinglpb', 'NewPickingController@spAddLPB')->middleware('auth');
-Route::post('/checkaddpicking', 'NewPickingController@spCheckAdd')->middleware('auth');
-Route::post('/checkaddpickinglpb', 'NewPickingController@spCheckAddLPB')->middleware('auth');
-Route::post('/koreksipicking','NewPickingController@spKoreksi')->middleware('auth');
-Route::get('/loadallpicking', 'NewPickingController@loadAll')->middleware('auth');
+Route::get('/newpicking', [NewPickingController::class, 'index'])->middleware('auth');
+Route::post('/detailpenerimaanpicking' , [NewPickingController::class, 'getDetailPenerimaan'])->middleware('auth');
+Route::post('/addpicking', [NewPickingController::class, 'spAdd'])->middleware('auth');
+Route::post('/addpickinglpb', [NewPickingController::class, 'spAddLPB'])->middleware('auth');
+Route::post('/checkaddpicking', [NewPickingController::class, 'spCheckAdd'])->middleware('auth');
+Route::post('/checkaddpickinglpb', [NewPickingController::class, 'spCheckAddLPB'])->middleware('auth');
+Route::post('/koreksipicking',[NewPickingController::class, 'spKoreksi'])->middleware('auth');
+Route::get('/loadallpicking', [NewPickingController::class, 'loadAll'])->middleware('auth');
 
 
 
 
 
 // packing
-Route::get('/packing', 'PackingController@index')->middleware('auth');
-Route::get('/loadallpacking' , 'PackingController@loadAll')->middleware('auth');
-Route::post('/detailoutpacking' , 'PackingController@getDetailOutstanding')->middleware('auth');
-Route::get('/getnobuktipacking' , 'PackingController@getNoBukti')->middleware('auth');
-Route::post('/detailoutstandingpacking' , 'PackingController@getDetailOutstanding')->middleware('auth');
-Route::post('/packingcheckadd' , 'PackingController@checkAdd')->middleware('auth');
+Route::get('/packing', [PackingController::class, 'index'])->middleware('auth');
+Route::get('/loadallpacking' , [PackingController::class, 'loadAll'])->middleware('auth');
+Route::post('/detailoutpacking' , [PackingController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::get('/getnobuktipacking' , [PackingController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/detailoutstandingpacking' , [PackingController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::post('/packingcheckadd' , [PackingController::class, 'checkAdd'])->middleware('auth');
 
 // Route::post('/detailoutstandingpackingkolli' , 'PackingController@getDetailOutstandingkolli')->middleware('auth');
-Route::post('/addpacking' , 'PackingController@addPacking')->middleware('auth');
-Route::post('/detailpacking' , 'PackingController@getDetailPenerimaan')->middleware('auth');
-Route::post('/koreksiPacking' , 'PackingController@spKoreksi')->middleware('auth');
+Route::post('/addpacking' , [PackingController::class, 'addPacking'])->middleware('auth');
+Route::post('/detailpacking' , [PackingController::class, 'getDetailPenerimaan'])->middleware('auth');
+Route::post('/koreksiPacking' , [PackingController::class, 'spKoreksi'])->middleware('auth');
 
 
 // PERSIAPAN SPB
-Route::get('/persiapanspb', 'PersiapanSpbController@index')->middleware('auth');
-Route::get('/loadallpersiapanspb' , 'PersiapanSpbController@loadAll')->middleware('auth');
-Route::post('/detailoutpersiapanspb' , 'PersiapanSpbController@getDetailOutstanding')->middleware('auth');
-Route::get('/getnobuktipersiapanspb' , 'PersiapanSpbController@getNoBukti')->middleware('auth');
-Route::post('/detailoutstandingpersiapanspb' , 'PersiapanSpbController@getDetailOutstanding')->middleware('auth');
-Route::post('/addpersiapanspb' , 'PersiapanSpbController@addSuratJalan')->middleware('auth');
-Route::post('/detailpersiapanspb' , 'PersiapanSpbController@getDetailPenerimaan')->middleware('auth');
-Route::post('/detailtransaksispb' , 'PersiapanSpbController@getDetailPenerimaan')->middleware('auth');
-Route::post('/spbkoreksiaddlist', 'PersiapanSpbController@getKoreksiAddList')->middleware('auth');
-Route::post('/koreksiPersiapanSPB' , 'PersiapanSpbController@spKoreksi')->middleware('auth');
-Route::post('/persiapanspbspotorisasi' , 'PersiapanSpbController@spOtorisasi1')->middleware('auth');
-Route::post('/PrintSPB' , 'PersiapanSpbController@getDetailPenerimaancetak')->middleware('auth');
-Route::post('/PrintKolli' , 'PersiapanSpbController@getDetailOutstandingkolli')->middleware('auth');
-Route::post('/persiapanspbupdatecetakkolli' , 'PersiapanSpbController@updateCetakKolli')->middleware('auth');
-Route::post('/persiapanspbupdatecetakspb' , 'PersiapanSpbController@updateCetakspb')->middleware('auth');
+Route::get('/persiapanspb', [PersiapanSpbController::class, 'index'])->middleware('auth');
+Route::get('/loadallpersiapanspb' , [PersiapanSpbController::class, 'loadAll'])->middleware('auth');
+Route::post('/detailoutpersiapanspb' , [PersiapanSpbController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::get('/getnobuktipersiapanspb' , [PersiapanSpbController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/detailoutstandingpersiapanspb' , [PersiapanSpbController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::post('/addpersiapanspb' , [PersiapanSpbController::class, 'addSuratJalan'])->middleware('auth');
+Route::post('/detailpersiapanspb' , [PersiapanSpbController::class, 'getDetailPenerimaan'])->middleware('auth');
+Route::post('/detailtransaksispb' , [PersiapanSpbController::class, 'getDetailPenerimaan'])->middleware('auth');
+Route::post('/spbkoreksiaddlist', [PersiapanSpbController::class, 'getKoreksiAddList'])->middleware('auth');
+Route::post('/koreksiPersiapanSPB' , [PersiapanSpbController::class, 'spKoreksi'])->middleware('auth');
+Route::post('/persiapanspbspotorisasi' , [PersiapanSpbController::class, 'spOtorisasi1'])->middleware('auth');
+Route::post('/PrintSPB' , [PersiapanSpbController::class, 'getDetailPenerimaancetak'])->middleware('auth');
+Route::post('/PrintKolli' , [PersiapanSpbController::class, 'getDetailOutstandingkolli'])->middleware('auth');
+Route::post('/persiapanspbupdatecetakkolli' , [PersiapanSpbController::class, 'updateCetakKolli'])->middleware('auth');
+Route::post('/persiapanspbupdatecetakspb' , [PersiapanSpbController::class, 'updateCetakspb'])->middleware('auth');
 
 
 
 
 // RETUR SERAH SAMPLE
-Route::get('/returserahsample' , 'ReturSerahSampleController@index')->middleware('auth');
-Route::get('/getnobuktireturserahsample' , 'ReturSerahSampleController@getNoBukti')->middleware('auth');
-Route::post('/detailoutstandingreturserahsample' , 'ReturSerahSampleController@getDetailOutstanding')->middleware('auth');
-Route::post('/addreturserahsample' , 'ReturSerahSampleController@addSuratJalan')->middleware('auth');
-Route::post('/detailpenerimaanreturserahsample' , 'ReturSerahSampleController@getDetailPenerimaan')->middleware('auth');
-Route::post('/returserahsamplekoreksiaddlist', 'ReturSerahSampleController@getKoreksiAddList')->middleware('auth');
-Route::post('/koreksireturserahsample' , 'ReturSerahSampleController@spKoreksi')->middleware('auth');
-Route::get('/loadallreturserahsample' , 'ReturSerahSampleController@loadAll')->middleware('auth');
+Route::get('/returserahsample' , [ReturSerahSampleController::class, 'index'])->middleware('auth');
+Route::get('/getnobuktireturserahsample' , [ReturSerahSampleController::class, 'getNoBukti'])->middleware('auth');
+Route::post('/detailoutstandingreturserahsample' , [ReturSerahSampleController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::post('/addreturserahsample' , [ReturSerahSampleController::class, 'addSuratJalan'])->middleware('auth');
+Route::post('/detailpenerimaanreturserahsample' , [ReturSerahSampleController::class, 'getDetailPenerimaan'])->middleware('auth');
+Route::post('/returserahsamplekoreksiaddlist', [ReturSerahSampleController::class, 'getKoreksiAddList'])->middleware('auth');
+Route::post('/koreksireturserahsample' , [ReturSerahSampleController::class, 'spKoreksi'])->middleware('auth');
+Route::get('/loadallreturserahsample' , [ReturSerahSampleController::class, 'loadAll'])->middleware('auth');
 
 
 // REPORT KARTU STOK
-Route::get('/reportkartustok', 'ReportKartuStokController@index')->middleware('auth');
-Route::get('/reportkartustoklistlokasi', 'ReportKartuStokController@listLokasi')->middleware('auth');
-Route::get('/reportkartustoklistbarang', 'ReportKartuStokController@listBarang')->middleware('auth');
-Route::get('/reportkartustokspreport', 'ReportKartuStokController@spReport')->middleware('auth');
+Route::get('/reportkartustok', [ReportKartuStokController::class, 'index'])->middleware('auth');
+Route::get('/reportkartustoklistlokasi', [ReportKartuStokController::class, 'listLokasi'])->middleware('auth');
+Route::get('/reportkartustoklistbarang', [ReportKartuStokController::class, 'listBarang'])->middleware('auth');
+Route::get('/reportkartustokspreport', [ReportKartuStokController::class, 'spReport'])->middleware('auth');
 
 // REPORT STOK LOKASI
-Route::get('/reportstoklokasi' , 'ReportStokLokasiController@index')->middleware('auth');
-Route::post('/reportstoklokasispfilter' , 'ReportStokLokasiController@spFilter')->middleware('auth');
+Route::get('/reportstoklokasi' , [ReportStokLokasiController::class, 'index'])->middleware('auth');
+Route::post('/reportstoklokasispfilter' , [ReportStokLokasiController::class, 'spFilter'])->middleware('auth');
 
 // REPORT STOK Gudang
-Route::get('/reportstokgudang' , 'ReportStokGudangController@index')->middleware('auth');
-Route::post('/reportstokgudangspfilter' , 'ReportStokGudangController@spFilter')->middleware('auth');
+Route::get('/reportstokgudang' , [ReportStokGudangController::class, 'index'])->middleware('auth');
+Route::post('/reportstokgudangspfilter' , [ReportStokGudangController::class, 'spFilter'])->middleware('auth');
 
 // REPORT  PUTAWAY
-Route::get('/reportputaway' , 'ReportPutawayController@index')->middleware('auth');
-Route::post('/reportputawayspfilter' , 'ReportPutawayController@spFilter')->middleware('auth');
+Route::get('/reportputaway' , [ReportPutawayController::class, 'index'])->middleware('auth');
+Route::post('/reportputawayspfilter' , [ReportPutawayController::class, 'spFilter'])->middleware('auth');
 
 // REPORT  PICKING
-Route::get('/reportpicking' , 'ReportPickingController@index')->middleware('auth');
-Route::post('/reportpickingspfilter' , 'ReportPickingController@spFilter')->middleware('auth');
+Route::get('/reportpicking' , [ReportPickingController::class, 'index'])->middleware('auth');
+Route::post('/reportpickingspfilter' , [ReportPickingController::class, 'spFilter'])->middleware('auth');
 
 
 
 // QC PICKING
-Route::get('/qcpicking', 'QCPickingCOntroller@index')->middleware('auth');
-Route::post('/qcpickingdetailoutstanding', 'QCPickingController@getDetailOutstanding')->middleware('auth');
-Route::post('/qcpickingdetailpenerimaan', 'QCPickingController@getDetailPenerimaan')->middleware('auth');
-Route::get('/qcpickingloadall', 'QCPickingController@loadAll')->middleware('auth');
-Route::post('/qcpickingspadd', 'QCPickingController@spAdd')->middleware('auth');
+Route::get('/qcpicking', [QCPickingController::class, 'index'])->middleware('auth');
+Route::post('/qcpickingdetailoutstanding', [QCPickingController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::post('/qcpickingdetailpenerimaan', [QCPickingController::class, 'getDetailPenerimaan'])->middleware('auth');
+Route::get('/qcpickingloadall', [QCPickingController::class, 'loadAll'])->middleware('auth');
+Route::post('/qcpickingspadd', [QCPickingController::class, 'spAdd'])->middleware('auth');
 
 
 // OPNAME GUDANG
-Route::get('/opnamegdg', 'OpnameGdg1Controller@index')->middleware('auth');
-Route::post('/opnamegdgcekbarang' , 'OpnameGdg1Controller@cekBarang')->middleware('auth');
-Route::post('/opnamegdgceklokasi' , 'OpnameGdg1Controller@cekLokasi')->middleware('auth');
-Route::get('/getnobuktiopnamegdg' , 'OpnameGdg1Controller@getNoBukti')->middleware('auth');
-Route::post('/opnamegdgspadd', 'OpnameGdg1Controller@spAdd')->middleware('auth');
-Route::get('/opnamegdgloadall', 'OpnameGdg1Controller@loadAll')->middleware('auth');
-Route::post('/opnamegdgdetailoutstanding' , 'OpnameGdg1Controller@getDetailOutstanding')->middleware('auth');
-Route::post('/opnamegdgspkoreksi', 'OpnameGdg1Controller@spKoreksi')->middleware('auth');
-Route::post('/opnamegdgspdelete', 'OpnameGdg1Controller@spDelete')->middleware('auth');
-Route::post('/opnamegdgspverifikasi', 'OpnameGdg1Controller@spVerifikasi')->middleware('auth');
+Route::get('/opnamegdg', [OpnameGdg1Controller::class, 'index'])->middleware('auth');
+Route::post('/opnamegdgcekbarang' , [OpnameGdg1Controller::class, 'cekBarang'])->middleware('auth');
+Route::post('/opnamegdgceklokasi' , [OpnameGdg1Controller::class, 'cekLokasi'])->middleware('auth');
+Route::get('/getnobuktiopnamegdg' , [OpnameGdg1Controller::class, 'getNoBukti'])->middleware('auth');
+Route::post('/opnamegdgspadd', [OpnameGdg1Controller::class, 'spAdd'])->middleware('auth');
+Route::get('/opnamegdgloadall', [OpnameGdg1Controller::class, 'loadAll'])->middleware('auth');
+Route::post('/opnamegdgdetailoutstanding' , [OpnameGdg1Controller::class, 'getDetailOutstanding'])->middleware('auth');
+Route::post('/opnamegdgspkoreksi', [OpnameGdg1Controller::class, 'spKoreksi'])->middleware('auth');
+Route::post('/opnamegdgspdelete', [OpnameGdg1Controller::class, 'spDelete'])->middleware('auth');
+Route::post('/opnamegdgspverifikasi', [OpnameGdg1Controller::class, 'spVerifikasi'])->middleware('auth');
 
 // OPNAME GUDANG INSPEKSI
-Route::get('/opnamegdginspeksi', 'OpnameGdgInspeksiController@index')->middleware('auth');
-Route::get('/opnamegdginspeksiloadall', 'OpnameGdgInspeksiController@loadAll')->middleware('auth');
-Route::post('/opnamegdginspeksidetailoutstanding' , 'OpnameGdgInspeksiController@getDetailOutstanding')->middleware('auth');
-Route::post('/opnamegdginspeksispkoreksi', 'OpnameGdgInspeksiController@spKoreksi')->middleware('auth');
-Route::post('/opnamegdginspeksispdelete', 'OpnameGdgInspeksiController@spDelete')->middleware('auth');
-Route::post('/opnamegdginspeksispverifikasiaudit', 'OpnameGdgInspeksiController@spVerifikasiAudit')->middleware('auth');
+Route::get('/opnamegdginspeksi', [OpnameGdgInspeksiController::class, 'index'])->middleware('auth');
+Route::get('/opnamegdginspeksiloadall', [OpnameGdgInspeksiController::class, 'loadAll'])->middleware('auth');
+Route::post('/opnamegdginspeksidetailoutstanding' , [OpnameGdgInspeksiController::class, 'getDetailOutstanding'])->middleware('auth');
+Route::post('/opnamegdginspeksispkoreksi', [OpnameGdgInspeksiController::class, 'spKoreksi'])->middleware('auth');
+Route::post('/opnamegdginspeksispdelete', [OpnameGdgInspeksiController::class, 'spDelete'])->middleware('auth');
+Route::post('/opnamegdginspeksispverifikasiaudit', [OpnameGdgInspeksiController::class, 'spVerifikasiAudit'])->middleware('auth');
 
 
 
 
 // REPORT  OUT DISPATCH
-Route::get('/reportoutdispatch' , 'ReportOutDispatchController@index')->middleware('auth');
-Route::post('/reportoutdispatchspfilter' , 'ReportOutDispatchController@spFilter')->middleware('auth');
+Route::get('/reportoutdispatch' , [ReportOutDispatchController::class, 'index'])->middleware('auth');
+Route::post('/reportoutdispatchspfilter' , [ReportOutDispatchController::class, 'spFilter'])->middleware('auth');
 
 // REPORT  SO-SPB
-Route::get('/reportsospb' , 'ReportSoSpbController@index')->middleware('auth');
-Route::post('/reportsospbspfilter' , 'ReportSoSpbController@spFilter')->middleware('auth');
+Route::get('/reportsospb' , [ReportSoSpbController::class, 'index'])->middleware('auth');
+Route::post('/reportsospbspfilter' , [ReportSoSpbController::class, 'spFilter'])->middleware('auth');
 
 
 // REPORT  OPNAME HARIAN
-Route::get('/reportopnameharian' , 'ReportOpnameHarianController@index')->middleware('auth');
-Route::post('/reportopnameharianspfilter' , 'ReportOpnameHarianController@spFilter')->middleware('auth');
+Route::get('/reportopnameharian' , [ReportOpnameHarianController::class, 'index'])->middleware('auth');
+Route::post('/reportopnameharianspfilter' , [ReportOpnameHarianController::class, 'spFilter'])->middleware('auth');
 
 
 // REPORT  OUT Receiving
-Route::get('/reportoutreceiving' , 'ReportOutReceivingController@index')->middleware('auth');
-Route::post('/reportoutreceivingspfilter' , 'ReportOutReceivingController@spFilter')->middleware('auth');
+Route::get('/reportoutreceiving' , [ReportOutReceivingController::class, 'index'])->middleware('auth');
+Route::post('/reportoutreceivingspfilter' , [ReportOutReceivingController::class, 'spFilter'])->middleware('auth');
 
 
 // REPORT  PickingList-SPB
-Route::get('/reportpickspb' , 'ReportPickSpbController@index')->middleware('auth');
-Route::post('/reportpickspbspfilter' , 'ReportPickSpbController@spFilter')->middleware('auth');
+Route::get('/reportpickspb' , [ReportPickSpbController::class, 'index'])->middleware('auth');
+Route::post('/reportpickspbspfilter' , [ReportPickSpbController::class, 'spFilter'])->middleware('auth');
 
 
 // REPORT  PICKINGLIST-PICKING
-Route::get('/reportplp' , 'ReportPlPController@index')->middleware('auth');
-Route::post('/reportplpspfilter' , 'ReportPlPController@spFilter')->middleware('auth');
+Route::get('/reportplp' , [ReportPlPController::class, 'index'])->middleware('auth');
+Route::post('/reportplpspfilter' , [ReportPlPController::class, 'spFilter'])->middleware('auth');
 
 
 
 // REPORT  RELOKASI
-Route::get('/reportrelokasi' , 'ReportRelokasiController@index')->middleware('auth');
-Route::post('/reportrelokasispfilter' , 'ReportRelokasiController@spFilter')->middleware('auth');
+Route::get('/reportrelokasi' , [ReportRelokasiController::class, 'index'])->middleware('auth');
+Route::post('/reportrelokasispfilter' , [ReportRelokasiController::class, 'spFilter'])->middleware('auth');
 
 
 // REPORT KARTU STOK
-Route::get('/kartustockgudang', 'KartuStockGudangController@index')->middleware('auth');
-Route::get('/kartustockgudanglistlokasi', 'KartuStockGudangController@listLokasi')->middleware('auth');
-Route::get('/kartustockgudanglistbarang', 'KartuStockGudangController@listBarang')->middleware('auth');
-Route::get('/kartustockgudangspreport', 'KartuStockGudangController@spReport')->middleware('auth');
+Route::get('/kartustockgudang', [KartuStockGudangController::class, 'index'])->middleware('auth');
+Route::get('/kartustockgudanglistlokasi', [KartuStockGudangController::class, 'listLokasi'])->middleware('auth');
+Route::get('/kartustockgudanglistbarang', [KartuStockGudangController::class, 'listBarang'])->middleware('auth');
+Route::get('/kartustockgudangspreport', [KartuStockGudangController::class, 'spReport'])->middleware('auth');
 
 
 // barcode barang
-Route::get('/barcodebarang', 'BarcodeBarangController@index')->middleware('auth');
-Route::get('/loadAllbarcodebarang', 'BarcodeBarangController@loadAll')->middleware('auth');
+Route::get('/barcodebarang', [BarcodeBarangController::class, 'index'])->middleware('auth');
+Route::get('/loadAllbarcodebarang', [BarcodeBarangController::class, 'loadAll'])->middleware('auth');
 
 
 // dashboardopnameharian
 //Route::get('/dashboardopnameharian', 'DashboardOpnameHarianController@index')->middleware('auth');
 //Route::get('/dashboardopnamehariansp', 'DashboardOpnameHarianController@spDashboard')->middleware('auth');
 
-Route::get('/dashboardopnameharian', 'DashboardOpnameHarianController@index')->middleware('auth');
-Route::get('/dashboardopnamehariansp', 'DashboardOpnameHarianController@spDashboard')->middleware('auth');
-Route::post('/dashboardopnamehariansplistbarang', 'DashboardOpnameHarianController@spListBarang')->middleware('auth');
+Route::get('/dashboardopnameharian', [DashboardOpnameHarianController::class, 'index'])->middleware('auth');
+Route::get('/dashboardopnamehariansp', [DashboardOpnameHarianController::class, 'spDashboard'])->middleware('auth');
+Route::post('/dashboardopnamehariansplistbarang', [DashboardOpnameHarianController::class, 'spListBarang'])->middleware('auth');
 
 
 // Route::get('/persiapanspb', 'PersiapanSpbController@index');
@@ -712,15 +776,15 @@ Route::post('/dashboardopnamehariansplistbarang', 'DashboardOpnameHarianControll
 // Route::post('/erasePiutang', 'PiutangController@erase')->middleware('auth');
 //
 // Gudang
-Route::get('/gudang', 'GudangController@index')->middleware('auth');
-Route::get('/loadAllGudang', 'GudangController@loadAll')->middleware('auth');
-Route::post('/addGudang', 'GudangController@add')->middleware('auth');
-Route::post('/editGudang', 'GudangController@edit')->middleware('auth');
-Route::post('/eraseGudang', 'GudangController@erase')->middleware('auth');
-Route::post('/showRak', 'GudangController@showRak')->middleware('auth');
-Route::post('/addRak', 'GudangController@addRak')->middleware('auth');
-Route::post('/showLokasi', 'GudangController@showLokasi')->middleware('auth');
-Route::post('/addLokasi', 'GudangController@addLokasi')->middleware('auth');
+Route::get('/gudang', [GudangController::class, 'index'])->middleware('auth');
+Route::get('/loadAllGudang', [GudangController::class, 'loadAll'])->middleware('auth');
+Route::post('/addGudang', [GudangController::class, 'add'])->middleware('auth');
+Route::post('/editGudang', [GudangController::class, 'edit'])->middleware('auth');
+Route::post('/eraseGudang', [GudangController::class, 'erase'])->middleware('auth');
+Route::post('/showRak', [GudangController::class, 'showRak'])->middleware('auth');
+Route::post('/addRak', [GudangController::class, 'addRak'])->middleware('auth');
+Route::post('/showLokasi', [GudangController::class, 'showLokasi'])->middleware('auth');
+Route::post('/addLokasi', [GudangController::class, 'addLokasi'])->middleware('auth');
 //
 // // Grup
 // Route::get('/kategori', 'GrupController@index')->middleware('auth');
@@ -819,16 +883,16 @@ Route::post('/addLokasi', 'GudangController@addLokasi')->middleware('auth');
 //
 
 // Barang Jadi
-Route::get('/barangjadi', 'BarangJadiController@index')->middleware('auth');
-Route::post('/loadAllBarangJadi', 'BarangJadiController@loadAll')->middleware('auth');
-Route::post('/addBarangJadi', 'BarangJadiController@add')->middleware('auth');
-Route::post('/showBarangJadi', 'BarangJadiController@show')->middleware('auth');
-Route::post('/editBarangJadi', 'BarangJadiController@edit')->middleware('auth');
-Route::post('/eraseBarangJadi', 'BarangJadiController@erase')->middleware('auth');
-Route::post('/showBarangLokasi', 'BarangJadiController@showBarangLokasi')->middleware('auth');
-Route::post('/addBarangLokasi', 'BarangJadiController@addBarangLokasi')->middleware('auth');
-Route::post('/brgonchangeheader' , 'BarangJadiController@onChangeHeader')->middleware('auth');
-Route::post('/loadkodebrg', 'BarangJadiController@loadkodebrg')->middleware('auth');
+Route::get('/barangjadi', [BarangJadiController::class, 'index'])->middleware('auth');
+Route::post('/loadAllBarangJadi', [BarangJadiController::class, 'loadAll'])->middleware('auth');
+Route::post('/addBarangJadi', [BarangJadiController::class, 'add'])->middleware('auth');
+Route::post('/showBarangJadi', [BarangJadiController::class, 'show'])->middleware('auth');
+Route::post('/editBarangJadi', [BarangJadiController::class, 'edit'])->middleware('auth');
+Route::post('/eraseBarangJadi', [BarangJadiController::class, 'erase'])->middleware('auth');
+Route::post('/showBarangLokasi', [BarangJadiController::class, 'showBarangLokasi'])->middleware('auth');
+Route::post('/addBarangLokasi', [BarangJadiController::class, 'addBarangLokasi'])->middleware('auth');
+Route::post('/brgonchangeheader' , [BarangJadiController::class, 'onChangeHeader'])->middleware('auth');
+Route::post('/loadkodebrg', [BarangJadiController::class, 'loadkodebrg'])->middleware('auth');
 //
 // // Bahan SparePart
 // Route::get('/bahansparepart', 'BahanSparePartController@index')->middleware('auth');
@@ -1700,10 +1764,10 @@ Route::post('/loadkodebrg', 'BarangJadiController@loadkodebrg')->middleware('aut
 // Route::post('/batalPenerimaanTransferBarang', 'PenerimaanTransferBarangController@changeBatal')->middleware('auth');
 //
 // Hitung Stok
-Route::get('/hitungstok', 'HitungStokController@index')->middleware('auth');
-Route::post('/getBarangGudangStok', 'HitungStokController@getBarangGudangStok')->middleware('auth');
-Route::post('/proseshitungstok', 'HitungStokController@hitungStok')->middleware('auth');
-Route::post('/proseshitungstok2', 'HitungStokController@hitungStok2')->middleware('auth');
+Route::get('/hitungstok', [HitungStokController::class, 'index'])->middleware('auth');
+Route::post('/getBarangGudangStok', [HitungStokController::class, 'getBarangGudangStok'])->middleware('auth');
+Route::post('/proseshitungstok', [HitungStokController::class, 'hitungStok'])->middleware('auth');
+Route::post('/proseshitungstok2', [HitungStokController::class, 'hitungStok2'])->middleware('auth');
 //
 // // Hitung HPP Bulanan
 // Route::get('/hitunghppbulanan', 'HPPController@index1')->middleware('auth');

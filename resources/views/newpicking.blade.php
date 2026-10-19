@@ -1,4 +1,5 @@
 @extends('newmaster')
+@section('page-title', 'Picking')
 @section('buttons')
 
 
@@ -7,7 +8,7 @@
 <div class="container-fluid">
   <div class="row">
     <div class="col-6 text-left">
-      <h1>Picking</h1>
+      {{-- <h1>Picking</h1> - judul pindah ke header (page-title) --}}
     </div>
     <div class="col-6 text-right">
       <!-- <button type="button" class="btn btn-primary btn-lg " style="height: 60px; " onclick="buttonAdd()"  >Add Picking</button> -->
@@ -34,7 +35,7 @@
             <div class="col-12" style="overflow:auto;">
               <div class="">
 
-                    <table id="tabel" class="table table-bordered table-striped"  >
+                    <table id="tabel" class="data-table"  >
                       <thead class="text-center">
                         <tr>
                           <th scope="col">No. Bukti</th>

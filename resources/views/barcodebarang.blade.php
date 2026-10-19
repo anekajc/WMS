@@ -1,4 +1,5 @@
 @extends('newmaster')
+@section('page-title', 'Barcode Barang')
 
 @section('css')
 @endsection
@@ -11,7 +12,7 @@
 
 @section('content')
 <div class="container-fluid">
-<h1>Barcode Barang</h1>
+{{-- <h1>Barcode Barang</h1> - judul pindah ke header (page-title) --}}
 </div>
 
 <div id="printContainer" style="display:none">
@@ -32,7 +33,8 @@
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  <div class="card">
+  <div class="card wms-kartu">
+    {{-- card-header lama (isi tab-nya sudah dikomentari) tidak ditampilkan:
     <div class="card-header">
       <div class="row">
         <!-- <nav style="width: 100%;">
@@ -42,11 +44,11 @@
           </div>
         </nav> -->
       </div>
-    </div>
+    </div> --}}
       <div class="card-body">
       <div class="row">
         <div class="col-12" style="padding-left: 20px; padding-right: 20px; overflow:auto;">
-          <table class="table table-bordered table-striped" id="tabel_gudang" style=" background: white;">
+          <table class="data-table" id="tabel_gudang" style=" background: white;">
             <thead>
               <tr>
                 <th width="15%">Kode</th>
@@ -113,6 +115,13 @@
       g_id = "", g_kode = "", g_nama = "", g_produksi = "", g_rusak = "", g_alamat = "";
     } );
     table.on('order', function () {
+      $('#gudang_data > tr').each(function() {
+        $(this).css('background-color', '');
+      });
+      g_id = "", g_kode = "", g_nama = "", g_produksi = "", g_rusak = "", g_alamat = "";
+    } );
+    // Ditambahkan 2026-10-19: tabel sekarang berhalaman - pindah halaman juga mereset pilihan baris.
+    table.on('page', function () {
       $('#gudang_data > tr').each(function() {
         $(this).css('background-color', '');
       });
@@ -296,6 +305,13 @@
       g_id = "", g_kode = "", g_nama = "", g_produksi = "", g_rusak = "", g_alamat = "";
     } );
     table.on('order', function () {
+      $('#gudang_data > tr').each(function() {
+        $(this).css('background-color', '');
+      });
+      g_id = "", g_kode = "", g_nama = "", g_produksi = "", g_rusak = "", g_alamat = "";
+    } );
+    // Ditambahkan 2026-10-19: tabel sekarang berhalaman - pindah halaman juga mereset pilihan baris.
+    table.on('page', function () {
       $('#gudang_data > tr').each(function() {
         $(this).css('background-color', '');
       });

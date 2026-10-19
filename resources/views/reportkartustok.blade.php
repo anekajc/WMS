@@ -1,4 +1,5 @@
 @extends('newmaster')
+@section('page-title', 'Report Kartu Stok')
 @section('buttons')
 
 @endsection
@@ -8,7 +9,7 @@
 
   <div class="row">
     <div class="col-12 text-left">
-      <h1>Report Kartu Stok</h1>
+      {{-- <h1>Report Kartu Stok</h1> - judul pindah ke header (page-title) --}}
     </div>
     <!-- <div class="col-6 text-right">
 
@@ -26,7 +27,7 @@
 
           </div>
           <div class="row text-right justify-content-center">
-            <div class="card" >
+            <div class="card wms-form-kartu" >
               <div class="card-body">
                 <h5 class="card-title text-left">Report Kartu Stok</h5>
                 <div class="container-fluid">
@@ -196,7 +197,7 @@
             <div class="col-12 mt-4" style="overflow:auto;">
               <div class="">
 
-                    <table id="tabel" class="table table-bordered table-striped"   >
+                    <table id="tabel" class="data-table"   >
 
                       <thead class="text-left" >
                         <tr>

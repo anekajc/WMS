@@ -41,7 +41,10 @@ class PersiapanSpbController extends Controller
       array_push($tempOutstanding, $o);
     }
 
-    $penerimaan = Vwpersiapanspb::all()->where('bulan',$periode->bulan )->where('tahun', $periode->tahun)->sortByDesc('tanggal')->groupBy('nobukti');
+    // Dinonaktifkan 2026-10-19: memuat seluruh view lalu menyaring periode di PHP (lambat).
+    // $penerimaan = Vwpersiapanspb::all()->where('bulan',$periode->bulan )->where('tahun', $periode->tahun)->sortByDesc('tanggal')->groupBy('nobukti');
+    // Pengganti: saring periode yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = Vwpersiapanspb::where('bulan', $periode->bulan)->where('tahun', $periode->tahun)->get()->sortByDesc('tanggal')->groupBy('nobukti');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -283,7 +286,10 @@ public function updateCetakspb (Request $req) {
       array_push($tempOutstanding, $o);
     }
 
-    $penerimaan = Vwpersiapanspb::all()->where('bulan',$periode->bulan )->where('tahun', $periode->tahun)->sortByDesc('tanggal')->groupBy('nobukti');
+    // Dinonaktifkan 2026-10-19: memuat seluruh view lalu menyaring periode di PHP (lambat).
+    // $penerimaan = Vwpersiapanspb::all()->where('bulan',$periode->bulan )->where('tahun', $periode->tahun)->sortByDesc('tanggal')->groupBy('nobukti');
+    // Pengganti: saring periode yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = Vwpersiapanspb::where('bulan', $periode->bulan)->where('tahun', $periode->tahun)->get()->sortByDesc('tanggal')->groupBy('nobukti');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...

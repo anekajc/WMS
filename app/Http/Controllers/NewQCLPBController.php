@@ -32,12 +32,18 @@ class NewQCLPBController extends Controller
     // $lpbDetail = vw_outbeliqc::all()->sortBy('URUT')->where('pQC', 0)->where('NOBUKTI', 'SML/LPB/00001/0116' );
 
     // $lpbArray1 = DB::connection("SML")->select('select * from vw_outbeliqc' );
-    $lpb = vw_outbeliqc::all()->sortBy('URUT')->sortBy('NoBukti')->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->where('pQC', 0)->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-19: memuat seluruh view lalu menyaring periode di PHP (lambat).
+    // $lpb = vw_outbeliqc::all()->sortBy('URUT')->sortBy('NoBukti')->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->where('pQC', 0)->groupBy('NOBUKTI');
+    // Pengganti: saring periode yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $lpb = vw_outbeliqc::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->sortBy('NoBukti')->where('pQC', 0)->groupBy('NOBUKTI');
     $lpbArray = [];
     foreach ($lpb as $l) {
       array_push($lpbArray, $l);
     }
-    $qc = vw_outbeliqc::all()->sortBy('URUT')->sortBy('NoBukti')->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->where('pQC', 1)->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-19: memuat seluruh view lalu menyaring periode di PHP (lambat).
+    // $qc = vw_outbeliqc::all()->sortBy('URUT')->sortBy('NoBukti')->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->where('pQC', 1)->groupBy('NOBUKTI');
+    // Pengganti: saring periode yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $qc = vw_outbeliqc::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->sortBy('NoBukti')->where('pQC', 1)->groupBy('NOBUKTI');
     $qcArray = [];
     foreach ($qc as $q) {
       array_push($qcArray, $q);
@@ -60,7 +66,10 @@ class NewQCLPBController extends Controller
 
   public function getAllLPB() {
     $periode = NewPeriode::where('user_id' , \Auth::id())->first();
-    $lpb = vw_outbeliqc::all()->sortBy('URUT')->sortBy('NoBukti')->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->where('pQC', 0)->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-19: memuat seluruh view lalu menyaring periode di PHP (lambat).
+    // $lpb = vw_outbeliqc::all()->sortBy('URUT')->sortBy('NoBukti')->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->where('pQC', 0)->groupBy('NOBUKTI');
+    // Pengganti: saring periode yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $lpb = vw_outbeliqc::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->sortBy('NoBukti')->where('pQC', 0)->groupBy('NOBUKTI');
     $lpbArray = [];
     foreach ($lpb as $l) {
       array_push($lpbArray, $l);
@@ -69,7 +78,10 @@ class NewQCLPBController extends Controller
   }
   public function getAllQC() {
     $periode = NewPeriode::where('user_id' , \Auth::id())->first();
-    $qc = $lpb = vw_outbeliqc::all()->sortBy('URUT')->sortBy('NoBukti')->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->where('pQC', 1)->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-19: memuat seluruh view lalu menyaring periode di PHP (lambat).
+    // $qc = $lpb = vw_outbeliqc::all()->sortBy('URUT')->sortBy('NoBukti')->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->where('pQC', 1)->groupBy('NOBUKTI');
+    // Pengganti: saring periode yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $qc = $lpb = vw_outbeliqc::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->sortBy('NoBukti')->where('pQC', 1)->groupBy('NOBUKTI');
     $qcArray = [];
     foreach ($qc as $q) {
       array_push($qcArray, $q);

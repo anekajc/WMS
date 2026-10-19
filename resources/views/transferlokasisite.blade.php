@@ -1,4 +1,5 @@
 @extends('newmaster')
+@section('page-title', 'Transfer Lokasi')
 @section('buttons')
 
 @endsection
@@ -12,7 +13,7 @@
   <!-- <div id="qrcode"></div> -->
   <div class="row">
     <div class="col-6 text-left">
-      <h1>Transfer Lokasi</h1>
+      {{-- <h1>Transfer Lokasi</h1> - judul pindah ke header (page-title) --}}
     </div>
     <div class="col-6 text-right">
       <!-- <button type="button" class="btn btn-primary btn-lg " style="height: 60px; " onclick="buttonAdd()"  >Add Put Away Gudang</button> -->

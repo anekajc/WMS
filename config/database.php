@@ -34,187 +34,87 @@ return [
 
     'connections' => [
 
+        /*
+        | Semua koneksi ajcwms menunjuk ke database yang sama (DBSMLBARU), sama seperti
+        | newSML. Nama koneksi lama (sqlsrv, sqlite, SPL, SML, SPLSIG) dipertahankan karena
+        | dipakai model & DB::connection() di controller. Nilai diambil dari .env.
+        */
+
         'sqlsrv' => [
             'driver' => 'sqlsrv',
-            'host' => '192.168.10.234',
-            'port' => '1433',
-            'database' => 'DBSML',
-            'username' => 'sa',
-            'password' => 'Anekajc1a9',
-            // 'charset' => 'utf8mb4',
-            // 'collation' => 'utf8mb4_unicode_ci',
-            'charset' => 'utf8',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST', '36.88.190.218'),
+            'port' => env('DB_PORT', '1433'),
+            'database' => env('DB_DATABASE', 'DBSMLBARU'),
+            'username' => env('DB_USERNAME', 'sa'),
+            'password' => env('DB_PASSWORD', 'Anekajc1a9'),
+            'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
-            'strict' => true,
-            'engine' => null,
-            'trust_server_certificate' => 'true',
-            'modes' => [
-                'STRICT_TRANS_TABLES',
-                'NO_ZERO_IN_DATE',
-                'NO_ZERO_DATE',
-                'ERROR_FOR_DIVISION_BY_ZERO',
-                'NO_AUTO_CREATE_USER',
-                'NO_ENGINE_SUBSTITUTION'
-            ],
+            'prefix_indexes' => true,
+            'encrypt' => env('DB_ENCRYPT', 'no'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
         ],
 
         'sqlite' => [
             'driver' => 'sqlsrv',
-            'host' => '192.168.10.234',
-            'port' => '1433',
-            'database' => 'DBSML',
-            'username' => 'sa',
-            'password' => 'Anekajc1a9',
-            // 'charset' => 'utf8mb4',
-            // 'collation' => 'utf8mb4_unicode_ci',
-            'charset' => 'utf8',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST', '36.88.190.218'),
+            'port' => env('DB_PORT', '1433'),
+            'database' => env('DB_DATABASE', 'DBSMLBARU'),
+            'username' => env('DB_USERNAME', 'sa'),
+            'password' => env('DB_PASSWORD', 'Anekajc1a9'),
+            'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
-            'strict' => true,
-            'engine' => null,
-            'trust_server_certificate' => 'true',
-            'modes' => [
-                'STRICT_TRANS_TABLES',
-                'NO_ZERO_IN_DATE',
-                'NO_ZERO_DATE',
-                'ERROR_FOR_DIVISION_BY_ZERO',
-                'NO_AUTO_CREATE_USER',
-                'NO_ENGINE_SUBSTITUTION'
-            ],
+            'prefix_indexes' => true,
+            'encrypt' => env('DB_ENCRYPT', 'no'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
         ],
-        //
-        // 'mysql' => [
-        //   // 'driver' => 'sqlsrv',
-        //   // 'host' => 'LAPTOP-GINGER',
-        //   // 'port' => '1433',
-        //   // // 'database' => 'DBPROJECT',
-        //   // 'database' => 'dbsdsweb',
-        //   // 'username' => 'sa',
-        //   // 'password' => 'Anekajc1a9',
-        //   // // 'charset' => 'utf8mb4',
-        //   // // 'collation' => 'utf8mb4_unicode_ci',
-        //   // 'charset' => 'utf8',
-        //   // 'prefix' => '',
-        //   // 'strict' => true,
-        //   // 'engine' => null,
-        //   // 'modes' => [
-        //   //     'STRICT_TRANS_TABLES',
-        //   //     'NO_ZERO_IN_DATE',
-        //   //     'NO_ZERO_DATE',
-        //   //     'ERROR_FOR_DIVISION_BY_ZERO',
-        //   //     'NO_AUTO_CREATE_USER',
-        //   //     'NO_ENGINE_SUBSTITUTION'
-        //   // ],
-        //     'driver' => 'mysql',
-        //     'host' => env('DB_HOST', '127.0.0.1'),
-        //     'port' => env('DB_PORT', '3306'),
-        //     'database' => 'sandaweb',
-        //     'username' => 'root',
-        //     'password' => '',
-        //     'unix_socket' => env('DB_SOCKET', ''),
-        //     // 'charset' => 'utf8',
-        //     'charset' => 'utf8mb4',
-        //     'collation' => 'utf8mb4_unicode_ci',
-        //     'prefix' => '',
-        //     'strict' => true,
-        //     'engine' => null,
-        //     'modes' => [
-        //         //'ONLY_FULL_GROUP_BY', // Disable this to allow grouping by one column
-        //         'STRICT_TRANS_TABLES',
-        //         'NO_ZERO_IN_DATE',
-        //         'NO_ZERO_DATE',
-        //         'ERROR_FOR_DIVISION_BY_ZERO',
-        //         'NO_AUTO_CREATE_USER',
-        //         'NO_ENGINE_SUBSTITUTION'
-        //     ],
-        //     'options'   => [
-        //         \PDO::ATTR_EMULATE_PREPARES => true
-        //     ]
-        // ],
 
-        // 'pgsql' => [
-        //     'driver' => 'pgsql',
-        //     'host' => env('DB_HOST', '127.0.0.1'),
-        //     'port' => env('DB_PORT', '5432'),
-        //     'database' => env('DB_DATABASE', 'forge'),
-        //     'username' => env('DB_USERNAME', 'forge'),
-        //     'password' => env('DB_PASSWORD', ''),
-        //     'charset' => 'utf8',
-        //     'prefix' => '',
-        //     'schema' => 'public',
-        //     'sslmode' => 'prefer',
-        // ],
-
-        'SPL' =>[
+        'SPL' => [
             'driver' => 'sqlsrv',
-            'host' => '192.168.10.234',
-            'port' => '1433',
-            'database' => 'DBSML',
-            'username' => 'sa',
-            'password' => 'Anekajc1a9',
-            // 'charset' => 'utf8mb4',
-            // 'collation' => 'utf8mb4_unicode_ci',
-            'charset' => 'utf8',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST', '36.88.190.218'),
+            'port' => env('DB_PORT', '1433'),
+            'database' => env('DB_DATABASE', 'DBSMLBARU'),
+            'username' => env('DB_USERNAME', 'sa'),
+            'password' => env('DB_PASSWORD', 'Anekajc1a9'),
+            'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
-            'strict' => true,
-            'engine' => null,
-            'trust_server_certificate' => 'true',
-            'modes' => [
-                'STRICT_TRANS_TABLES',
-                'NO_ZERO_IN_DATE',
-                'NO_ZERO_DATE',
-                'ERROR_FOR_DIVISION_BY_ZERO',
-                'NO_AUTO_CREATE_USER',
-                'NO_ENGINE_SUBSTITUTION'
-            ],
+            'prefix_indexes' => true,
+            'encrypt' => env('DB_ENCRYPT', 'no'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
         ],
 
         'SML' => [
             'driver' => 'sqlsrv',
-            'host' => '192.168.10.234',
-            'port' => '1433',
-            'database' => 'DBSML',
-            'username' => 'sa',
-            'password' => 'Anekajc1a9',
-            // 'charset' => 'utf8mb4',
-            // 'collation' => 'utf8mb4_unicode_ci',
-            'charset' => 'utf8',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST', '36.88.190.218'),
+            'port' => env('DB_PORT', '1433'),
+            'database' => env('DB_DATABASE', 'DBSMLBARU'),
+            'username' => env('DB_USERNAME', 'sa'),
+            'password' => env('DB_PASSWORD', 'Anekajc1a9'),
+            'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
-            'strict' => true,
-            'engine' => null,
-            'trust_server_certificate' => 'true',
-            'modes' => [
-                'STRICT_TRANS_TABLES',
-                'NO_ZERO_IN_DATE',
-                'NO_ZERO_DATE',
-                'ERROR_FOR_DIVISION_BY_ZERO',
-                'NO_AUTO_CREATE_USER',
-                'NO_ENGINE_SUBSTITUTION'
-            ],
+            'prefix_indexes' => true,
+            'encrypt' => env('DB_ENCRYPT', 'no'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
         ],
 
         'SPLSIG' => [
             'driver' => 'sqlsrv',
-            'host' => '192.168.10.234',
-            'port' => '1433',
-            'database' => 'DBSML',
-            'username' => 'sa',
-            'password' => 'Anekajc1a9',
-            // 'charset' => 'utf8mb4',
-            // 'collation' => 'utf8mb4_unicode_ci',
-            'charset' => 'utf8',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST', '36.88.190.218'),
+            'port' => env('DB_PORT', '1433'),
+            'database' => env('DB_DATABASE', 'DBSMLBARU'),
+            'username' => env('DB_USERNAME', 'sa'),
+            'password' => env('DB_PASSWORD', 'Anekajc1a9'),
+            'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
-            'strict' => true,
-            'engine' => null,
-            'trust_server_certificate' => 'true',
-            'modes' => [
-                'STRICT_TRANS_TABLES',
-                'NO_ZERO_IN_DATE',
-                'NO_ZERO_DATE',
-                'ERROR_FOR_DIVISION_BY_ZERO',
-                'NO_AUTO_CREATE_USER',
-                'NO_ENGINE_SUBSTITUTION'
-            ],
+            'prefix_indexes' => true,
+            'encrypt' => env('DB_ENCRYPT', 'no'),
+            'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
         ],
+
     ],
 
     /*
@@ -228,7 +128,10 @@ return [
     |
     */
 
-    'migrations' => 'migrations',
+    'migrations' => [
+        'table' => 'migrations',
+        'update_date_on_publish' => true,
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -243,7 +146,7 @@ return [
 
     'redis' => [
 
-        'client' => 'predis',
+        'client' => env('REDIS_CLIENT', 'phpredis'),
 
         'default' => [
             'host' => env('REDIS_HOST', '127.0.0.1'),

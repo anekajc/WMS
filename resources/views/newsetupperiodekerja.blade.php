@@ -1,10 +1,11 @@
 @extends('newmaster')
+@section('page-title', 'Setup Periode Kerja')
 @section('buttons')
 
 @endsection
 @section('content')
 <div class="container-fluid">
-<h1>Setup Periode Kerja</h1>
+{{-- <h1>Setup Periode Kerja</h1> - judul pindah ke header (page-title) --}}
 <!-- <button onclick="loadAll()">tes</button> -->
 </div>
 
@@ -24,7 +25,7 @@
               </div> -->
           </div>
           <div class="row text-left justify-content-center">
-            <div class="card bg-light mb-3" style="max-width: 30rem;">
+            <div class="card wms-form-kartu bg-light mb-3" style="max-width: 30rem;" >
             <div class="card-header">Ubah Periode Kerja</div>
             <div class="card-body">
               <div class="row">

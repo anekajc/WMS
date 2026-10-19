@@ -1,4 +1,5 @@
 @extends('newmaster')
+@section('page-title', 'Barang')
 
 @section('buttons')
 <button type="button" class="btn btn-primary btn-sm btn-top" onclick="loadAll()" data-toggle="tooltip" data-placement="bottom" title="Refresh" style="width: 30px;"><i class="bi bi-arrow-repeat"></i></button>&nbsp;&nbsp;
@@ -6,14 +7,15 @@
 
 @section('content')
 <div class="container-fluid">
-<h1>Barang</h1>
+{{-- <h1>Barang</h1> - judul pindah ke header (page-title) --}}
 </div>
 <!-- <button onclick="loadAll()">tes</button> -->
 
 <div class="container-fluid">
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
-  <div class="card">
+  <div class="card wms-kartu">
+    {{-- card-header lama (isi tab-nya sudah dikomentari) tidak ditampilkan:
     <div class="card-header">
       <div class="row">
         <!-- <nav style="width: 100%;">
@@ -23,11 +25,11 @@
           </div>
         </nav> -->
       </div>
-    </div>
+    </div> --}}
     <div class="card-body">
       <div class="row">
         <div class="col-12" style="padding-left: 20px; padding-right: 20px; overflow:auto;">
-          <table id="tabel_barangjadi" class="table table-bordered table-striped">
+          <table id="tabel_barangjadi" class="data-table po-aksi-hover">
             <thead>
               <tr>
                 <th>Actions</th>
@@ -874,6 +876,13 @@
       });
       g_id = "", g_nama = "";
     } );
+    // Ditambahkan 2026-10-19: tabel sekarang berhalaman - pindah halaman juga mereset pilihan baris.
+    table.on('page', function () {
+      $('#barangjadi_data > tr').each(function() {
+        $(this).css('background-color', '');
+      });
+      g_id = "", g_nama = "";
+    } );
     $(".format_number").val(0);
     $("#isi1").val(1);
     $(".format_number").autoNumeric('init');
@@ -1111,6 +1120,13 @@
     } );
     console.log('loadall4')
     table.on('order', function () {
+      $('#barangjadi_data > tr').each(function() {
+        $(this).css('background-color', '');
+      });
+      g_id = "", g_nama = "";
+    } );
+    // Ditambahkan 2026-10-19: tabel sekarang berhalaman - pindah halaman juga mereset pilihan baris.
+    table.on('page', function () {
       $('#barangjadi_data > tr').each(function() {
         $(this).css('background-color', '');
       });

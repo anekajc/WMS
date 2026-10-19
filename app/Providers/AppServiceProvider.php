@@ -2,26 +2,26 @@
 
 namespace App\Providers;
 
+use App\Database\LegacySqlServerConnection;
+use Illuminate\Database\Connection;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
     /**
-     * Bootstrap any application services.
-     *
-     * @return void
+     * Register any application services.
      */
-    public function boot()
+    public function register(): void
     {
-        //
+        Connection::resolverFor('sqlsrv', function ($connection, $database, $prefix, $config) {
+            return new LegacySqlServerConnection($connection, $database, $prefix, $config);
+        });
     }
 
     /**
-     * Register any application services.
-     *
-     * @return void
+     * Bootstrap any application services.
      */
-    public function register()
+    public function boot(): void
     {
         //
     }

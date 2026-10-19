@@ -1,4 +1,5 @@
 @extends('newmaster')
+@section('page-title', 'Picking List')
 @section('buttons')
 
 @endsection
@@ -11,10 +12,10 @@
 
 
   <div class="col-6 text-left">
-    <h1>Picking List</h1>
+    {{-- <h1>Picking List</h1> - judul pindah ke header (page-title) --}}
   </div>
   <div class="col-6 text-right">
-    <button type="button" class="btn btn-primary btn-sm " style="height: 60px; " onclick="buttonAdd()"  >Add PL</button>
+    {{-- tombol dipindah ke bar tab / toolbar tabel --}}
   </div>
   </div>
 <!-- <button onclick="loadAll()">tes</button> -->
@@ -51,28 +52,28 @@
   <input type="hidden" id="akses_iscetak" value="{!! $akses->ISCETAK !!}" />
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-  <div class="card">
-    <div class="card-header">
-      <div class="row">
-        <nav style="width: 100%;">
-          <div class="nav nav-tabs col-12" id="nav-tab" role="tablist">
-            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true" style="color: black;">Outstanding SO Reguler</a>
-            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile3" role="tab" aria-controls="nav-profile3" aria-selected="false" style="color: black;">Outstanding SO Booking</a>
-            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false" style="color: black;">Picking List</a>
-            <a class="nav-item nav-link" id="nav-profile2-tab" data-toggle="tab" href="#profile2" role="tab" aria-controls="nav-profile2" aria-selected="false" style="color: black;">Transaksi Picking List Per periode</a>
-
-          </div>
-        </nav>
+  <div class="card mb-3 tab-card">
+    <div class="card-body wms-tab-bar">
+      <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
+            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">Outstanding SO Reguler</a>
+            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile3" role="tab" aria-controls="nav-profile3" aria-selected="false">Outstanding SO Booking</a>
+            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">Picking List</a>
+            <a class="nav-item nav-link" id="nav-profile2-tab" data-toggle="tab" href="#profile2" role="tab" aria-controls="nav-profile2" aria-selected="false">Transaksi Picking List Per periode</a>
+      </div>
+      <div class="wms-tab-aksi">
+        <button type="button" class="btn btn-primary btn-sm " onclick="buttonAdd()"  >Add PL</button>
       </div>
     </div>
-    <div class="card-body" >
+  </div>
+  <div class="card wms-kartu">
+    <div class="card-body">
       <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
           <div class="row">
             <div class="col-14" style="overflow:auto; max-height: 650px">
               <div class="container-fluid">
 
-                    <table id="tabelReguler" class="table table-bordered table-striped"  >
+                    <table id="tabelReguler" class="data-table"  >
                       <thead class="text-center">
                         <tr>
                           <th class="text-center">v</th>
@@ -117,7 +118,7 @@
             <div class="col-14" style="overflow:auto; max-height: 650px">
               <div class="container-fluid">
 
-                    <table id="tabel" class="table table-bordered table-striped"  >
+                    <table id="tabel" class="data-table"  >
                       <thead class="text-center">
                         <tr>
                           <th class="text-center">v</th>
@@ -161,7 +162,7 @@
             <div class="col-14" style="overflow:auto;">
               <div class="container-fluid">
 
-                    <table id="tabelPenerimaan" class="table table-bordered table-striped"  >
+                    <table id="tabelPenerimaan" class="data-table po-aksi-hover"  >
                       <thead class="text-center">
                         <tr>
                           <th scope="col">Actions</th>
@@ -193,7 +194,7 @@
             <div class="col-14" style="overflow:auto;">
               <div class="container-fluid">
 
-                    <table id="tabelPenerimaanperiod" class="table table-bordered table-striped"  >
+                    <table id="tabelPenerimaanperiod" class="data-table po-aksi-hover"  >
                       <thead class="text-center">
                         <tr>
                           <th scope="col">Actions</th>
@@ -2206,7 +2207,7 @@ $("#tabelPenerimaanperiod").DataTable({ "lengthChange": false,
 </script>
 
 
-}
+{{-- } - karakter sisa di luar <script> (dulu tampil sebagai teks di halaman) --}}
 
 
 @endsection

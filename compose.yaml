@@ -1,0 +1,26 @@
+# Deploy ajcwms di VPS:  docker compose up -d --build
+# Panduan lengkap: docs/deploy-docker.md
+services:
+  ajcwms:
+    build: .
+    image: ajcwms:latest
+    container_name: ajcwms
+    restart: unless-stopped
+    ports:
+      # Ganti port kiri bila 8081 sudah dipakai aplikasi lain (mis. newSML).
+      - "8081:8080"
+    volumes:
+      # .env produksi di VPS (tidak ikut image / git).
+      - ./.env:/var/www/html/.env:ro
+      # storage persisten: sesi login (SESSION_DRIVER=file) & log tidak hilang saat container dibuat ulang.
+      - ajcwms-storage:/var/www/html/storage
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  ajcwms-storage:

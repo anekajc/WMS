@@ -45,6 +45,17 @@ class HomeController extends Controller
       $periode = NewPeriode::where('user_id' , \Auth::id())->first();
       $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0();
 
+      // Dinonaktifkan 2026-10-19: beranda memakai layout lama (menu atas).
+      // return view('newmaster' , [
+      //   "menul0" => $menul0,
+      //   "periode" => $periode,
+      // ]);
+      // Tampilan baru (sidebar seperti newSML) - data yang dikirim tetap sama.
+      // Dinonaktifkan 2026-10-19: layout tetap bernama newmaster (sidebar sudah ada di newmaster).
+      // return view('newmasterTest' , [
+      //   "menul0" => $menul0,
+      //   "periode" => $periode,
+      // ]);
       return view('newmaster' , [
         "menul0" => $menul0,
         "periode" => $periode,

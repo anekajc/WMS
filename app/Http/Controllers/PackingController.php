@@ -44,7 +44,10 @@ class PackingController extends Controller
     }
 
 
-    $penerimaan = vwpersiapanPACKING::all()->where('bulan',$periode->bulan )->where('tahun', $periode->tahun)->sortBy('urut')->groupBy('nobukti');
+    // Dinonaktifkan 2026-10-19: memuat seluruh view lalu menyaring periode di PHP (lambat).
+    // $penerimaan = vwpersiapanPACKING::all()->where('bulan',$periode->bulan )->where('tahun', $periode->tahun)->sortBy('urut')->groupBy('nobukti');
+    // Pengganti: saring periode yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = vwpersiapanPACKING::where('bulan', $periode->bulan)->where('tahun', $periode->tahun)->get()->sortBy('urut')->groupBy('nobukti');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -252,7 +255,10 @@ public function checkAdd (Request $req) {
       array_push($tempOutstanding, $o);
     }
 
-    $penerimaan = vwpersiapanPACKING::all()->where('bulan',$periode->bulan )->where('tahun', $periode->tahun)->sortBy('Urut')->groupBy('nobukti');
+    // Dinonaktifkan 2026-10-19: memuat seluruh view lalu menyaring periode di PHP (lambat).
+    // $penerimaan = vwpersiapanPACKING::all()->where('bulan',$periode->bulan )->where('tahun', $periode->tahun)->sortBy('Urut')->groupBy('nobukti');
+    // Pengganti: saring periode yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = vwpersiapanPACKING::where('bulan', $periode->bulan)->where('tahun', $periode->tahun)->get()->sortBy('Urut')->groupBy('nobukti');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...

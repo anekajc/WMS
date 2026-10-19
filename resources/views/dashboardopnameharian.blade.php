@@ -1,4 +1,5 @@
 @extends('newmaster')
+@section('page-title', 'Dashboard Opname Harian')
 @section('buttons')
 
 @endsection
@@ -17,7 +18,7 @@
 
   <div class="row">
     <div class="col-12 text-left">
-      <h1>Dashboard Opname Harian</h1>
+      {{-- <h1>Dashboard Opname Harian</h1> - judul pindah ke header (page-title) --}}
     </div>
   </div>
 

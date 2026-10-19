@@ -1,11 +1,12 @@
 @extends('newmaster')
+@section('page-title', 'QC LPB')
 @section('buttons')
 
 @endsection
 
 @section('content')
 <div class="container-fluid">
-<h1>QC LPB</h1>
+{{-- <h1>QC LPB</h1> - judul pindah ke header (page-title) --}}
 <!-- <svg id="barcode"></svg> -->
 <!-- <button onclick="loadAll()">tes</button> -->
 <!-- <button onclick="loadAll1()">tes1</button>
@@ -34,25 +35,23 @@
 <div id="contentContainer" class="container-fluid">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-  <div class="card">
-    <div class="card-header">
-      <div class="row">
-        <nav style="width: 100%;">
-          <div class="nav nav-tabs col-12" id="nav-tab" role="tablist">
-            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true" style="color: black;">LPB</a>
-            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false" style="color: black;">QC</a>
-          </div>
-        </nav>
+  <div class="card mb-3 tab-card">
+    <div class="card-body">
+      <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
+            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">LPB</a>
+            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="nav-profile" aria-selected="false">QC</a>
       </div>
     </div>
-    <div class="card-body" >
+  </div>
+  <div class="card wms-kartu">
+    <div class="card-body">
       <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
           <div class="row">
             <div class="col-12" style="overflow:auto;">
               <div class="container-fluid">
 
-                    <table id="tabel" class="table table-bordered table-striped"  >
+                    <table id="tabel" class="data-table po-aksi-hover"  >
                       <thead class="text-center">
                         <tr>
                           <th scope="col">Actions</th>
@@ -97,7 +96,7 @@
             <div class="col-12" style="overflow:auto;">
               <div class="container-fluid">
 
-                    <table id="tabelQC" class="table table-bordered table-striped"  >
+                    <table id="tabelQC" class="data-table po-aksi-hover"  >
                       <thead class="text-center">
                         <tr>
                           <th scope="col">Actions</th>
@@ -1010,7 +1009,7 @@
 </script>
 
 
-}
+{{-- } - karakter sisa di luar <script> (dulu tampil sebagai teks di halaman) --}}
 
 
 @endsection

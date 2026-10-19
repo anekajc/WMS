@@ -40,7 +40,10 @@ class NewPOController extends Controller
 
     // $testesbeli = DB::connection("SML")->select('select * from VWtampilbeli where Bulan = :bulan and Tahun = :tahun' ,['bulan' => $periode->bulan , 'tahun' => $periode->tahun ]);
     // $testesbeli1 = $testesbeli->groupBy('NoBukti');
-    $pembelian = VWtampilbeli::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('NoBukti')->groupBy('NoBukti');
+    // Dinonaktifkan 2026-10-19: memuat seluruh view lalu menyaring periode di PHP (lambat).
+    // $pembelian = VWtampilbeli::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('NoBukti')->groupBy('NoBukti');
+    // Pengganti: saring periode yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $pembelian = VWtampilbeli::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('NoBukti')->groupBy('NoBukti');
     $tempPembelian1 = [];
     foreach ($pembelian as $p) {
       array_push($tempPembelian1, $p);
@@ -101,7 +104,10 @@ class NewPOController extends Controller
 
   public function getAllPembelian () {
     $periode = NewPeriode::where('user_id' , \Auth::id())->first();
-    $pembelian = VWtampilbeli::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('NoBukti')->groupBy('NoBukti');
+    // Dinonaktifkan 2026-10-19: memuat seluruh view lalu menyaring periode di PHP (lambat).
+    // $pembelian = VWtampilbeli::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('NoBukti')->groupBy('NoBukti');
+    // Pengganti: saring periode yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $pembelian = VWtampilbeli::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('NoBukti')->groupBy('NoBukti');
     $tempPembelian = [];
     foreach ($pembelian as $p) {
       array_push($tempPembelian, $p);
@@ -112,7 +118,10 @@ class NewPOController extends Controller
 
 public function getDetailPembelian (Request $req) {
   $periode = NewPeriode::where('user_id' , \Auth::id())->first();
-  $pembelian = VWtampilbeli::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->where('NoBukti', $req->input('NoBukti'))->sortBy('NoBukti')->groupBy('NoBukti');
+  // Dinonaktifkan 2026-10-19: memuat seluruh view lalu menyaring periode di PHP (lambat).
+  // $pembelian = VWtampilbeli::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->where('NoBukti', $req->input('NoBukti'))->sortBy('NoBukti')->groupBy('NoBukti');
+  // Pengganti: saring periode yang sama langsung di query database (hasil sama, jauh lebih cepat).
+  $pembelian = VWtampilbeli::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->where('NoBukti', $req->input('NoBukti'))->sortBy('NoBukti')->groupBy('NoBukti');
   $tempPembelian1 = [];
   foreach ($pembelian as $p) {
     array_push($tempPembelian1, $p);

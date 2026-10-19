@@ -1,4 +1,5 @@
 @extends('newmaster')
+@section('page-title', 'Opname Gudang')
 @section('buttons')
 
 @endsection
@@ -6,10 +7,11 @@
 <div class="container-fluid">
   <div class="row">
     <div class="col-6 text-left">
-      <h1>Opname Gudang</h1>
+      {{-- <h1>Opname Gudang</h1> - judul pindah ke header (page-title) --}}
     </div>
     <div class="col-6 text-right">
-      <button type="button" class="btn btn-primary btn-sm " style="height: 60px; " onclick="buttonAdd()"  >Add Opname Gudang</button>
+      <button data-wms-toolbar="tabel" type="button" class="btn btn-primary btn-sm " onclick="buttonAdd()"  >Add Opname Gudang</button>
+      
     </div>
   </div>
 <!-- <button onclick="loadAll()">tes</button> -->
@@ -37,9 +39,9 @@
           </div>
           <div class="row mt-3">
             <div class="col-12" style="overflow:auto;">
-              <div class="">
+              <div class="card wms-kartu">
 
-                    <table id="tabel" class="table table-bordered table-striped"  >
+                    <table id="tabel" class="data-table"  >
                       <thead class="text-center">
                         <tr>
                           <th scope="col">Actions</th>

@@ -1,4 +1,5 @@
 @extends('newmaster')
+@section('page-title', 'Permintaan Pemakaian Internal')
 @section('buttons')
 
 @endsection
@@ -9,10 +10,10 @@
 
 
   <div class="col-6 text-left">
-    <h2>Permintaan Pemakaian Internal</h2>
+    {{-- <h2>Permintaan Pemakaian Internal</h2> - judul pindah ke header (page-title) --}}
   </div>
   <div class="col-6 text-right">
-    <button type="button" class="btn btn-primary btn-sm " style="height: 60px; " onclick="buttonAdd()"  >Add Pemakaian Internal</button>
+    {{-- tombol dipindah ke bar tab / toolbar tabel --}}
     <!-- <button type="button" class="btn btn-primary btn-sm " style="height: 60px; " onclick="buttonShowModal()"  >Add Transokasi</button> -->
     <!-- <button type="button" class="btn btn-primary btn-sm " style="height: 60px; " onclick="buttonAdd()"  >Add Perkiraan</button> -->
   </div>
@@ -51,26 +52,25 @@
   <input type="hidden" id="akses_iscetak" value="{!! $akses->ISCETAK !!}" />
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-  <div class="card">
-    <div class="card-header">
-      <div class="row">
-        <nav style="width: 100%;">
-          <div class="nav nav-tabs col-12" id="nav-tab" role="tablist">
-            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true" style="color: black;">Permintaan Pemakaian Internal</a>
-
-          </div>
-        </nav>
+  <div class="card mb-3 tab-card">
+    <div class="card-body wms-tab-bar">
+      <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
+            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="nav-home" aria-selected="true">Permintaan Pemakaian Internal</a>
       </div>
-
+      <div class="wms-tab-aksi">
+        <button type="button" class="btn btn-primary btn-sm " onclick="buttonAdd()"  >Add Pemakaian Internal</button>
+      </div>
     </div>
-    <div class="card-body" >
+  </div>
+  <div class="card wms-kartu">
+    <div class="card-body">
       <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
           <div class="row">
             <div class="col-12" style="overflow:auto;">
               <div class="container-fluid">
 
-                    <table id="tabel" class="table table-bordered table-striped"  >
+                    <table id="tabel" class="data-table po-aksi-hover"  >
                       <thead class="text-center">
                         <tr>
                           <th scope="col">Actions</th>
@@ -1695,7 +1695,7 @@ function resetTableAddAdd() {
 </script>
 
 
-}
+{{-- } - karakter sisa di luar <script> (dulu tampil sebagai teks di halaman) --}}
 
 
 @endsection

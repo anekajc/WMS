@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use PDF;
 use Excel;
+use App\Exports\ViewExport;
 
 trait ReportTrait
 {
@@ -24,7 +25,7 @@ trait ReportTrait
     }
 
     // count, counter & numeric column
-    for ($i = 0; $i < count($len); $i++) { array_push($counter, 0.0); array_push($subcounter, 0.0); array_push($numeric, DB::connection()->getDoctrineColumn($table, $col[$i])->getType()->getName()); }
+    for ($i = 0; $i < count($len); $i++) { array_push($counter, 0.0); array_push($subcounter, 0.0); array_push($numeric, $this->tipeKolomDoctrine($table, $col[$i])); }
     if ($hidden != NULL) {
       for ($i = 0; $i < count($count); $i++) { if ($hidden->{$col[$count[$i]]} == 0) { array_splice($count, $i, 1); $i--; } }
     }
@@ -156,6 +157,35 @@ trait ReportTrait
     return $res;
   }
 
+  /**
+   * Pengganti DB::connection()->getDoctrineColumn($table, $kolom)->getType()->getName()
+   * (doctrine/dbal dihapus sejak Laravel 11). Tipe asli SQL Server diterjemahkan ke nama
+   * tipe Doctrine yang sama seperti dulu (integer, bigint, float, date, ...) supaya
+   * pengecekan $numericType / "date" di loadQuery() tetap menghasilkan tampilan yang sama.
+   */
+  protected function tipeKolomDoctrine($table, $kolom) {
+    static $cache = [];
+    if (!isset($cache[$table])) {
+      $cache[$table] = [];
+      foreach (DB::getSchemaBuilder()->getColumns($table) as $c) {
+        $cache[$table][strtolower($c['name'])] = strtolower($c['type_name']);
+      }
+    }
+    $asli = $cache[$table][strtolower($kolom)] ?? '';
+    $peta = [
+      'bigint' => 'bigint', 'int' => 'integer', 'smallint' => 'smallint', 'tinyint' => 'smallint',
+      'money' => 'integer', 'smallmoney' => 'integer', 'bit' => 'boolean',
+      'decimal' => 'decimal', 'numeric' => 'decimal',
+      'float' => 'float', 'real' => 'float', 'double' => 'float', 'double precision' => 'float',
+      'date' => 'date', 'time' => 'time', 'datetime' => 'datetime', 'datetime2' => 'datetime',
+      'smalldatetime' => 'datetime', 'datetimeoffset' => 'datetimetz',
+      'char' => 'string', 'varchar' => 'string', 'nchar' => 'string', 'nvarchar' => 'string',
+      'text' => 'text', 'ntext' => 'text', 'uniqueidentifier' => 'guid',
+      'binary' => 'binary', 'varbinary' => 'binary', 'image' => 'blob',
+    ];
+    return $peta[$asli] ?? 'string';
+  }
+
   public function columnReport($table) {
     $val = array(); $col = DB::getSchemaBuilder()->getColumnListing($table);
     for ($i = 2; $i < count($col); $i++) { array_push($val, ucwords(str_replace('_', ' ', $col[$i]))); }
@@ -219,10 +249,6 @@ trait ReportTrait
     $fixed = preg_replace('/\<table (.*?)>/', "<table>", $fixed);
     $perusahaan = DB::table('perusahaan')->where('id', 1)->first();
     $table = '<table><tr><th>'.$perusahaan->nama.'</th><th>'.$title.'</th></tr><tr><th></th><th>'.$periode.'</th></tr>'.$fixed.'</table>';
-		Excel::create($title, function($excel) use ($table, $title) {
-			$excel->sheet($title, function($sheet) use ($table) {
-				$sheet->loadView('templateexcel', compact('table'));
-			});
-		})->download('xlsx');
+		return Excel::download(new ViewExport('templateexcel', compact('table'), (string) $title), $title.'.xlsx');
   }
 }

@@ -1,10 +1,11 @@
 @extends('newmaster')
+@section('page-title', 'Ganti Password')
 @section('buttons')
 
 @endsection
 @section('content')
 <div class="container-fluid">
-<h1>Ganti Password</h1>
+{{-- <h1>Ganti Password</h1> - judul pindah ke header (page-title) --}}
 <!-- <button onclick="loadAll()">tes</button> -->
 </div>
 
@@ -24,7 +25,7 @@
               </div> -->
           </div>
           <div class="row text-left justify-content-center">
-            <div class="card bg-light mb-3">
+            <div class="card wms-form-kartu bg-light mb-3" >
             <div class="card-header">Ganti Password</div>
             <div class="card-body">
 
