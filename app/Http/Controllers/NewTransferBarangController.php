@@ -1,0 +1,203 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Model\NewMenu;
+use App\Model\NewAksesMenu;
+use App\Model\NewPeriode;
+use App\Model\NewUsers;
+use Illuminate\Support\Facades\DB;
+use App\Model\VWTRansferOut;
+
+use App\Model\VWOutBRGTRansfer;
+
+
+class NewTransferBarangController extends Controller
+{
+
+
+
+
+  public function index () {
+
+    $kodemenu = '026';
+    $akses = NewAksesMenu::where('USERID', \Auth::id())-> where('L1', $kodemenu)->first();
+    if(!$akses || !$akses->HASACCESS) {
+       return redirect('/home');
+    }
+
+    $periode = NewPeriode::where('user_id' , \Auth::id())->first();
+    $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0();
+
+    $outstanding = VWOutBRGTRansfer::all()->sortBy('URUT')->groupBy('NOBUKTI');
+
+    $tempOutstanding = [];
+    foreach ($outstanding as $o) {
+      // code...
+      array_push($tempOutstanding, $o);
+    }
+
+    //
+    // $penerimaan = VWTRansferOut::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    $penerimaan = VWTRansferOut::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    $tempPenerimaan = [];
+    foreach ($penerimaan as $p) {
+      // code...
+      array_push($tempPenerimaan, $p);
+    }
+
+
+    return view('newtransferbarang' , [
+      "periode" => $periode,
+      "menul0" => $menul0,
+      "outstandingArray" => $tempOutstanding,
+      "penerimaanArray" => $tempPenerimaan,
+      "akses" => $akses
+    ]);
+  }
+
+  public function getNoBukti (Request $req) {
+
+    $periode = NewPeriode::where('user_id' , \Auth::id())->first();
+    // $inisial = DB::connection("SML")->select('select PBL from DBNOMOR');
+    $inisial = DB::connection("SML")->select('select TRS from DBNOMOR');
+    $username = \Auth::user()->username;
+    // return [$periode->bulan,$inisial[0]->PBL,$username];
+    $values = [
+        $inisial[0]->TRS,
+        $periode->bulan,
+        $periode->tahun,
+        $username
+    ];
+    return
+    $noBukti = DB::connection('SML')->select('exec SP_IsiNobukti ?,?,?,?',$values);
+    return $noBukti;
+  }
+
+  public function loadAll () {
+    $kodemenu = '026';
+    $akses = NewAksesMenu::where('USERID', \Auth::id())-> where('L1', $kodemenu)->first();
+    $periode = NewPeriode::where('user_id' , \Auth::id())->first();
+
+    $outstanding = VWOutBRGTRansfer::all()->sortBy('URUT')->groupBy('NOBUKTI');
+
+    $tempOutstanding = [];
+    foreach ($outstanding as $o) {
+      // code...
+      array_push($tempOutstanding, $o);
+    }
+
+    $penerimaan = VWTRansferOut::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    $tempPenerimaan = [];
+    foreach ($penerimaan as $p) {
+      // code...
+      array_push($tempPenerimaan, $p);
+    }
+
+    return [
+      "outstandingArray" => $tempOutstanding,
+      "penerimaanArray" => $tempPenerimaan,
+      "akses" => $akses
+    ];
+  }
+
+  public function getDetailPenerimaan (Request $req) {
+    $detailPenerimaan = VWTRansferOut::all()->where('NOBUKTI',$req->input('NOBUKTI') )->sortBy('URUT');
+    $tempPenerimaan = [];
+    foreach ($detailPenerimaan as $p) {
+      // code...
+      array_push($tempPenerimaan, $p);
+    }
+    return $tempPenerimaan;
+  }
+
+  public function getDetailOutstanding (Request $req) {
+
+    $detailOutstanding = VWOutBRGTRansfer::all()->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT');
+    $tempOutstanding = [];
+    foreach ($detailOutstanding as $do) {
+      // code...
+      array_push($tempOutstanding,$do);
+    }
+    return $tempOutstanding;
+
+  }
+
+  public function getKoreksiAddList (Request $req) {
+    $tempPenerimaan = VWTRansferOut::where('NOBUKTI' , $req->input('notrf'))->select('KODEBRG')->get()->toArray();
+
+    $tempAddList = VWOutBRGTRansfer::select()->where('NOBUKTI', $req->input('noout'))->whereNotIn('KODEBRG', $tempPenerimaan)->get();
+
+    return $tempAddList;
+  }
+
+  public function addTransferBarang (Request $req) {
+
+    $periode = NewPeriode::where('user_id' , \Auth::id())->first();
+    $date = $req->input('inputDate');
+    $username = \Auth::user()->username;
+    $data = $req->input('tempData');
+    $nourut = $req->input('nourut');
+    $noout = $req->input('noout');
+    $notrf = $req->input('notrf');
+
+
+    // return [$data,$date,$username,$nourut,$noout,$notrf];
+
+    // select * from DBTRANSFER where NOBUKTI ='SML/TRF/00004/0523'
+    $check = DB::connection('SML')->select('select * from DBTRANSFER where NOBUKTI = :nobukti',["nobukti" => $notrf]);
+    if ($check) {
+      return 2;
+    }
+    DB::connection('SML')->statement('delete	TempOutstandingPO where IDUser = :idUser',['idUser' => $username ]);
+
+
+    // DB::connection('SML')->statement('delete	TempOutstanding where IDUser = :idUser',['idUser' => $username ]);
+
+
+    foreach ($data as $d) {
+      $values = [$username, $noout,$d['Tahun'],$d['Bulan'],$d['inputQntTerima'],$d['Urut']];
+      DB::connection("SML")->statement('exec sp_RefreshTempOutBRG ?,?,?,?,?,?',$values);
+    }
+    $tempValues = [$notrf, $nourut, $noout, $username, $date];
+    DB::connection('SML')->statement('exec SP_InsertOutBrgTRansfer ?,?,?,?,?', $tempValues);
+    return 1;
+
+
+
+
+  }
+
+
+  public function spKoreksi (Request $req) {
+    $values = [
+      $req->input('choice'),
+      $req->input('notrf'),
+      $req->input('nourut'),
+      $req->input('inputDate'),
+      $req->input('note'),
+      $req->input('urut'),
+      $req->input('kodebrg'),
+      $req->input('gdgasal'),
+      $req->input('gdgtujuan'),
+      $req->input('sat_1'),
+      $req->input('sat_2'),
+      $req->input('qntTerima'),
+      $req->input('qntTerima2'),
+      $req->input('nosat'),
+      $req->input('isi'),
+      \Auth::user()->username,
+      $req->input('nopenyerahan'),
+      $req->input('noout'),
+      $req->input('urutout')
+    ];
+
+    DB::connection('SML')->statement('exec SP_TRANSFERWEB1 ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?' ,$values);
+    return 1;
+  }
+
+
+
+
+}

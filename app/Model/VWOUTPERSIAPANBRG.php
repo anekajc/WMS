@@ -1,0 +1,18 @@
+<?php
+
+namespace App\Model;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+
+class VWOUTPERSIAPANBRG extends Model
+{
+		protected $connection = 'SML';
+    protected $table = 'VWOUTPERSIAPANBRG';
+    // protected $fillable = array(
+    //
+    // );
+    public $timestamps = false;
+}
+
+?>

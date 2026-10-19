@@ -1,0 +1,316 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Model\NewMenu;
+use App\Model\NewAksesMenu;
+use App\Model\NewPeriode;
+use App\Model\NewUsers;
+use Illuminate\Support\Facades\DB;
+use App\Model\VWSerahSampleOut;
+
+
+
+use App\Model\VWMASTERPRUBAHKEMASAN;
+use App\Model\VWOutPRUKO;
+use App\Model\VWUbahKemasanOut;
+
+use App\Model\VWOUTPERSIAPANBRGUKWEB;
+use App\Model\vwShowOutBrgUKWEB;
+use App\Model\VWQCPickingUKWEB;
+
+
+
+
+
+class UbahKemasanPickingController extends Controller
+{
+
+
+
+
+  public function index () {
+    // vwShowOutBrgUKWEB
+    // WOUTPERSIAPANBRGUKWEB
+
+    $kodemenu = '029102';
+    $akses = NewAksesMenu::where('USERID', \Auth::id())-> where('L1', $kodemenu)->first();
+    if(!$akses || !$akses->HASACCESS) {
+       return redirect('/home');
+    }
+
+    $periode = NewPeriode::where('user_id' , \Auth::id())->first();
+    $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0();
+
+    $outstanding = VWOUTPERSIAPANBRGUKWEB::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('Urut')->groupBy('NoBukti');
+
+    $tempOutstanding = [];
+    foreach ($outstanding as $o) {
+      // code...
+      array_push($tempOutstanding, $o);
+    }
+
+    $penerimaan = VWQCPickingUKWEB::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('urut')->groupBy('NoBukti');
+    $tempPenerimaan = [];
+    foreach ($penerimaan as $p) {
+      // code...
+      array_push($tempPenerimaan, $p);
+    }
+
+
+    return view('ubahkemasanpicking' , [
+      "periode" => $periode,
+      "menul0" => $menul0,
+      "outstandingArray" => $tempOutstanding,
+      "penerimaanArray" => $tempPenerimaan,
+      "akses" => $akses
+    ]);
+  }
+
+
+
+  public function getDetailOutstanding (Request $req) {
+
+    $detailOutstanding = VWOUTPERSIAPANBRGUKWEB::all()->where('NoBukti', $req->input('NOBUKTI'))->sortBy('Urut');
+    $tempOutstanding = [];
+    foreach ($detailOutstanding as $do) {
+      // code...
+      array_push($tempOutstanding,$do);
+    }
+    return $tempOutstanding;
+
+  }
+
+  public function getDetailOutstandingInfo (Request $req) {
+
+    $detailOutstanding = vwShowOutBrgUKWEB::all()->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT');
+    $tempOutstanding = [];
+    foreach ($detailOutstanding as $do) {
+      // code...
+      array_push($tempOutstanding,$do);
+    }
+    return $tempOutstanding;
+
+  }
+
+  public function getDetailPenerimaan (Request $req) {
+    $detailPenerimaan = VWQCPickingUKWEB::all()->where('NoBukti',$req->input('NOBUKTI') )->sortBy('urut');
+    $tempPenerimaan = [];
+    foreach ($detailPenerimaan as $p) {
+      // code...
+      array_push($tempPenerimaan, $p);
+    }
+    return $tempPenerimaan;
+  }
+
+
+  public function loadAll () {
+
+    $kodemenu = '029102';
+    $akses = NewAksesMenu::where('USERID', \Auth::id())-> where('L1', $kodemenu)->first();
+    $periode = NewPeriode::where('user_id' , \Auth::id())->first();
+
+    $outstanding = VWOUTPERSIAPANBRGUKWEB::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('Urut')->groupBy('NoBukti');
+
+    $tempOutstanding = [];
+    foreach ($outstanding as $o) {
+      // code...
+      array_push($tempOutstanding, $o);
+    }
+
+
+    $penerimaan = VWQCPickingUKWEB::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('urut')->groupBy('NoBukti');
+    $tempPenerimaan = [];
+    foreach ($penerimaan as $p) {
+      // code...
+      array_push($tempPenerimaan, $p);
+    }
+
+    return [
+      "outstandingArray" => $tempOutstanding,
+      "penerimaanArray" => $tempPenerimaan,
+      "akses" => $akses
+    ];
+  }
+
+  public function spCheckAdd (Request $req) {
+
+    $nobukti = $req->input('nobukti');
+    $nobarang = $req->input('nobarang');
+    $urut = $req->input('urut');
+    $periode = NewPeriode::where('user_id' , \Auth::id())->first();
+
+    $check = VWOUTPERSIAPANBRGUKWEB::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->where('NoBukti',$nobukti )->where('Kodebrg', $nobarang)->where('Urut',$urut );
+
+
+    $tempCheck= [];
+    foreach ($check as $p) {
+      // code...
+      array_push($tempCheck, $p);
+    }
+
+    // $variable = $tempCheck[0]->namafield;
+
+
+//   $lokasi =  DB::connection('SML')->select("select A.BarcodeLoc,A.qntMax
+// ,c.KodeGdg
+// from dbBarangLokasiSIG A
+// left outer join dbLokasiSIG C on A.BarcodeLoc=c.BarcodeLoc
+// where A.KodeBarang= :nobarang
+// and C.KODEGDG <>'GTC'", ["nobarang" => $nobarang]);
+
+
+$lokasi =  DB::connection('SML')->select("
+
+declare @Kodegdg Varchar(20)
+select @Kodegdg= :kodegdg
+set @Kodegdg=ISNULL(@Kodegdg,'')
+
+select B.BarcodeLoc,10000 qntMax,
+isnull(b.SALDOQNT,0) StockLokasi ,10000 - isnull(B.SALDOQNT,0) SisaKapasitas
+,B.KodeGdg
+from DBBARANG A
+left outer join (select  KODEBRG,BARCODELoc,SUM(SaldoQnt) SaldoQnt,KODEGDG
+      from (
+        select  KodeBrg,barcode BARCODELoc,QntAwal SaldoQnt ,KODEGDG
+        from 	DBSTOCKBRGSIG
+        where         Tahun=year(GETDATE()) and  Bulan= case when year(GETDATE())=2024 then 2 else 1 End
+
+        union all
+
+        select 	KodeBrg,Barcode BARCODELoc ,
+        SUM(QntDb)-SUM(QntCr) SaldoQnt,Kodegdg
+        from 	vwKartuStockSIG
+        where 	year(Tanggal)=year(GETDATE())  and Tanggal<=GETDATE()
+        and Tipe not in ('AWL')
+        and KodeGdg <>'GTC'
+
+        group by KodeBrg,Barcode,Kodegdg
+
+        ) A
+
+
+      group by KODEBRG,BARCODELoc,KODEGDG
+      having SUM(SaldoQnt) >0
+) B on A.KODEBRG=B.KODEBRG
+where A.KODEBRG= :nobarang
+  and B.KodeGdg like case when @Kodegdg='' then '%%' else @Kodegdg End
+and B.SALDOQNT>0 and B.KODEGDG <>'GTC' and (B.BARCODELoc like ('%REC%') or B.BARCODELoc like ('%KIT%') /*OR B.BARCODELoc like ('%DIS%')*/ OR B.BARCODELoc like ('%LSA%'))
+and b.KODEGDG in ('GMPL','GSML','GSML2','GKSI 4','GSAMPLE','GSML3')
+
+
+union all
+
+select A.BarcodeLoc,A.qntMax,
+isnull(b.SALDOQNT,0) StockLokasi ,A.qntMax - isnull(B.SALDOQNT,0) SisaKapasitas
+,c.KodeGdg
+from dbBarangLokasiSIG A
+left outer join dbLokasiSIG C on A.BarcodeLoc=c.BarcodeLoc
+left outer join (select  KODEBRG,BARCODE,SUM(SaldoQnt) SaldoQnt,KODEGDG
+      from (
+        select  KodeBrg,barcode ,QntAwal SaldoQnt ,KODEGDG
+        from 	DBSTOCKBRGSIG
+        where         Tahun=year(GETDATE()) and  Bulan= case when year(GETDATE())=2024 then 2 else 1 End
+
+        union all
+
+        select 	KodeBrg,Barcode ,
+        SUM(QntDb)-SUM(QntCr) SaldoQnt,Kodegdg
+        from 	vwKartuStockSIG
+        where 	year(Tanggal)=year(GETDATE())  and Tanggal<=GETDATE()
+        and Tipe not in ('AWL')
+        and KodeGdg <>'GTC'
+
+        group by KodeBrg,Barcode,Kodegdg
+
+        ) A
+
+
+      group by KODEBRG,BARCODE,KODEGDG
+      having SUM(SaldoQnt) >0
+) B on A.KodeBarang=B.KODEBRG and A.BarcodeLoc=B.BARCODE and C.KodeGdg=b.KODEGDG
+where A.KodeBarang=:nobarang1
+and B.SALDOQNT>0 and C.KODEGDG <>'GTC'
+and C.KodeGdg like case when @Kodegdg='' then '%%' else @Kodegdg End
+and b.KODEGDG in ('GMPL','GSML','GSML2','GKSI 4','GSAMPLE','GSML3')
+and  (A.BarcodeLoc not like ('%REC%') AND A.BARCODELoc NOT like ('%KIT%') AND A.BARCODELoc NOT like ('%DIS%') and a.BarcodeLoc not like ('%LSA%'))
+", ["nobarang" => $nobarang,"nobarang1" => $nobarang,"kodegdg" => '']);
+
+
+
+
+//   $lokasi =  DB::connection('SML')->select("select A.BarcodeLoc,A.qntMax,
+// isnull(b.SALDOQNT,0) StockLokasi ,A.qntMax - isnull(B.SALDOQNT,0) SisaKapasitas
+// ,c.KodeGdg
+//   from dbBarangLokasiSIG A
+//   left outer join dbLokasiSIG C on A.BarcodeLoc=c.BarcodeLoc
+//  left outer join (select  KODEBRG,BARCODE,SUM(SaldoQnt) SaldoQnt,KODEGDG
+// 				from (
+// 					select  KodeBrg,barcode ,QntAwal SaldoQnt ,KODEGDG
+// 					from 	DBSTOCKBRGSIG
+// 					where         Tahun=year(GETDATE()) and Bulan=MONTH(GETDATE())
+//
+// 					union all
+//
+// 					select 	KodeBrg,Barcode ,
+// 					SUM(QntDb)-SUM(QntCr) SaldoQnt,Kodegdg
+// 					from 	vwKartuStockSIG
+// 					where 	year(Tanggal)=year(GETDATE()) and month(tanggal)=MONTH(GETDATE()) and Tanggal<=GETDATE()
+// 					and Tipe not in ('AWL')
+// 					and KodeGdg <>'GTC'
+//
+// 					group by KodeBrg,Barcode,Kodegdg
+//
+// 					) A
+//
+//
+// 				group by KODEBRG,BARCODE,KODEGDG
+// 				having SUM(SaldoQnt) >0
+//  ) B on A.KodeBarang=B.KODEBRG and A.BarcodeLoc=B.BARCODE and C.KodeGdg=b.KODEGDG
+//   where A.KodeBarang= :nobarang
+//   and B.SALDOQNT>0 and C.KODEGDG <>'GTC'", ["nobarang" => $nobarang]);
+
+
+      return ["check" => $tempCheck ,"lokasi" => $lokasi];
+
+  }
+
+
+  public function spAdd (Request $req) {
+    // return 'tes';
+    $tempData = $req->input('tempData');
+    $username = \Auth::user()->username;
+    foreach ($tempData as $d) {
+      // code...
+
+      $values = [
+        $d['NoBukti'], $d['Kodebrg'], $d['inputKodeLokasi'], $d['Qnt'], $d['Urut'],$username, '', '', \Auth::user()->username
+      ];
+
+      DB::connection("SML")->statement('exec Sp_TransPersiapanUKWEB ?,?,?,?,?,?,?,?,?',$values);
+    }
+
+    // foreach ($data as $d) {
+    //   $values = [$username, $noout,$d['Tahun'],$d['Bulan'],$d['inputQntTerima'],$d['Urut']];
+    //   DB::connection("SML")->statement('exec sp_RefreshTempOutBRG ?,?,?,?,?,?',$values);
+    // }
+
+
+
+
+    // $values = [
+    //   $nobukti, $nobarang, $barcodelokasi, $qntTerima, $urut,$username, $nobuktiLPB, $urutLPB
+    // ];
+    //
+    //   DB::connection("SML")->statement('exec Sp_TransPersiapanUKWEB ?,?,?,?,?,?,?',$values);
+    return 1;
+
+  }
+
+
+
+
+
+
+}
