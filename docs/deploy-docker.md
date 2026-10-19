@@ -1,8 +1,14 @@
 # Deploy ajcwms dengan Docker di VPS
 
-Image berisi PHP 8.3-FPM + nginx (diatur supervisord), driver SQL Server lewat FreeTDS
-(`pdo_dblib`, sama dengan newSML), ekstensi gd/zip/intl untuk export Excel, dan wkhtmltopdf
-untuk cetak PDF. Container mendengarkan port **8080**.
+Image berisi PHP 8.3-FPM + nginx (diatur supervisord), driver SQL Server **pdo_sqlsrv**
+(Microsoft ODBC Driver 18 - sama dengan ajcwms di Windows), ekstensi gd/zip/intl untuk export
+Excel, dan wkhtmltopdf untuk cetak PDF. Container mendengarkan port **8080**.
+
+Kenapa bukan FreeTDS (`pdo_dblib`) seperti newSML: dblib mengembalikan angka sebagai angka
+(`1581`, `0`), sedangkan sqlsrv sebagai string (`"1581.0"`, `".00"`). Kode ajcwms ditulis untuk
+perilaku sqlsrv (mis. `pQC === '1'`, `$res[0]->terhitung ? ...`), jadi dengan dblib tampilan dan
+logika bisa berubah diam-diam. Sudah diuji: dengan pdo_sqlsrv di container hasil query identik
+dengan Windows.
 
 ajcwms dilayani dari **root folder proyek** (seperti Apache lama: `index.php` di root), karena
 semua view memanggil aset `public/...` dan `img/...`. nginx hanya melayani file di `public/`
@@ -74,7 +80,12 @@ Log aplikasi: `docker compose logs -f ajcwms` (nginx/php) dan volume `ajcwms-sto
 
 ## Catatan
 
-- Koneksi ke SQL Server memakai TDS 7.0 (`/etc/freetds/freetds.conf`), sama dengan newSML.
+- SQL Server 36.88.190.218 memakai algoritma TLS lama yang ditolak OpenSSL 3 ("legacy sigalg
+  disallowed"). Di dalam container saja, `/etc/ssl/openssl.cnf` diizinkan TLS 1.0+ dan
+  `SECLEVEL=0` supaya ODBC 18 bisa login. `DB_ENCRYPT` / `DB_TRUST_SERVER_CERTIFICATE` di `.env`
+  tetap dipakai seperti biasa (diuji dengan `DB_ENCRYPT=yes`, `DB_TRUST_SERVER_CERTIFICATE=true`).
+- `config/database.php` punya opsi query-timeout khusus bila suatu saat driver jatuh ke
+  `pdo_dblib` (batas bawaan dblib 30 detik); dengan pdo_sqlsrv opsi itu tidak aktif.
 - Batas PHP: memory 512M, waktu 300 detik (halaman berat seperti Barang/Dashboard Opname).
 - Jangan jalankan `php artisan config:cache` di repo lokal lalu commit `bootstrap/cache/*.php`;
   cache selalu dibuat di container.

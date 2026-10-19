@@ -9,11 +9,13 @@ ENV DEBIAN_FRONTEND=noninteractive \
     # wkhtmltopdf (laravel-snappy) berjalan tanpa layar X
     QT_QPA_PLATFORM=offscreen
 
-# Paket sistem: nginx, supervisor, library ekstensi PHP, FreeTDS (SQL Server), wkhtmltopdf.
+# Paket sistem: nginx, supervisor, library ekstensi PHP, wkhtmltopdf.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         nginx \
         supervisor \
         curl \
+        gnupg \
+        ca-certificates \
         unzip \
         git \
         libzip-dev \
@@ -22,19 +24,31 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libfreetype6-dev \
         libicu-dev \
         libonig-dev \
-        freetds-dev \
-        freetds-bin \
         unixodbc-dev \
         wkhtmltopdf \
         fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
-# SQL Server lewat PDO_DBLIB (FreeTDS). Driver 'sqlsrv' di config/database.php otomatis memakai
-# DSN dblib bila ekstensi sqlsrv tidak ada (Illuminate\Database\Connectors\SqlServerConnector),
-# sama seperti newSML. TDS 7.0 untuk kompatibilitas SQL Server lama.
-RUN docker-php-ext-configure pdo_dblib \
-    && docker-php-ext-install pdo_dblib \
-    && printf "\n[global]\n\ttds version = 7.0\n" >> /etc/freetds/freetds.conf
+# SQL Server lewat pdo_sqlsrv (Microsoft ODBC Driver 18) - driver yang SAMA dengan ajcwms di Windows,
+# sehingga tipe data hasil query identik (angka dikembalikan sebagai string, mis. "1581.0", ".00").
+# Seluruh kode ajcwms ditulis/diuji dengan perilaku itu (mis. pQC === '1'). PDO_DBLIB (FreeTDS, dipakai
+# newSML) mengembalikan angka asli (1581, 0) sehingga perbandingan & tampilan bisa berubah - sengaja
+# tidak dipakai di sini. Versi ekstensi dipatok supaya build ulang di VPS hasilnya sama.
+RUN curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg \
+    && curl -fsSL https://packages.microsoft.com/config/debian/12/prod.list > /etc/apt/sources.list.d/mssql-release.list \
+    && apt-get update \
+    && ACCEPT_EULA=Y apt-get install -y --no-install-recommends msodbcsql18 \
+    && apt-get install -y --no-install-recommends $PHPIZE_DEPS \
+    && pecl install sqlsrv-5.12.0 pdo_sqlsrv-5.12.0 \
+    && docker-php-ext-enable sqlsrv pdo_sqlsrv \
+    && rm -rf /var/lib/apt/lists/* /tmp/pear
+
+# SQL Server 36.88.190.218 memakai sertifikat/algoritma TLS lama ("legacy sigalg disallowed") yang
+# ditolak OpenSSL 3 bawaan Debian 12 - ODBC 18 gagal login walau Encrypt=no. Hanya di container ini,
+# TLS 1.0+ dan SECLEVEL=0 diizinkan supaya handshake login ke SQL Server itu berhasil
+# (sudah diuji: konek OK, hasil query identik dengan Windows).
+RUN sed -i 's/^\[openssl_init\]/[openssl_init]\nssl_conf = ssl_sect/' /etc/ssl/openssl.cnf \
+    && printf '\n[ssl_sect]\nsystem_default = system_default_sect\n\n[system_default_sect]\nMinProtocol = TLSv1\nCipherString = DEFAULT@SECLEVEL=0\n' >> /etc/ssl/openssl.cnf
 
 # Ekstensi PHP lain: gd/zip (maatwebsite/excel - PhpSpreadsheet), intl, bcmath, dst.
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \

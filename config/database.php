@@ -1,5 +1,15 @@
 <?php
 
+// Ditambahkan 2026-10-19 (deploy Docker/Linux): di Linux driver 'sqlsrv' memakai PDO_DBLIB (FreeTDS)
+// karena ekstensi sqlsrv tidak ada. PDO_DBLIB memasang batas waktu query bawaan 30 detik, sehingga
+// stored procedure berat (mis. sp_dashboardopnameharian) gagal "Adaptive Server connection timed out".
+// Batasnya dinaikkan ke DB_QUERY_TIMEOUT (bawaan 300 detik = max_execution_time di Docker). Hanya
+// dipasang bila driver yang dipakai memang dblib - di Windows (sqlsrv) tidak ada opsi tambahan.
+// 1001 = PDO::DBLIB_ATTR_QUERY_TIMEOUT (ditulis angka supaya file ini tetap aman tanpa ekstensi dblib).
+$opsiDblib = (! in_array('sqlsrv', \PDO::getAvailableDrivers(), true) && in_array('dblib', \PDO::getAvailableDrivers(), true))
+    ? [1001 => (int) env('DB_QUERY_TIMEOUT', 300)]
+    : [];
+
 return [
 
     /*
@@ -53,6 +63,7 @@ return [
             'prefix_indexes' => true,
             'encrypt' => env('DB_ENCRYPT', 'no'),
             'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
+            'options' => $opsiDblib,
         ],
 
         'sqlite' => [
@@ -68,6 +79,7 @@ return [
             'prefix_indexes' => true,
             'encrypt' => env('DB_ENCRYPT', 'no'),
             'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
+            'options' => $opsiDblib,
         ],
 
         'SPL' => [
@@ -83,6 +95,7 @@ return [
             'prefix_indexes' => true,
             'encrypt' => env('DB_ENCRYPT', 'no'),
             'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
+            'options' => $opsiDblib,
         ],
 
         'SML' => [
@@ -98,6 +111,7 @@ return [
             'prefix_indexes' => true,
             'encrypt' => env('DB_ENCRYPT', 'no'),
             'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
+            'options' => $opsiDblib,
         ],
 
         'SPLSIG' => [
@@ -113,6 +127,7 @@ return [
             'prefix_indexes' => true,
             'encrypt' => env('DB_ENCRYPT', 'no'),
             'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'true'),
+            'options' => $opsiDblib,
         ],
 
     ],

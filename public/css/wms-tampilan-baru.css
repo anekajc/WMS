@@ -9,7 +9,8 @@
  *   header tabel #f8f9fb abu uppercase, baris ganjil #fbfbfc, hover #f5f3ff,
  *   tombol aksi pastel 30x30 (hijau/kuning/biru/merah/cyan), tombol soft di modal.
  * Tidak memuat fitur geser/sembunyikan kolom dan filter tanggal (tidak dipakai ajcwms).
- * Tab (nav-tabs) sengaja TIDAK diubah.
+ * (Catatan 2026-10-19: file ini sekarang dimuat layout newmaster untuk SEMUA menu - lihat BAGIAN 2;
+ *  tab memakai custom-tabs pola newpo. Aturan .wms-baru di bagian awal tetap untuk modal newpo.)
  * ========================================================================== */
 
 #content { padding-top: 16px; }
@@ -787,7 +788,7 @@
 
 /* Kartu statistik Dashboard Opname Harian - putih bersudut seperti kartu newSML. */
 #content-blade .card.col-lg-2.text-center {
-  background: var(--white, #fff);
+  background: var(--white, #fff) !important; /* menimpa style inline #edf0f5 */
   border: 1.5px solid var(--border, #e5e7eb);
   border-radius: var(--radius, 12px);
   box-shadow: none;
