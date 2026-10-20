@@ -29,10 +29,24 @@
     <div class="card-body">
       <div class="row">
         <div class="col-12" style="padding-left: 20px; padding-right: 20px; overflow:auto;">
-          <table id="tabel_barangjadi" class="data-table po-aksi-hover">
+          {{-- Ditambahkan 2026-10-20: kotak cari + pilihan jumlah baris (data dimuat per halaman dari server). --}}
+          <div class="po-toolbar wms-toolbar">
+            <input type="search" class="po-search-inp" id="cari_barangjadi" placeholder="Cari kode / nama barang" autocomplete="off">
+            <div class="po-len-wrap">
+              <label for="tampil_barangjadi">Tampilkan</label>
+              <select class="po-len-inp" id="tampil_barangjadi">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="-1">Semua</option>
+              </select>
+            </div>
+          </div>
+          <table id="tabel_barangjadi" class="data-table po-aksi-hover" data-wms-asli>
             <thead>
               <tr>
-                <th>Actions</th>
+                <th class="text-center">Actions</th>
                 <th>Kode</th>
                 <th>Nama</th>
                 <th>Agen</th>
@@ -51,6 +65,7 @@
               </tr>
             </thead>
             <tbody id="barangjadi_data">
+              {{-- Diubah 2026-10-20: baris diisi DataTables per halaman (initTabelBarangJadi) - render lama:
               @if (count($barangjadi) > 0)
                 @for ($i = 0; $i < count($barangjadi); $i++)
                   <tr id="{!! $i !!}-tr" >
@@ -103,12 +118,15 @@
                   <td style="display: none;"></td>
                 </tr>
               @endif
+              --}}
             </tbody>
           </table>
         </div>
+        {{-- Paginasi Laravel dimatikan 2026-10-20: tampil rusak di Laravel 13 dan halaman ke-2 error di SQL Server 2008
         <div class="float-right">
           {!! $barangjadi->links() !!}
         </div>
+        --}}
       </div>
     </div>
   </div>
@@ -297,6 +315,7 @@
 </div>
 <!-- End modal add detail Lokasi -->
 
+{{-- Modal tambah/ubah barang lama (sudah tidak dipakai) - komentar Blade 2026-10-20 supaya loop di dalamnya tidak dirender.
 <!-- start modal add barang jadi -->
 <!-- <div class="modal fade" id="addBarangJadi" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-md modal-dialog-centered" role="document">
@@ -851,6 +870,7 @@
   </div>
 </div> -->
 <!-- End modal edit barang jadi -->
+--}}
 @endsection
 
 @section('js')
@@ -860,29 +880,12 @@
 
   // start document ready
 	$(document).ready(function(){
-    var table = $('#tabel_barangjadi').DataTable(
-      {"lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]]}
-      // { "paging": false, "bInfo" : false, "ordering": false }
-    );
-    table.on('search', function () {
-      $('#barangjadi_data > tr').each(function() {
-        $(this).css('background-color', '');
-      });
-      g_id = "", g_nama = "";
-    } );
-    table.on('order', function () {
-      $('#barangjadi_data > tr').each(function() {
-        $(this).css('background-color', '');
-      });
-      g_id = "", g_nama = "";
-    } );
-    // Ditambahkan 2026-10-19: tabel sekarang berhalaman - pindah halaman juga mereset pilihan baris.
-    table.on('page', function () {
-      $('#barangjadi_data > tr').each(function() {
-        $(this).css('background-color', '');
-      });
-      g_id = "", g_nama = "";
-    } );
+    // Diubah 2026-10-20: tabel diisi per halaman dari server (initTabelBarangJadi) - init lama:
+    // var table = $('#tabel_barangjadi').DataTable(
+    //   {"lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]]}
+    // );
+    // table.on('search' / 'order' / 'page', ...) -> sekarang di initTabelBarangJadi()
+    initTabelBarangJadi();
     $(".format_number").val(0);
     $("#isi1").val(1);
     $(".format_number").autoNumeric('init');
@@ -992,8 +995,115 @@
   }
 
 
+  // Ditambahkan 2026-10-20: tabel Barang per halaman dari server (barangjadidata). Kotak cari mencari
+  // kode/nama barang di seluruh data, "Tampilkan" mengatur jumlah baris per halaman.
+  var tabelBarangJadi = null;
+  var timerCariBarangJadi = null;
+
+  function teksBarangJadi(v) {
+    return $('<div>').text(v == null ? '' : v).html();
+  }
+
+  function angkaBarangJadi(v) {
+    var n = Number(v);
+    return isFinite(n) ? Math.round(n).toLocaleString('en-US') : '0';
+  }
+
+  function ikonBarangJadi(v) {
+    return v == 1 ? '<i class="bi bi-check-circle text-success"></i>' : '<i class="bi bi-x-circle text-danger"></i>';
+  }
+
+  function resetPilihBarangJadi() {
+    $('#barangjadi_data > tr').each(function() {
+      $(this).css('background-color', '');
+    });
+    g_id = "", g_nama = "";
+  }
+
+  function initTabelBarangJadi() {
+    tabelBarangJadi = $('#tabel_barangjadi').DataTable({
+      serverSide: true,
+      processing: true,
+      ajax: {
+        url: "{!! url('barangjadidata') !!}",
+        type: "POST",
+        data: function (d) {
+          d._token = $("#_token").val();
+          delete d.columns;
+        },
+        error: function (err) {
+          console.log(err);
+          alertify.warning('Gagal memuat data barang, silahkan refresh browser');
+        }
+      },
+      dom: "r<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+      pageLength: Number($("#tampil_barangjadi").val()) || 10,
+      order: [[1, 'asc']],
+      columns: [
+        // Diubah 2026-10-20: tombol Lokasi bergaya newSML - "+" primary soft, ikon lebih besar, rata tengah.
+        { data: null, orderable: false, className: 'text-center', render: function () {
+          return '<button type="button" class="btn btn-primary btn-sm btn-top" onclick="pilihBarisBarangJadi(this)" data-toggle="tooltip" data-placement="bottom" title="Lokasi" style="width: 30px;"><i class="bi bi-plus-lg" style="font-size: 16px;"></i></button>';
+        } },
+        { data: 'KODEBRG', render: teksBarangJadi },
+        { data: 'NAMABRG', render: teksBarangJadi },
+        { data: 'pAgen', className: 'text-center', render: ikonBarangJadi },
+        { data: 'SAT1', render: teksBarangJadi },
+        { data: 'ISI1', className: 'text-right', render: angkaBarangJadi },
+        { data: 'SAT2', render: teksBarangJadi },
+        { data: 'ISI2', className: 'text-right', render: angkaBarangJadi },
+        { data: 'SAT3', render: teksBarangJadi },
+        { data: 'ISI3', className: 'text-right', render: angkaBarangJadi },
+        { data: 'ISAKTIF', className: 'text-center', render: ikonBarangJadi },
+        { data: 'QntMin', className: 'text-right', render: angkaBarangJadi },
+        { data: 'QntMax', className: 'text-right', render: angkaBarangJadi }
+      ],
+      createdRow: function (row, data, index) {
+        row.id = index + '-tr';
+      },
+      language: {
+        emptyTable: 'Tidak ada data barang jadi ditemukan.',
+        zeroRecords: 'Tidak ada data yang cocok dengan pencarian',
+        processing: 'Memuat data...'
+      },
+      drawCallback: function () {
+        if (window.wmsAturTinggiTabel) { setTimeout(window.wmsAturTinggiTabel, 0); }
+      }
+    });
+    tabelBarangJadi.on('search', resetPilihBarangJadi);
+    tabelBarangJadi.on('order', resetPilihBarangJadi);
+    tabelBarangJadi.on('page', resetPilihBarangJadi);
+    tabelBarangJadi.on('length', resetPilihBarangJadi);
+  }
+
+  $(document).on('input', '#cari_barangjadi', function () {
+    var kata = this.value;
+    clearTimeout(timerCariBarangJadi);
+    timerCariBarangJadi = setTimeout(function () {
+      if (tabelBarangJadi && tabelBarangJadi.search() !== kata) { tabelBarangJadi.search(kata).draw(); }
+    }, 400);
+  });
+
+  $(document).on('change', '#tampil_barangjadi', function () {
+    if (tabelBarangJadi) { tabelBarangJadi.page.len(Number(this.value)).draw(); }
+  });
+
+  // Tombol Lokasi di baris tabel -> fungsi select() lama dengan data baris yang sama.
+  function pilihBarisBarangJadi(btn) {
+    var tr = $(btn).closest('tr');
+    var d = tabelBarangJadi.row(tr).data();
+    if (!d) { return; }
+    select(tr.attr('id').replace('-tr', ''), d.KODEBRG, d.NAMABRG, d.Berat);
+  }
+
   // start refresh tabel
+  // Diubah 2026-10-20: Refresh memuat ulang halaman tabel yang sedang tampil (cari & Tampilkan tetap).
   function loadAll() {
+    resetPilihBarangJadi();
+    if (tabelBarangJadi) { tabelBarangJadi.ajax.reload(null, false); }
+  }
+
+  {{-- loadAll lama (memuat semua barang sekaligus lewat loadAllBarangJadi) - tidak dipakai sejak 2026-10-20:
+  function loadAllLama() {
     console.log('loadall')
     $('#tabel_barangjadi').DataTable().destroy();
     $('#barangjadi_data > tr').each(function() {
@@ -1134,6 +1244,7 @@
     } );
     console.log('loadall success')
   }
+  --}}
   // end refresh table
 
   function select(_row, _id, _nama,_berat) {

@@ -3,29 +3,71 @@
 @section('buttons')
 
 @endsection
-@section('content')
-<div class="container-fluid">
 
-  <!-- <div id="qrcode"></div> -->
-  <div class="row">
-    <div class="col-6 text-left">
-      {{-- <h1>User</h1> - judul pindah ke header (page-title) --}}
-    </div>
-    <div class="col-6 text-right">
-      <button data-wms-toolbar="tabel" type="button" class="btn btn-primary btn-sm " onclick="buttonAdd()"  >Add User</button>
-      
-    </div>
-  </div>
-<!-- <button onclick="loadAll()">tes</button> -->
-</div>
+@section('css')
+{{-- Diubah 2026-10-20: tampilan menu User disamakan dengan newSML berkas/newsetpemakai.blade.php
+     (kartu ringkasan, toolbar, tombol aksi soft, badge level, modal akses & form bs-form).
+     Logika (route users* / setpemakai*, cek hak akses, isi data) tetap milik ajcwms. --}}
+<link rel="stylesheet" href="{!! URL::asset('public/css/master-list.css') !!}?v={{ @filemtime(base_path('public/css/master-list.css')) ?: '1' }}">
+<style>
+  /* Kartu ringkasan di atas tabel - nilai disalin dari newSML newsetpemakai. */
+  .sp-stats-row { display: flex; gap: 16px; margin-bottom: 14px; flex-wrap: wrap; }
+  .sp-stat-card {
+    background: #fff;
+    border: 1px solid #e7e9ee;
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(20,20,43,.04), 0 1px 1px rgba(20,20,43,.03);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 200px;
+    flex: 1 1 200px;
+  }
+  .sp-stat-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex: none;
+  }
+  .sp-stat-icon.is-purple { background: #efe9ff; color: #6f42f3; }
+  .sp-stat-icon.is-green  { background: #e7f7ed; color: #16a34a; }
+  .sp-stat-icon.is-blue   { background: #e8edff; color: #2563eb; }
+  .sp-stat-label { font-size: 13px; color: #6b7280; margin-bottom: 2px; }
+  .sp-stat-value { font-size: 22px; font-weight: 700; line-height: 1.1; color: #1f2430; }
+  .sp-stat-sub   { font-size: 12px; color: #6b7280; margin-top: 2px; }
+
+  /* Tabel hak akses di modal Akses Menu / Akses Report. */
+  .akses-user { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 13.5px; color: #6b7280; }
+  .akses-user b { color: #1f2430; font-size: 15px; }
+  .akses-wrap { max-height: 62vh; overflow: auto; border: 1px solid #e7e9ee; border-radius: 8px; }
+  .akses-tabel { width: 100%; margin: 0; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+  .akses-tabel thead th {
+    position: sticky; top: 0; z-index: 2;
+    background: #f7f8fa; color: #6b7280; font-weight: 700; font-size: 11.5px;
+    text-transform: uppercase; letter-spacing: .03em; text-align: center;
+    padding: 8px 6px; border-bottom: 1px solid #e7e9ee; white-space: nowrap;
+  }
+  .akses-tabel tbody td { padding: 5px 8px; border-bottom: 1px solid #f0f1f4; vertical-align: middle; white-space: nowrap; }
+  .akses-tabel tbody td.cek { text-align: center; }
+  .akses-tabel tbody tr:hover td { background: #f7f9ff; }
+  .akses-tabel tbody tr.akses-induk td { background: #fff8e1; font-weight: 600; }
+  .akses-tabel input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; accent-color: #2563eb; vertical-align: middle; transform: none; }
+  .akses-kosong { text-align: center; color: #9ca3af; padding: 18px !important; }
+
+  /* Tombol Tambah di toolbar tabel - ukuran sama dengan newSML (.btn-dpp-utama). */
+  #content-blade .wms-toolbar .po-toolbar-act .btn.btn-dpp-utama { height: 36px !important; padding: 0 16px; font-size: 0.78rem; }
+</style>
+@endsection
+
+@section('content')
 
 <div id="printContainer" style="display:none">
 
 </div>
-<div id="contentContainer" class="container-fluid" style="max-width: 900px">
+
+<div id="contentContainer" class="container-fluid po-list-page">
   <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
   <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
-
 
   <input type="hidden" id="akses_istambah" value="{!! $akses->ISTAMBAH !!}" />
   <input type="hidden" id="akses_ishapus" value="{!! $akses->ISHAPUS!!}" />
@@ -34,730 +76,318 @@
   <input type="hidden" id="akses_isotorisasi1" value="{!! $akses->IsOtorisasi1 !!}" />
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-          <div class="row mt-4">
-              <!-- <div class="col-12 text-right">
-                  <button type="button" class="btn btn-primary btn-lg " style="height: 60px; " onclick="buttonAdd()"  >Add Koreksi Stock Gudang</button>
-              </div> -->
-          </div>
-          <div class="row mt-3">
-            <div class="col-12" style="overflow:auto;">
-              <div class="card wms-kartu">
 
-                    <table id="tabel" class="data-table"  >
-                      <thead class="text-center">
-                        <tr>
-                          <th scope="col">Username</th>
-                          <th scope="col">Name</th>
-                          <th scope="col">Level</th>
-                          <th scope="col">Actions</th>
+  <!-- Kartu ringkasan - angkanya diisi isiRingkasan() -->
+  <div class="sp-stats-row">
+    <div class="sp-stat-card">
+      <div class="sp-stat-icon is-purple"><i class="bi bi-people"></i></div>
+      <div>
+        <div class="sp-stat-label">Total User</div>
+        <div class="sp-stat-value" id="stat_total">-</div>
+      </div>
+    </div>
+    <div class="sp-stat-card">
+      <div class="sp-stat-icon is-green"><i class="bi bi-check-circle"></i></div>
+      <div>
+        <div class="sp-stat-label">User Online</div>
+        <div class="sp-stat-value" id="stat_aktif">-</div>
+        <div class="sp-stat-sub"><span id="stat_nonaktif">-</span> Offline</div>
+      </div>
+    </div>
+    <div class="sp-stat-card">
+      <div class="sp-stat-icon is-blue"><i class="bi bi-shield-check"></i></div>
+      <div>
+        <div class="sp-stat-label">User Level 2</div>
+        <div class="sp-stat-value" id="stat_admin">-</div>
+      </div>
+    </div>
+  </div>
 
-                        </tr>
-                      </thead>
+  <div class="card wms-kartu">
+    <div class="card-body" style="padding:0;">
 
+      {{-- Toolbar Cari + Tampilkan dibuat otomatis (public/js/wms-tampilan-baru.js); tombol ini dipindah ke kanannya. --}}
+      <button data-wms-toolbar="tabel" id="AddVisibility" class="btn btn-dpp-utama" type="button" onclick="buttonAdd()">Tambah</button>
 
-                      <tbody id="tabel_data" class="text-left" >
-                        @for ($i = 0; $i < count($listData); $i++)
-                        <tr >
-
-                          <td>{{ $listData[$i]->username }}</td>
-                          <td>{{ $listData[$i]->name }}</td>
-                          <td>{{ $listData[$i]->level }}</td>
-
-
-                            <td class="text-center">
-                              <!-- <button class="btn btn-warning btn-sm" type="button" onclick="" ><i class="bi bi-info-lg"></i></button> -->
-                              <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('{{ $listData[$i]->username }}')"><i class="bi bi-info"></i></button>
-                              <button class="btn btn-success btn-sm" type="button" onclick="buttonEdit('{{ $listData[$i]->username }}')"><i class="bi bi-pen"></i></button>
-                              <!-- <button data-toggle="tooltip" data-placement="top" title="Ganti Password" class="btn btn-primary btn-sm" type="button" onclick="buttonGantiPassword('{{ $listData[$i]->username }}')"><i class="bi bi-lock"></i></button> -->
-                              <button data-toggle="tooltip" data-placement="top" title="FLMENU" class="btn btn-success btn-sm" type="button" onclick="editAkses('{{ $listData[$i]->id }}', '{{ $listData[$i]->username }}')"><i class="bi bi-card-checklist"></i></button>
-                              <button data-toggle="tooltip" data-placement="top" title="FLMENUREPORT" class="btn btn-success btn-sm" type="button" onclick="editAksesReport('{{ $listData[$i]->id }}', '{{ $listData[$i]->username }}')"><i class="bi bi-card-checklist"></i></button>
-                              <button class="btn btn-danger btn-sm" type="button" onclick="buttonDelete('{{ $listData[$i]->username }}')"><i class="bi bi-trash"></i></button>
-
-
-                            </td>
-                      </tr>
-                      @endfor
-                      </tbody>
-
-
-                    </table>
+      <table id="tabel" class="data-table po-aksi-hover">
+        <thead>
+          <tr>
+            <th style="padding: 4px 12px;" scope="col">Actions</th>
+            <th style="padding: 4px 12px;" scope="col">User ID</th>
+            <th style="padding: 4px 12px;" scope="col">Nama</th>
+            <th style="padding: 4px 12px;" scope="col">Level</th>
+          </tr>
+        </thead>
+        <tbody id="tabel_data" class="text-left">
+          @for ($i = 0; $i < count($listData); $i++)
+          <tr>
+            <td style="white-space:nowrap;" class="text-center">
+              <div class="action-buttons-wrap">
+                <button title="Detail User" class="btn-action-sm btn-action-warning" type="button" onclick="buttonDetail('{{ $listData[$i]->username }}')"><i class="bi bi-info-lg"></i></button>
+                <button title="Edit User" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('{{ $listData[$i]->username }}')"><i class="bi bi-pen"></i></button>
+                <button title="Akses Menu" class="btn-action-sm btn-action-primary" type="button" onclick="editAkses('{{ $listData[$i]->id }}', '{{ $listData[$i]->username }}')"><i class="bi bi-card-checklist"></i></button>
+                <button title="Akses Report" class="btn-action-sm btn-action-primary" type="button" onclick="editAksesReport('{{ $listData[$i]->id }}', '{{ $listData[$i]->username }}')"><i class="bi bi-card-list"></i></button>
+                <button title="Hapus User" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('{{ $listData[$i]->username }}')"><i class="bi bi-trash"></i></button>
               </div>
-            </div>
-          </div>
+            </td>
+            <td>{{ $listData[$i]->username }}</td>
+            <td>{{ $listData[$i]->name }}</td>
+            <td><span class="sp-badge {{ $listData[$i]->level == 2 ? 'is-admin' : ($listData[$i]->level == 1 ? 'is-supervisor' : 'is-user') }}">Level {{ $listData[$i]->level }}</span></td>
+          </tr>
+          @endfor
+        </tbody>
+      </table>
 
+    </div>
+  </div>
 
 </div>
 
 
 <!-- start modal add -->
-<div class="modal fade"  id="form" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 500px">
+<div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="judulAddUser" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 540px">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Add</h5>
+        <h5 class="modal-title" id="judulAddUser">Tambah User</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
-
+      <div class="modal-body" id="formBsGrid">
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
+          <div class="bs-form bs-form-1">
+            <label for="input_add_username">User</label>
+            <input type="text" class="form-control" id="input_add_username" placeholder="Username" autocomplete="off">
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Username</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_username" placeholder="Username">
-                </div>
-              </div>
+            <label for="input_add_nama">Nama Lengkap</label>
+            <input type="text" class="form-control" id="input_add_nama" placeholder="Nama">
 
-            </div>
+            <label for="input_add_password">Password</label>
+            <input type="password" class="form-control" id="input_add_password" placeholder="Password" autocomplete="new-password">
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_add_nama" placeholder="Nama">
-                </div>
-              </div>
+            <label for="input_add_password2">Konfirmasi PW</label>
+            <input type="password" class="form-control" id="input_add_password2" placeholder="Ulangi password" autocomplete="new-password">
 
-            </div>
-
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Password</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="password" class="form-control" id="input_add_password" placeholder="Password">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Repeat Password</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="password" class="form-control" id="input_add_password2" placeholder="Repeat Password">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Level</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <!-- <input type="text" class="form-control" id="input_add_namaarea" placeholder="Nama Area"> -->
-                  <select id="input_add_level" class="form-control" aria-label="Default select example">
-                    <option disabled selected value="">Pilih Level</option>
-                    <option value="0">0</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                  </select>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row">
-              <div class="col-4">
-
-              </div>
-
-
-
-
-
-
-    </div>
-
-
+            <label for="input_add_level">Level</label>
+            <select id="input_add_level" class="form-control">
+              <option disabled selected value="">Pilih Level</option>
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitAdd()">Simpan</button>
+      </div>
     </div>
   </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-    <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button>
-  </div>
-</div>
-</div>
 </div>
 <!-- End modal add-->
 
 
-<!-- start modal add -->
-<div class="modal fade"  id="formGantiPassword" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 500px">
+<!-- start modal ganti password -->
+<div class="modal fade" id="formGantiPassword" tabindex="-1" role="dialog" aria-labelledby="judulGantiPassword" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 540px">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Ganti Password</h5>
+        <h5 class="modal-title" id="judulGantiPassword">Ganti Password</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
-
+      <div class="modal-body" id="formBsGrid">
         <div class="container-fluid">
-          <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
+          <div class="bs-form bs-form-1">
+            <label for="input_gantipassword_username">User</label>
+            <input type="text" class="form-control" id="input_gantipassword_username" readonly placeholder="Username">
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Username</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_gantipassword_username" readonly placeholder="Username">
-                </div>
-              </div>
+            <label for="input_gantipassword_password">Password</label>
+            <input type="password" class="form-control" id="input_gantipassword_password" placeholder="Password" autocomplete="new-password">
 
-            </div>
-
-
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Password</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="password" class="form-control" id="input_gantipassword_password" placeholder="Password">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Repeat Password</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="password" class="form-control" id="input_gantipassword_password2" placeholder="Repeat Password">
-                </div>
-              </div>
-
-            </div>
-
-
-            <div class="row">
-              <div class="col-4">
-
-              </div>
-
-
-
-
-
-
-    </div>
-
-
+            <label for="input_gantipassword_password2">Konfirmasi PW</label>
+            <input type="password" class="form-control" id="input_gantipassword_password2" placeholder="Ulangi password" autocomplete="new-password">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitGantiPassword()">Simpan</button>
+      </div>
     </div>
   </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-    <button type="button" class="btn btn-primary" onclick="submitGantiPassword()">Submit</button>
-  </div>
 </div>
-</div>
-</div>
-<!-- End modal add-->
+<!-- End modal ganti password-->
 
 
-<!-- start modal add -->
-<div class="modal fade"  id="formDetail" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 500px">
+<!-- start modal detail -->
+<div class="modal fade" id="formDetail" tabindex="-1" role="dialog" aria-labelledby="judulDetailUser" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 540px">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Detail</h5>
+        <h5 class="modal-title" id="judulDetailUser">Detail User</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
-
+      <div class="modal-body" id="formBsGrid">
         <div class="container-fluid">
-          <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
+          <div class="bs-form bs-form-1">
+            <label for="input_detail_username">User</label>
+            <input type="text" class="form-control" id="input_detail_username" placeholder="Username" readonly>
 
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Username</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_detail_username" placeholder="Username" readonly>
-                </div>
-              </div>
+            <label for="input_detail_nama">Nama Lengkap</label>
+            <input type="text" class="form-control" id="input_detail_nama" placeholder="Nama" readonly>
 
-            </div>
-
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" readonly id="input_detail_nama" placeholder="Nama">
-                </div>
-              </div>
-
-            </div>
-
-
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Level</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <!-- <input type="text" class="form-control" id="input_detail_namaarea" placeholder="Nama Area"> -->
-                  <input type="text" class="form-control" readonly id="input_detail_level" placeholder="Level">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row">
-              <div class="col-4">
-
-              </div>
-
-
-
-
-
-
-    </div>
-
-
+            <label for="input_detail_level">Level</label>
+            <input type="text" class="form-control" id="input_detail_level" placeholder="Level" readonly>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Tutup</button>
+      </div>
     </div>
   </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-    <!-- <button type="button" class="btn btn-primary" onclick="submitAdd()">Submit</button> -->
-  </div>
 </div>
-</div>
-</div>
-<!-- End modal add-->
-
+<!-- End modal detail-->
 
 
 <!-- start modal akses menu -->
-<div class="modal fade" id="formAkses" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+<div class="modal fade" id="formAkses" tabindex="-1" role="dialog" aria-labelledby="judulAksesMenu" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" style="width: 95%; max-width:1400px;" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Akses Menu</h5>
+        <h5 class="modal-title" id="judulAksesMenu">Akses Menu</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <input type="hidden" class="form-control" id="input_akses_userid" disabled>
+      <input type="hidden" id="input_akses_userid">
       <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
+        <input type="hidden" name="noUrut" id="input_akses_noUrut" value="" />
+        <input type="hidden" id="input_akses_username">
+        <div class="akses-user">User <b id="label_akses_username">-</b> <span>· perubahan langsung tersimpan saat kotak dicentang</span></div>
 
-        <div class="container-fluid">
-          <input type="hidden" name="noUrut" id="input_akses_noUrut" value="" />
-          <div class="row">
-
-
-            <div class="col-4">
-              <div class="form-group">
-                <label>Username</label>
-              </div>
-            </div>
-            <div class="col-8">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_akses_username" placeholder="Username" disabled>
-              </div>
-            </div>
-            <!-- <div class="col-2">
-              <div class="form-group">
-                <label>No RPB</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_add_norpb" placeholder="No PBG" disabled>
-              </div>
-            </div> -->
-          </div>
-
-          <!-- <div class="row">
-            <div class="col-2">
-              <div class="form-group">
-                <label>Gdg</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_add_gdg" placeholder="Gdg Asal" required disabled>
-              </div>
-            </div>
-            <div class="col-2">
-              <div class="form-group">
-                <label>Tanggal</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <input type="date" class="form-control" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" >
-              </div>
-            </div>
-
-            <div class="col-2">
-              <div class="form-group">
-                <label>Nama Cust</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_add_namacust" placeholder="cust supp" disabled>
-              </div>
-            </div>
-
-
-          </div> -->
-          <div class="row">
-
-
+        <div class="akses-wrap">
+          <table id="aksesTable" class="akses-tabel">
+            <thead>
+              <tr>
+                <th scope="col" style="text-align:left;">Kode Menu</th>
+                <th scope="col" style="text-align:left;">Keterangan</th>
+                <th scope="col">Akses</th>
+                <th scope="col">Tambah</th>
+                <th scope="col">Koreksi</th>
+                <th scope="col">Hapus</th>
+                <th scope="col">Cetak</th>
+                <th scope="col">Export</th>
+                <th scope="col">Oto1</th>
+                <th scope="col">Oto2</th>
+                <th scope="col">Oto3</th>
+                <th scope="col">Oto4</th>
+                <th scope="col">Oto5</th>
+                <th scope="col">Batal</th>
+                <th scope="col">Pemb</th>
+              </tr>
+            </thead>
+            <tbody id="aksesTableData">
+            </tbody>
+          </table>
         </div>
-        <div class="row">
-
-
-        </div>
-
-        </div>
-
-
-
       </div>
-        <!-- <div class="container-fluid" style="overflow-x: auto; transform: rotateX(180deg)">
-          <div style="transform: rotateX(180deg)"> -->
-        <div class="container-fluid doublescroll" style="overflow-x: auto;">
-          <div style="">
 
-              <table id="aksesTable" class="table table-bordered table-striped"  >
-                <thead class="text-center">
-                  <tr>
-                    <!-- <th style="" scope="col">Kode Menu</th> -->
-                    <th scope="col">Ket</th>
-                    <th scope="col">ACCESS</th>
-                    <th scope="col">TAMBAH</th>
-                    <th scope="col">KOREKSI</th>
-                    <th scope="col">HAPUS</th>
-                    <th scope="col">CETAK</th>
-                    <th scope="col">EXPORT</th>
-                    <th scope="col">OTO1</th>
-                    <th scope="col">OTO2</th>
-                    <th scope="col">OTO3</th>
-                    <th scope="col">OTO4</th>
-                    <th scope="col">OTO5</th>
-                    <th scope="col">BATAL</th>
-                    <th scope="col">Pemb</th>
-                  </tr>
-                </thead>
-
-
-                <tbody id="aksesTableData" class="text-left" style="" >
-                  <tr >
-
-                      <td class="text-center"><input class="" type="checkbox" value="" id="flexCheckDefault"></td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                </tr>
-
-                </tbody>
-
-
-              </table>
-            </div>
-        </div>
-
-
-
-      <!-- <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-        <button type="button" class="btn btn-primary" onclick="submitAkses()">Submit</button>
-      </div> -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Tutup</button>
+      </div>
     </div>
   </div>
 </div>
 <!-- End modal akses menu-->
 
 
-<!-- start modal akses menu -->
-<div class="modal fade" id="formAksesReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+<!-- start modal akses menu report -->
+<div class="modal fade" id="formAksesReport" tabindex="-1" role="dialog" aria-labelledby="judulAksesReport" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" style="max-width:900px;" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Akses Menu Report</h5>
+        <h5 class="modal-title" id="judulAksesReport">Akses Menu Report</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <input type="hidden" class="form-control" id="input_aksesreport_userid" disabled>
+      <input type="hidden" id="input_aksesreport_userid">
       <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
+        <input type="hidden" name="noUrut" id="input_aksesreport_noUrut" value="" />
+        <input type="hidden" id="input_aksesreport_username">
+        <div class="akses-user">User <b id="label_aksesreport_username">-</b> <span>· perubahan langsung tersimpan saat kotak dicentang</span></div>
 
+        <div class="akses-wrap">
+          <table id="aksesReportTable" class="akses-tabel">
+            <thead>
+              <tr>
+                <th scope="col" style="text-align:left;">Kode Menu</th>
+                <th scope="col" style="text-align:left;">Keterangan</th>
+                <th scope="col">Akses</th>
+                <th scope="col">Design</th>
+                <th scope="col">Export</th>
+              </tr>
+            </thead>
+            <tbody id="aksesReportTableData">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- End modal akses menu report-->
+
+
+<!-- start modal edit -->
+<div class="modal fade" id="formEdit" tabindex="-1" role="dialog" aria-labelledby="judulEditUser" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 540px">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="judulEditUser">Edit User</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="formBsGrid">
         <div class="container-fluid">
-          <input type="hidden" name="noUrut" id="input_aksesreport_noUrut" value="" />
-          <div class="row">
+          <div class="bs-form bs-form-1">
+            <label for="input_edit_username">User</label>
+            <input type="text" class="form-control" id="input_edit_username" readonly placeholder="Username">
 
+            <label for="input_edit_nama">Nama Lengkap</label>
+            <input type="text" class="form-control" id="input_edit_nama" placeholder="Nama">
 
-            <div class="col-4">
-              <div class="form-group">
-                <label>Username</label>
-              </div>
-            </div>
-            <div class="col-8">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_aksesreport_username" placeholder="Username" disabled>
-              </div>
-            </div>
-            <!-- <div class="col-2">
-              <div class="form-group">
-                <label>No RPB</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_add_norpb" placeholder="No PBG" disabled>
-              </div>
-            </div> -->
+            <label for="input_edit_level">Level</label>
+            <select id="input_edit_level" class="form-control">
+              <option disabled selected value="">Pilih Level</option>
+              <option value=0>0</option>
+              <option value=1>1</option>
+              <option value=2>2</option>
+            </select>
           </div>
-
-          <!-- <div class="row">
-            <div class="col-2">
-              <div class="form-group">
-                <label>Gdg</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_add_gdg" placeholder="Gdg Asal" required disabled>
-              </div>
-            </div>
-            <div class="col-2">
-              <div class="form-group">
-                <label>Tanggal</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <input type="date" class="form-control" id="input_add_tanggal" value="{!! date('Y-m-d') !!}" >
-              </div>
-            </div>
-
-            <div class="col-2">
-              <div class="form-group">
-                <label>Nama Cust</label>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="form-group">
-                <input type="text" class="form-control" id="input_add_namacust" placeholder="cust supp" disabled>
-              </div>
-            </div>
-
-
-          </div> -->
-          <div class="row">
-
-
         </div>
-        <div class="row">
-
-
-        </div>
-
-        </div>
-
-
-
       </div>
-        <!-- <div class="container-fluid" style="overflow-x: auto; transform: rotateX(180deg)">
-          <div style="transform: rotateX(180deg)"> -->
-        <div class="container-fluid doublescroll" style="overflow-x: auto;">
-          <div style="">
-
-              <table id="aksesReportTable" class="table table-bordered table-striped"  >
-                <thead class="text-center">
-                  <tr>
-                    <!-- <th style="" scope="col">Kode Menu</th> -->
-                    <th scope="col">Ket</th>
-                    <th scope="col">ACCESS</th>
-                    <th scope="col">DESIGN</th>
-                    <th scope="col">EXPORT</th>
-                  </tr>
-                </thead>
-
-
-                <tbody id="aksesReportTableData" class="text-left" style="" >
-                  <tr >
-
-                      <td class="text-center"><input class="" type="checkbox" value="" id="flexCheckDefault"></td>
-                      <td>-</td>
-                      <td>-</td>
-                      <td>-</td>
-                </tr>
-
-                </tbody>
-
-
-              </table>
-            </div>
-        </div>
-
-
-
-      <!-- <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-        <button type="button" class="btn btn-primary" onclick="submitAkses()">Submit</button>
-      </div> -->
-    </div>
-  </div>
-</div>
-<!-- End modal akses menu-->
-
-
-
-<!-- start modal add -->
-<div class="modal fade"  id="formEdit" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered"  role="document" style="max-width: 500px">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-sm btn-batal-add" data-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-sm btn-chip-biru" onclick="submitEdit()">Simpan</button>
       </div>
-      <div class="modal-body">
-        <!-- <h1>Tes Modal</h1> -->
-
-        <div class="container-fluid">
-          <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
-
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Username</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_username" readonly placeholder="Username">
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Nama</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="input_edit_nama" placeholder="Nama">
-                </div>
-              </div>
-
-            </div>
-
-
-
-            <div class="row">
-              <div class="col-4 text-left">
-                <div class="form-group text-left">
-                  <label class="text-left">Level</label>
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="form-group">
-                  <!-- <input type="text" class="form-control" id="input_edit_namaarea" placeholder="Nama Area"> -->
-                  <select id="input_edit_level" class="form-control" aria-label="Default select example">
-                    <option disabled selected value="">Pilih Level</option>
-                    <option value=0>0</option>
-                    <option value=1>1</option>
-                    <option value=2>2</option>
-                  </select>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="row">
-              <div class="col-4">
-
-              </div>
-
-
-
-
-
-
-    </div>
-
-
     </div>
   </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-dismiss="modal" >Batal</button>
-    <button type="button" class="btn btn-primary" onclick="submitEdit()">Submit</button>
-  </div>
 </div>
-</div>
-</div>
-<!-- End modal add-->
-
-
-
-
-
-
+<!-- End modal edit-->
 
 @endsection
 
@@ -765,6 +395,24 @@
 <script type="text/javascript">
 
 let dataRefresh = []
+
+// Ditambahkan 2026-10-20 (tampilan newSML): badge level & kartu ringkasan di atas tabel.
+function badgeLevel (level) {
+  let kelas = Number(level) === 2 ? 'is-admin' : (Number(level) === 1 ? 'is-supervisor' : 'is-user')
+  return `<span class="sp-badge ${kelas}">Level ${level}</span>`
+}
+
+function isiRingkasan (list) {
+  let online = list.filter(u => Number(u.status) === 1).length
+  document.getElementById('stat_total').textContent = list.length
+  document.getElementById('stat_aktif').textContent = online
+  document.getElementById('stat_nonaktif').textContent = list.length - online
+  document.getElementById('stat_admin').textContent = list.filter(u => Number(u.level) === 2).length
+}
+
+$(function () {
+  isiRingkasan(@json($listData))
+})
 
 $(document).ready(function(){
       $("#tabel").DataTable({
@@ -1200,40 +848,42 @@ function editAkses (userid, username) {
   listAkses.forEach((item, i) => {
     // <td>${item.KODEMENU}</td>
     if (item.L0 == 0) {
-      rowTable += `<tr style="background-color: #FDFD96">
+      rowTable += `<tr class="akses-induk">
 
+      <td>${item.KODEMENU}</td>
       <td>${item.Keterangan}</td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","hasaccess")' class="" type="checkbox" value="" id="akses_checkbox_hasaccess${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","istambah")' class="" type="checkbox" value="" id="akses_checkbox_istambah${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isKoreksi")' class="" type="checkbox" value="" id="akses_checkbox_isKoreksi${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isHapus")' class="" type="checkbox" value="" id="akses_checkbox_isHapus${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isCetak")' class="" type="checkbox" value="" id="akses_checkbox_isCetak${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isExport")' class="" type="checkbox" value="" id="akses_checkbox_isExport${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isOtorisasi1")' class="" disabled type="checkbox" value="" id="akses_checkbox_isOtorisasi1${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isOtorisasi2")' class="" disabled type="checkbox" value="" id="akses_checkbox_isOtorisasi2${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isOtorisasi3")' class="" disabled type="checkbox" value="" id="akses_checkbox_isOtorisasi3${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isOtorisasi4")' class="" disabled type="checkbox" value="" id="akses_checkbox_isOtorisasi4${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isOtorisasi5")' class="" disabled type="checkbox" value="" id="akses_checkbox_isOtorisasi5${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isBatal")' class="" type="checkbox" value="" id="akses_checkbox_isBatal${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","pembatalan")' class="" type="checkbox" value="" id="akses_checkbox_pembatalan${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","hasaccess")' class="" type="checkbox" value="" id="akses_checkbox_hasaccess${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","istambah")' class="" type="checkbox" value="" id="akses_checkbox_istambah${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isKoreksi")' class="" type="checkbox" value="" id="akses_checkbox_isKoreksi${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isHapus")' class="" type="checkbox" value="" id="akses_checkbox_isHapus${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isCetak")' class="" type="checkbox" value="" id="akses_checkbox_isCetak${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isExport")' class="" type="checkbox" value="" id="akses_checkbox_isExport${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isOtorisasi1")' class="" disabled type="checkbox" value="" id="akses_checkbox_isOtorisasi1${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isOtorisasi2")' class="" disabled type="checkbox" value="" id="akses_checkbox_isOtorisasi2${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isOtorisasi3")' class="" disabled type="checkbox" value="" id="akses_checkbox_isOtorisasi3${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isOtorisasi4")' class="" disabled type="checkbox" value="" id="akses_checkbox_isOtorisasi4${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isOtorisasi5")' class="" disabled type="checkbox" value="" id="akses_checkbox_isOtorisasi5${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","isBatal")' class="" type="checkbox" value="" id="akses_checkbox_isBatal${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenuHeader("${i}" ,"${item.KODEMENU}","pembatalan")' class="" type="checkbox" value="" id="akses_checkbox_pembatalan${i}"></td>
       </tr>`
     } else {
       rowTable += `<tr>
 
+      <td>${item.KODEMENU}</td>
       <td>${item.Keterangan}</td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_hasaccess${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_istambah${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_isKoreksi${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_isHapus${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_isCetak${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_isExport${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}" , 1)' class="" type="checkbox" value="" id="akses_checkbox_isOtorisasi1${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}" , 2 )' class="" type="checkbox" value="" id="akses_checkbox_isOtorisasi2${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}", 3)' class="" type="checkbox" value="" id="akses_checkbox_isOtorisasi3${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}" , 4)' class="" type="checkbox" value="" id="akses_checkbox_isOtorisasi4${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}" , 5)' class="" type="checkbox" value="" id="akses_checkbox_isOtorisasi5${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_isBatal${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_pembatalan${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_hasaccess${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_istambah${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_isKoreksi${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_isHapus${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_isCetak${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_isExport${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}" , 1)' class="" type="checkbox" value="" id="akses_checkbox_isOtorisasi1${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}" , 2 )' class="" type="checkbox" value="" id="akses_checkbox_isOtorisasi2${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}", 3)' class="" type="checkbox" value="" id="akses_checkbox_isOtorisasi3${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}" , 4)' class="" type="checkbox" value="" id="akses_checkbox_isOtorisasi4${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}" , 5)' class="" type="checkbox" value="" id="akses_checkbox_isOtorisasi5${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_isBatal${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenu("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="akses_checkbox_pembatalan${i}"></td>
       </tr>`
     }
 
@@ -1247,6 +897,7 @@ function editAkses (userid, username) {
   console.log(listAkses)
   console.log(listAkses[0])
   document.getElementById("input_akses_username").value = username
+  document.getElementById("label_akses_username").textContent = username // 2026-10-20: nama user di judul modal (tampilan newSML)
   document.getElementById("input_akses_userid").value = userid
 
   document.getElementById("aksesTableData").innerHTML = rowTable
@@ -1354,20 +1005,22 @@ function editAksesReport (userid, username) {
   listAksesReport.forEach((item, i) => {
     // <td>${item.KODEMENU}</td>
     if (item.L0 == 0) {
-      rowTable += `<tr style="background-color: #FDFD96">
+      rowTable += `<tr class="akses-induk">
 
+      <td>${item.KODEMENU}</td>
       <td>${item.Keterangan}</td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenuReportHeader("${i}" ,"${item.KODEMENU}","hasaccess")' class="" type="checkbox" value="" id="aksesreport_checkbox_hasaccess${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenuReportHeader("${i}" ,"${item.KODEMENU}","isdesign")' class="" type="checkbox" value="" id="aksesreport_checkbox_isdesign${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenuReportHeader("${i}" ,"${item.KODEMENU}","isexport")' class="" type="checkbox" value="" id="aksesreport_checkbox_isexport${i}"></td
+      <td class="cek"><input onclick='clickUpdateAksesMenuReportHeader("${i}" ,"${item.KODEMENU}","hasaccess")' class="" type="checkbox" value="" id="aksesreport_checkbox_hasaccess${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenuReportHeader("${i}" ,"${item.KODEMENU}","isdesign")' class="" type="checkbox" value="" id="aksesreport_checkbox_isdesign${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenuReportHeader("${i}" ,"${item.KODEMENU}","isexport")' class="" type="checkbox" value="" id="aksesreport_checkbox_isexport${i}"></td>
       </tr>`
     } else {
       rowTable += `<tr>
 
+      <td>${item.KODEMENU}</td>
       <td>${item.Keterangan}</td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenuReport("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="aksesreport_checkbox_hasaccess${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenuReport("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="aksesreport_checkbox_isdesign${i}"></td>
-      <td class="text-center"><input onclick='clickUpdateAksesMenuReport("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="aksesreport_checkbox_isexport${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenuReport("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="aksesreport_checkbox_hasaccess${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenuReport("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="aksesreport_checkbox_isdesign${i}"></td>
+      <td class="cek"><input onclick='clickUpdateAksesMenuReport("${i}","${item.KODEMENU}")' class="" type="checkbox" value="" id="aksesreport_checkbox_isexport${i}"></td>
       </tr>`
     }
 
@@ -1381,6 +1034,7 @@ function editAksesReport (userid, username) {
   console.log(listAksesReport)
   console.log(listAksesReport[0])
   document.getElementById("input_aksesreport_username").value = username
+  document.getElementById("label_aksesreport_username").textContent = username // 2026-10-20: nama user di judul modal (tampilan newSML)
   document.getElementById("input_aksesreport_userid").value = userid
 
   document.getElementById("aksesReportTableData").innerHTML = rowTable
@@ -1627,18 +1281,20 @@ let rowTable = ""
 dataRefresh.forEach((item, i) => {
   let temp = ""
 
+  // Diubah 2026-10-20 (tampilan newSML): kolom Actions di depan, tombol aksi soft, level berupa badge.
   rowTable += `<tr>
+  <td style="white-space:nowrap;" class="text-center">
+    <div class="action-buttons-wrap">
+      <button title="Detail User" class="btn-action-sm btn-action-warning" type="button" onclick="buttonDetail('${item.username}')"><i class="bi bi-info-lg"></i></button>
+      <button title="Edit User" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.username}')"><i class="bi bi-pen"></i></button>
+      <button title="Akses Menu" class="btn-action-sm btn-action-primary" type="button" onclick="editAkses('${item.id}', '${item.username}')"><i class="bi bi-card-checklist"></i></button>
+      <button title="Akses Report" class="btn-action-sm btn-action-primary" type="button" onclick="editAksesReport('${item.id}', '${item.username}')"><i class="bi bi-card-list"></i></button>
+      <button title="Hapus User" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${item.username}')"><i class="bi bi-trash"></i></button>
+    </div>
+  </td>
   <td>${item.username}</td>
   <td>${item.name}</td>
-  <td>${item.level}</td>
-  <td class="text-center">
-  <button class="btn btn-warning btn-sm" type="button" onclick="buttonDetail('${item.username}')"><i class="bi bi-info"></i></button>
-    <button class="btn btn-success btn-sm" type="button" onclick="buttonEdit('${item.username}')"><i class="bi bi-pen"></i></button>
-    <button data-toggle="tooltip" data-placement="top" title="FLMENU" class="btn btn-success btn-sm" type="button" onclick="editAkses('${item.id}', '${item.username}')"><i class="bi bi-card-checklist"></i></button>
-    <button data-toggle="tooltip" data-placement="top" title="FLMENUREPORT" class="btn btn-success btn-sm" type="button" onclick="editAksesReport('${item.id}', '${item.username}')"><i class="bi bi-card-checklist"></i></button>
-
-    <button class="btn btn-danger btn-sm" type="button" onclick="buttonDelete('${item.username}')"><i class="bi bi-trash"></i></button>
-  </td>
+  <td>${badgeLevel(item.level)}</td>
   </tr>`
 });
 
@@ -1648,6 +1304,7 @@ dataRefresh.forEach((item, i) => {
 
 
 document.getElementById("tabel_data").innerHTML = rowTable
+isiRingkasan(dataRefresh)
 $("#tabel").DataTable({
   "lengthChange": false,
     "paging": false ,

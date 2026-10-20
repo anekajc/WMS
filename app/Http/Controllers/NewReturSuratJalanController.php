@@ -38,7 +38,10 @@ class NewReturSuratJalanController extends Controller
       }
     }
 
-    $penerimaan = VWRSPBWEB::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = VWRSPBWEB::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = VWRSPBWEB::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -75,7 +78,10 @@ class NewReturSuratJalanController extends Controller
 
   public function getDetailOutstanding (Request $req) {
 
-    $detailOutstanding = VwOutSPBRSPB::all()->where('NOBUKTI', $req->input('NOBUKTI'))->where('KodeGdg', $req->input('kodegdg'))->sortBy('URUT');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailOutstanding = VwOutSPBRSPB::all()->where('NOBUKTI', $req->input('NOBUKTI'))->where('KodeGdg', $req->input('kodegdg'))->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailOutstanding = VwOutSPBRSPB::whereRaw('NOBUKTI = cast(? as varchar(50))', [$req->input('NOBUKTI')])->whereRaw('KodeGdg = cast(? as varchar(50))', [$req->input('kodegdg')])->get()->sortBy('URUT');
     $tempOutstanding = [];
     foreach ($detailOutstanding as $do) {
       // code...
@@ -86,7 +92,10 @@ class NewReturSuratJalanController extends Controller
   }
 
   public function getDetailPenerimaan (Request $req) {
-    $detailPenerimaan = VWRSPBWEB::all()->where('NOBUKTI',$req->input('NOBUKTI') )->sortBy('URUT');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailPenerimaan = VWRSPBWEB::all()->where('NOBUKTI',$req->input('NOBUKTI') )->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailPenerimaan = VWRSPBWEB::whereRaw('NOBUKTI = cast(? as varchar(50))', [$req->input('NOBUKTI')])->get()->sortBy('URUT');
     $tempPenerimaan = [];
     foreach ($detailPenerimaan as $p) {
       // code...
@@ -153,7 +162,10 @@ class NewReturSuratJalanController extends Controller
   }
 
   public function loadAll () {
-    $kodemenu = '014';
+    // Dinonaktifkan 2026-10-20: '014' = kode menu Retur Jual (salin-tempel), padahal menu ini Retur Srt Jln
+    // (index() memakai '016'). Akibatnya hak tambah/koreksi/cetak berganti setelah simpan.
+    // $kodemenu = '014';
+    $kodemenu = '016';
     $akses = NewAksesMenu::where('USERID', \Auth::id())-> where('L1', $kodemenu)->first();
     $periode = NewPeriode::where('user_id' , \Auth::id())->first();
 
@@ -168,7 +180,10 @@ class NewReturSuratJalanController extends Controller
       }
     }
 
-    $penerimaan = VWRSPBWEB::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = VWRSPBWEB::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = VWRSPBWEB::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...

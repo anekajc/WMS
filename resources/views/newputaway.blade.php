@@ -644,6 +644,11 @@
   }
 
   function loadAll () {
+    // Ditambah 2026-10-20: halaman scan ini tidak punya tabel daftar (#tabel / #tabel_data) sejak versi
+    // lama, jadi loadAll() setelah edit/hapus koreksi selalu error JS + memuat data sia-sia. Lewati saja.
+    if (!document.getElementById("tabel_data")) {
+      return
+    }
     $.ajax({
       url: "{!! url('loadallputaway') !!}",
       type: "get",
@@ -671,7 +676,7 @@
       <td>${item[0].NAMAGUDANG}</td>
       <td class="text-center">
       <button style="" class="btn btn-warning btn-sm" type="button"   onclick="buttonDetailKoreksi('${item[0].NOBUKTI}')" ><i class="bi bi-info-lg"></i></button>
-      <button class="btn btn-success btn-sm" type="button" onclick="buttonKoreksi('${item[0].NOBUKTI}')"><i class="bi bi-bag-plus-fill"></i></button>
+      <button style="width: 30px;" class="btn btn-primary btn-sm" type="button" title="Koreksi" onclick="buttonKoreksi('${item[0].NOBUKTI}')"><i class="bi bi-plus-lg" style="font-size: 16px;"></i></button>
       </tr>`
     })
 

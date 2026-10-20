@@ -77,7 +77,7 @@
                         @for ($i = 0; $i < count($outstandingArray); $i++)
                         <tr>
                           <td class="text-center"><button style="" class="btn btn-warning btn-sm" type="button"   onclick="buttonDetail('{{$outstandingArray[$i][0]->NOBUKTI}}')" ><i class="bi bi-info-lg"></i></button>
-                            <button class="btn btn-success btn-sm" type="button" onclick="buttonAdd('{{$outstandingArray[$i][0]->NOBUKTI}}')"><i class="bi bi-bag-plus-fill"></i></button></td>
+                            <button style="width: 30px;" class="btn btn-primary btn-sm" type="button" title="Tambah" onclick="buttonAdd('{{$outstandingArray[$i][0]->NOBUKTI}}')"><i class="bi bi-plus-lg" style="font-size: 16px;"></i></button></td>
                             <td>{{ $outstandingArray[$i][0]->NOBUKTI }}</td>
                             <td>{!! date("Y/m/d", strtotime($outstandingArray[$i][0]->Tanggal)) !!}</td>
                             <td>{{ $outstandingArray[$i][0]->KodeCustSupp }}</td>
@@ -1125,7 +1125,7 @@ function loadAll () {
       }
       rowTable += `<tr>
       <td class="text-center"><button style="" class="btn btn-warning btn-sm" type="button"   onclick="buttonDetail('${item[0].NOBUKTI}')" ><i class="bi bi-info-lg"></i></button>
-      <button class="btn btn-success btn-sm" type="button" onclick="buttonAdd('${item[0].NOBUKTI}')"><i class="bi bi-bag-plus-fill"></i></button></td>
+      <button style="width: 30px;" class="btn btn-primary btn-sm" type="button" title="Tambah" onclick="buttonAdd('${item[0].NOBUKTI}')"><i class="bi bi-plus-lg" style="font-size: 16px;"></i></button></td>
       <td>${item[0].NOBUKTI}</td>
       <td>${date1}</td>
       <td>${item[0].KodeCustSupp}</td>
@@ -1179,7 +1179,12 @@ function onChangePrint (index) {
   // input_add_qnt input_add_qntTerima
   let qtyTerima = $(`#input_add_qntTerima${index}`).val();
   // let qtyReject= $(`#input_add_qntTerima${index}`).val();
-  document.getElementById(`input_add_qntPrint${index}`).value = qtyTerima
+  // Dinonaktifkan 2026-10-20: kolom input_add_qntPrint sudah tidak ada di tabel tambah -> error JS tiap qty diubah.
+  // document.getElementById(`input_add_qntPrint${index}`).value = qtyTerima
+  let inputPrint = document.getElementById(`input_add_qntPrint${index}`)
+  if (inputPrint) {
+    inputPrint.value = qtyTerima
+  }
 }
 
 function submitAddKoreksi () {

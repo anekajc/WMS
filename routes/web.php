@@ -305,6 +305,8 @@ Route::post('/detailpenerimaanterimaubahkemasan', [TerimaUbahKemasanController::
 Route::get('/loadallterimaubahkemasan', [TerimaUbahKemasanController::class, 'loadAll'])->middleware('auth');
 Route::post('/addterimaubahkemasan' , [TerimaUbahKemasanController::class, 'spAdd'])->middleware('auth');
 Route::post('/koreksiterimaubahkemasan' , [TerimaUbahKemasanController::class, 'spKoreksi'])->middleware('auth');
+// Ditambah 2026-10-20: nomor bukti Terima Ubah Kemasan = KMBJ milik PR (dulu memakai getnobuktiubahkemasan)
+Route::get('/getnobuktiterimaubahkemasan' , [TerimaUbahKemasanController::class, 'getNoBuktiTerima'])->middleware('auth');
 
 // TRANSFER LOKASI SITE
 
@@ -546,6 +548,7 @@ Route::get('/kartustockgudangspreport', [KartuStockGudangController::class, 'spR
 // barcode barang
 Route::get('/barcodebarang', [BarcodeBarangController::class, 'index'])->middleware('auth');
 Route::get('/loadAllbarcodebarang', [BarcodeBarangController::class, 'loadAll'])->middleware('auth');
+Route::post('/barcodebarangdata', [BarcodeBarangController::class, 'dataTabel'])->middleware('auth');
 
 
 // dashboardopnameharian
@@ -885,6 +888,7 @@ Route::post('/addLokasi', [GudangController::class, 'addLokasi'])->middleware('a
 // Barang Jadi
 Route::get('/barangjadi', [BarangJadiController::class, 'index'])->middleware('auth');
 Route::post('/loadAllBarangJadi', [BarangJadiController::class, 'loadAll'])->middleware('auth');
+Route::post('/barangjadidata', [BarangJadiController::class, 'dataTabel'])->middleware('auth');
 Route::post('/addBarangJadi', [BarangJadiController::class, 'add'])->middleware('auth');
 Route::post('/showBarangJadi', [BarangJadiController::class, 'show'])->middleware('auth');
 Route::post('/editBarangJadi', [BarangJadiController::class, 'edit'])->middleware('auth');

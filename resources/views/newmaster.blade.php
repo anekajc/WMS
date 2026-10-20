@@ -1236,6 +1236,12 @@
       //
       // }
     </script>
+    <script type="text/javascript">
+      // Ditambahkan 2026-10-20: beberapa halaman (Gudang, Barcode Barang, dll.) memanggil middleTD() saat
+      // Refresh, tapi definisinya ikut terkomentari di atas sehingga Refresh berhenti dengan error.
+      // Fungsi kosong yang sama dengan versi lama; halaman yang punya middleTD sendiri tetap memakai miliknya.
+      if (typeof window.middleTD !== 'function') { window.middleTD = function () {} }
+    </script>
     @include('partials.ajax-error-logger')
     @yield('js')
   </body>

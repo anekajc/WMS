@@ -1,198 +1,228 @@
 @extends('newmaster')
-@section('page-title', 'Setup Periode Kerja')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Setup Periode Kerja')
 @section('content')
-<div class="container-fluid">
-{{-- <h1>Setup Periode Kerja</h1> - judul pindah ke header (page-title) --}}
-<!-- <button onclick="loadAll()">tes</button> -->
-</div>
+
+{{-- Diubah 2026-10-20: tampilan disamakan persis dengan newSML (berkas/newsetupperiodekerja.blade.php).
+     Sistemnya tetap ajcwms: bulan + tahun dikirim ke newsetupperiodekerjaupdate. --}}
 
 <div id="printContainer" style="display:none">
 
 </div>
+
 <div id="contentContainer" class="container-fluid">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-  <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
-  <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
+  <input type="hidden" id="periode_tahun" value="{{ $periode->tahun ?? '' }}" />
+  <input type="hidden" id="periode_bulan" value="{{ (int) ($periode->bulan ?? 0) }}" />
 
+  <div class="kp-wrap">
+    <div class="kp-card">
 
-  <div class="row mt-6">
-              <!-- <div class="col-12 text-right">
-                  <button type="button" class="btn btn-primary btn-lg " style="height: 60px; " onclick="buttonAdd()"  >Add Koreksi Stock Gudang</button>
-              </div> -->
-          </div>
-          <div class="row text-left justify-content-center">
-            <div class="card wms-form-kartu bg-light mb-3" style="max-width: 30rem;" >
-            <div class="card-header">Ubah Periode Kerja</div>
-            <div class="card-body">
-              <div class="row">
-                <!-- <div class="col-4">
-                </div> -->
-                <div class="col-6">
-                  <h6 class="card-title">Bulan</h6>
-                </div>
-                <!-- <div class="col-1">
-                </div> -->
-                <div class="col-6">
-                  <h6 class="card-title">Tahun</h6>
-                </div>
-              </div>
-              <div class="row">
-                <!-- <div class="col-4">
-                  <h5 class="card-title">Periode</p>
-                </div> -->
-                <div class="col-6">
-                  <select id="input_periodekerja_bulan" class="form-select form-control text-right" aria-label="Default select example">
-                    <!-- <option selected>Open this select menu</option> -->
-                    <option value=1>1</option>
-                    <option value=2>2</option>
-                    <option value=3>3</option>
-                    <option value=4>4</option>
-                    <option value=5>5</option>
-                    <option value=6>6</option>
-                    <option value=7>7</option>
-                    <option value=8>8</option>
-                    <option value=9>9</option>
-                    <option value=10>10</option>
-                    <option value=11>11</option>
-                    <option value=12>12</option>
-                  </select>
-                </div>
-                <!-- <div class="col-1">
-                </div> -->
-                <div class="col-6">
-                  <input type="number" class="form-control text-right" id="input_periodekerja_tahun" placeholder="Tahun" >
-                </div>
-              </div>
-              <div class="row text-right mt-4">
-                <div class="col-12">
-                  <a href="#" onclick="submitPeriodeKerja()" class="btn text-right btn-primary">Simpan</a>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div class="kp-header">
+        <div class="kp-header-icon">
+          <i class="bi bi-calendar-week-fill"></i>
+        </div>
+        <div>
+          <div class="kp-header-title">Setup Periode Kerja</div>
+          <div class="kp-header-subtitle">Pilih Bulan dan Tahun, Klik Simpan</div>
+        </div>
+      </div>
 
-            <!-- <div class="card w-40">
-              <div class="card-body">
-                <h5 class="card-title text-left">Laporan Pemasukan Barang</h5>
-                <div class="container-fluid">
-                <div style="background-color: #E8E8E8; padding: 10px; " class="rounded">
-                <div class="row " >
-                  <h6 class="col-3 text-left">Periode</h6>
-                </div>
-                <div class="row text-center">
-                  <div class="col-5"><input id="inputDate1" style="display: block; width: 100%" class="text-center" type="date" value="{!! date('Y-m-d') !!}">
-                  </div>
-                  <div class="col-2">s/d
-                  </div>
-                  <div class="col-5"><input id="inputDate2" style="display: block; width: 100%" class="text-center" type="date" value="{!! date('Y-m-d') !!}">
-                  </div>
-                </div>
-              </div>
+      <div class="kp-body" id="formBsGrid">
 
-                <div class="row text-center mt-4">
-                  <div class="col-6">
-                    <select id="inputReport1" style="display: block; width: 100%"  class="form-select" aria-label="Default select example">
-                      <option value=0>BC 2.6.2</option>
-                      <option value=1>BC 2.3</option>
-                      <option value=2>BC 4.0</option>
-                      <option value=3>BC 2.7</option>
-                    </select>
-                  </div>
-                  <div class="col-6">
-                    <select id="inputReport2" style="display: block; width: 100%" class="form-select form-select-sm" aria-label=".form-select-sm example">
-                      <option value=0>Urut Dok. Pabean</option>
-                      <option value=1>Urut Bukti LPB</option>
-                    </select>
-                  </div>
-                </div>
+        <div class="bs-form bs-form-1">
+          <label for="input_periodekerja_bulan">Bulan</label>
+          <select id="input_periodekerja_bulan" class="form-control">
+            <option value="1">Januari</option>
+            <option value="2">Februari</option>
+            <option value="3">Maret</option>
+            <option value="4">April</option>
+            <option value="5">Mei</option>
+            <option value="6">Juni</option>
+            <option value="7">Juli</option>
+            <option value="8">Agustus</option>
+            <option value="9">September</option>
+            <option value="10">Oktober</option>
+            <option value="11">November</option>
+            <option value="12">Desember</option>
+          </select>
 
-                <div class="row text-center mt-4">
-                  <div class="col-6">
-                    <select id="inputReport3" style="display: block; width: 100%"  class="form-select" aria-label="Default select example">
-                      <option value="All">All</option>
-                      <option value="PHI001">PEIHAI</option>
-                      <option value="PHJ001">JANTI</option>
-                    </select>
-                  </div>
+          <label for="input_periodekerja_tahun">Tahun</label>
+          <input type="text" class="form-control" id="input_periodekerja_tahun" placeholder="Tahun" maxlength="4" inputmode="numeric">
+        </div>
 
-                  <div class="col-6">
+        <div class="kp-footer">
+          <button type="button" class="kp-ok-btn" onclick="submitPeriodeKerja()">
+            <i class="bi bi-check-lg"></i> Simpan
+          </button>
+        </div>
 
-                    </select>
-                  </div>
-                </div>
+      </div>
 
-                  <a href="#" class="mt-4 btn btn-primary text-right justify-content-right" onclick="makeTable()">Submit</a>
-
-              </div>
-              </div>
-            </div> -->
-          </div>
+    </div>
+  </div>
 
 </div>
 
+@endsection
 
+@section('css')
+{{-- Isian memakai #formBsGrid .bs-form seperti newSML (bs-form-1 ada di master-list.css). --}}
+<link rel="stylesheet" href="{!! URL::asset('public/css/master-list.css') !!}?v={{ @filemtime(base_path('public/css/master-list.css')) ?: '1' }}">
+<style>
 
+  .kp-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 30px 0;
+  }
 
+  .kp-card {
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.06);
+  }
 
+  .kp-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    color: #fff;
+    padding: 18px 20px;
+  }
 
+  .kp-header-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
 
+  .kp-header-title {
+    font-size: 17px;
+    font-weight: 700;
+  }
 
+  .kp-header-subtitle {
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.85);
+    margin-top: 2px;
+  }
 
+  .kp-body {
+    padding: 24px 22px 22px;
+  }
 
+  .kp-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 22px;
+  }
+
+  .kp-ok-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #e8edff;
+    color: #2563eb;
+    border: 1px solid #cfdcff;
+    padding: 7px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.12s ease;
+  }
+
+  .kp-ok-btn:hover {
+    background: #dce6ff;
+    color: #1d4ed8;
+  }
+
+</style>
 @endsection
 
 @section('js')
 <script type="text/javascript">
 
-  $(document).ready(function(){
-      // console.log('tes ready')
-      let tahun = $("#periode_tahun").val();
-      let bulan = $("#periode_bulan").val();
-      document.getElementById("input_periodekerja_tahun").value = tahun
-      document.getElementById("input_periodekerja_bulan").value = bulan
+const namaBulanPeriode = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
 
-  });
+$(document).ready(function () {
+  let tahun = $("#periode_tahun").val();
+  let bulan = $("#periode_bulan").val();
 
-  function submitPeriodeKerja () {
-    let tahun = Number($("#input_periodekerja_tahun").val())
-    let bulan = Number($("#input_periodekerja_bulan").val())
-    let _token = $("#_token").val();
-    console.log(tahun,bulan)
+  document.getElementById("input_periodekerja_tahun").value = tahun;
+  document.getElementById("input_periodekerja_bulan").value = bulan;
+});
 
-    $.ajax({
-      url: "{!! url('newsetupperiodekerjaupdate') !!}",
-      type: "post",
-      async: false,
-      data: {
-        _token : _token,
-        bulan,
-        tahun
-      },
-      success: function(res) {
-        console.log(res)
-        console.log(res.data)
+function submitPeriodeKerja () {
+  let tahunTeks = String($("#input_periodekerja_tahun").val()).trim();
+  let tahun = Number(tahunTeks);
+  let bulan = Number($("#input_periodekerja_bulan").val());
+  let _token = $("#_token").val();
 
-        if (res.status == 1) {
-          document.getElementById("div_periode").innerHTML = `Username : ${res.data[0].username} - Periode : ${res.data[0].bulan} / ${res.data[0].tahun}`
-          alertify.success('Berhasil update')
-        } else {
-          alertify.danger('Terjadi kesalahan, silahkan update ulang')
-        }
-
-      }
-    })
+  if (!/^\d{4}$/.test(tahunTeks) || tahun < 1900 || tahun > 2999) {
+    alertify.warning('Tahun harus diisi 4 angka, mis. ' + new Date().getFullYear());
+    return
+  }
+  if (!(bulan >= 1 && bulan <= 12)) {
+    alertify.warning('Bulan harus dipilih');
+    return
   }
 
+  $.ajax({
+    url: "{!! url('newsetupperiodekerjaupdate') !!}",
+    type: "post",
+    async: false,
+    data: {
+      _token,
+      bulan,
+      tahun
+    },
+    success: function (res) {
+      if (!res || typeof res !== 'object') {
+        alertify.error('Sesi login habis atau server tidak merespons dengan benar. Silakan muat ulang halaman.')
+        return
+      }
+      // ajcwms: status = jumlah baris new_periode yang diubah (0 = gagal).
+      if (!Number(res.status)) {
+        alertify.warning(res.pesan || 'Periode kerja gagal disimpan')
+        return
+      }
 
+      // Badge periode di bar atas layout newmaster (.period-badge).
+      let el = document.querySelector(".period-badge");
+      if (el) {
+        // Dua versi: .pb-full (layar lebar) / .pb-short (mobile) - lihat css/header-mobile.css.
+        el.innerHTML = `<span class="pb-full">Username: {{ Auth::user()->username }} &nbsp;–&nbsp; Periode: ${namaBulanPeriode[bulan]} ${tahun}</span>` +
+          `<span class="pb-short">${String(namaBulanPeriode[bulan]).substring(0, 3)} ${tahun}</span>`;
+      }
 
+      // Input tersembunyi periode di halaman ini ikut diperbarui.
+      document.getElementById("periode_bulan").value = bulan;
+      document.getElementById("periode_tahun").value = tahun;
+
+      alertify.success('Periode kerja telah disimpan');
+    },
+    error: function (err) {
+      console.log(err);
+      alertify.warning('Terjadi kesalahan, silakan refresh browser');
+    }
+  });
+}
 
 </script>
-
-
-
-
 @endsection

@@ -92,7 +92,10 @@ class NewQCLPBController extends Controller
   public function detailLPB(Request $req) {
     // return 1;
     // $pembelian = VWtampilbeli::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->where('NoBukti', $req->input('NoBukti'))->sortBy('NoBukti')->groupBy('NoBukti');
-    $lpbDetail = vw_outbeliqc::all()->where('pQC', 0)->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT')->groupBy('NoBukti');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $lpbDetail = vw_outbeliqc::all()->where('pQC', 0)->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT')->groupBy('NoBukti');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $lpbDetail = vw_outbeliqc::whereRaw('(pQC = 0 or pQC is null)')->whereRaw('NOBUKTI = cast(? as varchar(50))', [$req->input('NOBUKTI')])->get()->sortBy('URUT')->groupBy('NoBukti');
     $lpbDetail1 = [];
     foreach ($lpbDetail as $lpb) {
       array_push($lpbDetail1, $lpb);
@@ -103,7 +106,10 @@ class NewQCLPBController extends Controller
   public function detailQC(Request $req) {
     // return 1;
     // $pembelian = VWtampilbeli::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->where('NoBukti', $req->input('NoBukti'))->sortBy('NoBukti')->groupBy('NoBukti');
-    $qcDetail = vw_outbeliqc::all()->where('pQC', 1)->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT')->groupBy('NoBukti');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $qcDetail = vw_outbeliqc::all()->where('pQC', 1)->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT')->groupBy('NoBukti');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $qcDetail = vw_outbeliqc::where('pQC', 1)->whereRaw('NOBUKTI = cast(? as varchar(50))', [$req->input('NOBUKTI')])->get()->sortBy('URUT')->groupBy('NoBukti');
     $qcDetail1 = [];
     foreach ($qcDetail as $qc) {
       array_push($qcDetail1, $qc);

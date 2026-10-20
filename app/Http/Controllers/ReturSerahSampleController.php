@@ -18,7 +18,11 @@ class ReturSerahSampleController extends Controller
 
 
   public function index () {
-    $kodemenu = '016';
+    // Dinonaktifkan 2026-10-20: '016' = kode menu Retur Srt Jln (salin-tempel). Retur Serah Sample di
+    // new_menu = '019'. Hak user 016 sudah disalin ke 019:
+    // docs/update-db-DBSMLBARU/2026-10-20_akses_returserahsample_019.sql (jalankan saat deploy).
+    // $kodemenu = '016';
+    $kodemenu = '019';
     $akses = NewAksesMenu::where('USERID', \Auth::id())-> where('L1', $kodemenu)->first();
     if(!$akses || !$akses->HASACCESS) {
        return redirect('/home');
@@ -37,7 +41,10 @@ class ReturSerahSampleController extends Controller
       }
     }
 
-    $penerimaan = VWRSERAHSAMPLEWEB::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = VWRSERAHSAMPLEWEB::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = VWRSERAHSAMPLEWEB::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -74,7 +81,10 @@ class ReturSerahSampleController extends Controller
 
   public function getDetailOutstanding (Request $req) {
 
-    $detailOutstanding = VwOutSSPRSSP::all()->where('NOBUKTI', $req->input('NOBUKTI'))->where('KodeGdg', $req->input('kodegdg'))->sortBy('URUT');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailOutstanding = VwOutSSPRSSP::all()->where('NOBUKTI', $req->input('NOBUKTI'))->where('KodeGdg', $req->input('kodegdg'))->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailOutstanding = VwOutSSPRSSP::whereRaw('NOBUKTI = cast(? as varchar(50))', [$req->input('NOBUKTI')])->whereRaw('KodeGdg = cast(? as varchar(50))', [$req->input('kodegdg')])->get()->sortBy('URUT');
     $tempOutstanding = [];
     foreach ($detailOutstanding as $do) {
       // code...
@@ -85,7 +95,10 @@ class ReturSerahSampleController extends Controller
   }
 
   public function getDetailPenerimaan (Request $req) {
-    $detailPenerimaan = VWRSERAHSAMPLEWEB::all()->where('NOBUKTI',$req->input('NOBUKTI') )->sortBy('URUT');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailPenerimaan = VWRSERAHSAMPLEWEB::all()->where('NOBUKTI',$req->input('NOBUKTI') )->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailPenerimaan = VWRSERAHSAMPLEWEB::whereRaw('NOBUKTI = cast(? as varchar(50))', [$req->input('NOBUKTI')])->get()->sortBy('URUT');
     $tempPenerimaan = [];
     foreach ($detailPenerimaan as $p) {
       // code...
@@ -152,7 +165,10 @@ class ReturSerahSampleController extends Controller
   }
 
   public function loadAll () {
-    $kodemenu = '014';
+    // Dinonaktifkan 2026-10-20: '014' = kode menu Retur Jual (salin-tempel) - hak tambah/koreksi/cetak
+    // berganti setelah simpan. Disamakan dengan index(): '019'.
+    // $kodemenu = '014';
+    $kodemenu = '019';
     $akses = NewAksesMenu::where('USERID', \Auth::id())-> where('L1', $kodemenu)->first();
     $periode = NewPeriode::where('user_id' , \Auth::id())->first();
 
@@ -167,7 +183,10 @@ class ReturSerahSampleController extends Controller
       }
     }
 
-    $penerimaan = VWRSERAHSAMPLEWEB::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = VWRSERAHSAMPLEWEB::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = VWRSERAHSAMPLEWEB::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...

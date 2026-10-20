@@ -287,7 +287,9 @@
                           <th scope="col">Ekspedisi</th>
                         </tr>
                       </thead>
-                      <!-- <tbody id="tabel_data" class="text-right" >
+                      {{-- Blok lama di bawah dulu dibungkus komentar HTML, tapi Blade tetap mengeksekusinya
+                           (±500 KB data PO terkirim ke browser tanpa tampil). Sekarang komentar Blade. --}}
+                      {{-- <tbody id="tabel_data" class="text-right" >
                         @for ($i = 0; $i < count($po); $i++)
                         <tr id="tr{!! $i !!}" onclick="tesclick( {{ $i }} , {{ $po[$i]  }} )">
                             <td>{{ $po[$i]->NoBukti}}</td>
@@ -306,15 +308,16 @@
                         </tr>
                         @endfor
 
-                      </tbody> -->
+                      </tbody> --}}
 
                       <tbody id="tabel_data" class="text-left" >
                         @for ($j = 0; $j < count($tempPo); $j++)
                         <tr id="tr{!! $j  !!}" onclick="">
-                        <!-- <tr id="tr{!! $j  !!}" onclick="tesclick({{$j}} , {{$tempPo[$j]}})"> -->
+                        {{-- <tr id="tr{!! $j  !!}" onclick="tesclick({{$j}} , {{$tempPo[$j]}})"> --}}
                         <td>
                           <button style="" class="btn btn-warning btn-sm" type="button" title="Detail" onclick="buttonDetail({{$j}}, {{$tempPo[$j]}})" ><i class="bi bi-info-lg"></i></button>
-                          <button style="" class="btn btn-primary btn-sm" type="button" title="Terima" onclick="buttonAdd({{$j}}, {{$tempPo[$j]}})" ><i class="bi bi-plus"></i></button>
+                          {{-- <button style="" class="btn btn-primary btn-sm" type="button" title="Terima" onclick="buttonAdd({{$j}}, {{$tempPo[$j]}})" ><i class="bi bi-plus"></i></button> --}}
+                          <button style="width: 30px;" class="btn btn-primary btn-sm" type="button" title="Terima" onclick="buttonAdd({{$j}}, {{$tempPo[$j]}})" ><i class="bi bi-plus-lg" style="font-size: 16px;"></i></button>
                         </td>
                             <td>{{ $tempPo[$j][0]->NoBukti}}</td>
                             <td>{!! date("Y/m/d", strtotime($tempPo[$j][0]->TANGGAL)) !!}</td>
@@ -1191,7 +1194,9 @@
             if (item[0].NAMACUSTSUPP) {
               NAMACUSTSUPP = item[0].NAMACUSTSUPP
             }
-            rowTabel += `<tr><td><button style="" class="btn btn-warning btn-sm" type="button" title="Detail" onclick="buttonDetail1(${i})" ><i class="bi bi-info-lg"></i></button> <button style="" class="btn btn-primary btn-sm" type="button" title="Terima" onclick="buttonAdd1(${i})" ><i class="bi bi-plus"></i></button></td><td>${NoBukti}</td><td>${date1}</td><td>${NAMACUSTSUPP}</td><td>-</td><td>-</td></tr>`
+            // Dinonaktifkan 2026-10-20: tombol + terlalu kecil (bi-plus) - diganti ukuran seperti master Barang.
+            // rowTabel += `<tr><td><button style="" class="btn btn-warning btn-sm" type="button" title="Detail" onclick="buttonDetail1(${i})" ><i class="bi bi-info-lg"></i></button> <button style="" class="btn btn-primary btn-sm" type="button" title="Terima" onclick="buttonAdd1(${i})" ><i class="bi bi-plus"></i></button></td><td>${NoBukti}</td><td>${date1}</td><td>${NAMACUSTSUPP}</td><td>-</td><td>-</td></tr>`
+            rowTabel += `<tr><td><button style="" class="btn btn-warning btn-sm" type="button" title="Detail" onclick="buttonDetail1(${i})" ><i class="bi bi-info-lg"></i></button> <button style="width: 30px;" class="btn btn-primary btn-sm" type="button" title="Terima" onclick="buttonAdd1(${i})" ><i class="bi bi-plus-lg" style="font-size: 16px;"></i></button></td><td>${NoBukti}</td><td>${date1}</td><td>${NAMACUSTSUPP}</td><td>-</td><td>-</td></tr>`
 
           });
           document.getElementById("tabel_data").innerHTML = rowTabel

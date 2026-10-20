@@ -1,179 +1,185 @@
 @extends('newmaster')
-@section('page-title', 'Ganti Password')
 @section('buttons')
 
 @endsection
+@section('page-title', 'Ganti Password')
 @section('content')
-<div class="container-fluid">
-{{-- <h1>Ganti Password</h1> - judul pindah ke header (page-title) --}}
-<!-- <button onclick="loadAll()">tes</button> -->
-</div>
 
-<div id="printContainer" style="display:none">
+{{-- Diubah 2026-10-20: tampilan disamakan persis dengan newSML (berkas/gantipassword.blade.php).
+     Sistemnya tetap ajcwms: password baru + ulangi, dikirim ke gantipassworduser. --}}
 
-</div>
 <div id="contentContainer" class="container-fluid">
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
-  <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
-  <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
 
+  <div class="kp-wrap">
+    <div class="kp-card">
 
-  <div class="row mt-6">
-              <!-- <div class="col-12 text-right">
-                  <button type="button" class="btn btn-primary btn-lg " style="height: 60px; " onclick="buttonAdd()"  >Add Koreksi Stock Gudang</button>
-              </div> -->
-          </div>
-          <div class="row text-left justify-content-center">
-            <div class="card wms-form-kartu bg-light mb-3" >
-            <div class="card-header">Ganti Password</div>
-            <div class="card-body">
+      <div class="kp-header">
+        <div class="kp-header-icon">
+          <i class="bi bi-key-fill"></i>
+        </div>
+        <div>
+          <div class="kp-header-title">Ganti Password</div>
+          <div class="kp-header-subtitle">User {{ Auth::user()->username }}</div>
+        </div>
+      </div>
 
+      <div class="kp-body" id="formBsGrid">
 
+        <div class="bs-form bs-form-1">
+          <label for="input_gantipassword_password">Password Baru</label>
+          <input type="password" class="form-control" id="input_gantipassword_password" placeholder="Password baru" autocomplete="new-password">
 
+          <label for="input_gantipassword_password2" class="bs-wrap">Ulangi Password Baru</label>
+          <input type="password" class="form-control" id="input_gantipassword_password2" placeholder="Ulangi password baru" autocomplete="new-password">
+        </div>
 
-              <div class="row">
-                <div class="col-12 text-left">
-                  <div class="form-group text-left">
-                    <label class="text-left">Password</label>
-                  </div>
-                </div>
-                <div class="col-12">
-                  <div class="form-group">
-                    <input type="password" class="form-control" id="input_gantipassword_password" placeholder="Password">
-                  </div>
-                </div>
+        <div class="kp-footer">
+          <button type="button" class="kp-ok-btn" onclick="submitGantiPassword()">
+            <i class="bi bi-check-lg"></i> Simpan
+          </button>
+        </div>
 
-              </div>
+      </div>
 
-              <div class="row">
-                <div class="col-12 text-left">
-                  <div class="form-group text-left">
-                    <label class="text-left">Repeat Password</label>
-                  </div>
-                </div>
-                <div class="col-12">
-                  <div class="form-group">
-                    <input type="password" class="form-control" id="input_gantipassword_password2" placeholder="Repeat Password">
-                  </div>
-                </div>
-
-              </div>
-
-
-              <div class="row text-right mt-4">
-                <div class="col-12">
-                  <a href="#" onclick="submitGantiPassword()" class="btn text-right btn-primary">Simpan</a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-
-          </div>
+    </div>
+  </div>
 
 </div>
 
+@endsection
 
+@section('css')
+{{-- Isian memakai #formBsGrid .bs-form seperti newSML (bs-form-1 & bs-wrap ada di master-list.css). --}}
+<link rel="stylesheet" href="{!! URL::asset('public/css/master-list.css') !!}?v={{ @filemtime(base_path('public/css/master-list.css')) ?: '1' }}">
+<style>
 
+  .kp-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 30px 0;
+  }
 
+  .kp-card {
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.06);
+  }
 
+  .kp-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    color: #fff;
+    padding: 18px 20px;
+  }
 
+  .kp-header-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
 
+  .kp-header-title {
+    font-size: 17px;
+    font-weight: 700;
+  }
 
+  .kp-header-subtitle {
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.85);
+    margin-top: 2px;
+  }
 
+  .kp-body {
+    padding: 24px 22px 22px;
+  }
 
+  .kp-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 22px;
+  }
+
+  .kp-ok-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #e8edff;
+    color: #2563eb;
+    border: 1px solid #cfdcff;
+    padding: 7px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.12s ease;
+  }
+
+  .kp-ok-btn:hover {
+    background: #dce6ff;
+    color: #1d4ed8;
+  }
+
+</style>
 @endsection
 
 @section('js')
 <script type="text/javascript">
 
+function submitGantiPassword () {
 
+  let _token = $("#_token").val();
+  let password = $("#input_gantipassword_password").val();
+  let password2 = $("#input_gantipassword_password2").val();
 
-
-  function submitGantiPassword () {
-
-    let _token = $("#_token").val();
-    // let username = $("#input_gantipassword_username").val();
-    let password = $("#input_gantipassword_password").val();
-    let password2 = $("#input_gantipassword_password2").val();
-    // let isagen = 0
-
-    // console.log('password', password)
-    // console.log('password2', password2)
-
-    if (!password) {
-      alertify.warning('password harus diisi')
-      return
-    }
-
-    if (password != password2) {
-      alertify.warning('password harus sama')
-      return
-    }
-
-
-
-    // if (document.getElementById("input_add_isagen").checked) {
-    //   isagen= 1
-    // }
-    // if (!kode) {
-    //   alertify.warning("Kode harus diisi");
-    //   return
-    // }
-    //
-    // if (!nama) {
-    //   alertify.warning("Nama harus diisi");
-    //   return
-    // }
-
-
-
-    // return
-
-    // return
-    // return
-    $.ajax({
-      url: "{!! url('gantipassworduser') !!}",
-      type: "post",
-      async: false,
-      data: {
-        _token : _token,
-        // username,
-        password,
-      },
-      success: function(res) {
-
-        if (res != 1) {
-          alertify.warning(res);
-        }  else {
-          console.log(res ,'!')
-          // $("#formEdit").modal('toggle')
-          alertify.success("User telah ganti password");
-          // loadAll()
-          // $("#formGantiPassword").modal('toggle')
-          document.getElementById("input_gantipassword_password").value = ''
-          document.getElementById("input_gantipassword_password2").value = ''
-        }
-
-      },
-      error: function (err) {
-        // xhr, ajaxOptions, thrownError
-        // alert(xhr.status);
-        // alert(thrownError);
-        alertify.warning('error')
-        console.log(err)
-      }})
-
-    // console.log(kodearea, namaarea)
+  if (!password) {
+    alertify.warning('Password harus diisi')
+    return
   }
 
+  if (password != password2) {
+    alertify.warning('Password harus sama')
+    return
+  }
 
+  $.ajax({
+    url: "{!! url('gantipassworduser') !!}",
+    type: "post",
+    async: false,
+    data: {
+      _token : _token,
+      password,
+    },
+    success: function(res) {
 
+      if (res != 1) {
+        alertify.warning(res);
+      }  else {
+        alertify.success("Password telah diganti");
+        document.getElementById("input_gantipassword_password").value = ''
+        document.getElementById("input_gantipassword_password2").value = ''
+      }
+
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan, silakan refresh browser')
+    }})
+
+}
 
 </script>
-
-
-
-
 @endsection

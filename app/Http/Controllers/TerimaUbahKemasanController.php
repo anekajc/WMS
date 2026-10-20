@@ -43,7 +43,10 @@ class TerimaUbahKemasanController extends Controller
     }
     //
     // $penerimaan = VWTRansferOut::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
-    $penerimaan = VWUbahKemasanIN::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = VWUbahKemasanIN::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = VWUbahKemasanIN::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -79,9 +82,45 @@ class TerimaUbahKemasanController extends Controller
     return $noBukti;
   }
 
+  // Ditambah 2026-10-20: KMBJ yang sudah dibuat untuk PR ubah kemasan ini (VWOutPRUKI hanya
+  // menampilkan PR yang sudah punya KMBJ). SP_InsertOutUKI selalu menambah baris terima ke KMBJ
+  // milik PR (TempOutstandingPO.NOBATCH, diisi sp_RefreshOutTempUKI dengan "top 1" yang sama).
+  // Dulu SP_IsiNobukti mengembalikan nomor ini (cabang KMBJ + @NoPRKMBJ); di DBSMLBARU cabang
+  // itu dikomentari sehingga keluar nomor baru dan simpan gagal "duplicate key IX_dbUBAHKEMASAN".
+  private function kmbjMilikPR ($nopr) {
+    $kmbj = DB::connection('SML')->select('select top 1 nobukti from DBUBAHKEMASANDET where noprubah = cast(? as varchar(30))', [$nopr]);
+    if (!$kmbj) {
+      return null;
+    }
+    $header = DB::connection('SML')->select('select NOBUKTI, NOURUT, TANGGAL, month(TANGGAL) BULAN, year(TANGGAL) TAHUN from DBUBAHKEMASAN where NOBUKTI = cast(? as varchar(30))', [$kmbj[0]->nobukti]);
+    if (!$header) {
+      return null;
+    }
+    $header[0]->TERKUNCI = count(DB::connection('SML')->select('select 1 from dblockperiode where TAHUN = ? and BULAN = ?', [$header[0]->TAHUN, $header[0]->BULAN])) > 0;
+    return $header[0];
+  }
+
+  // Ditambah 2026-10-20: nomor bukti untuk form Terima Ubah Kemasan. Bila PR sudah punya KMBJ,
+  // pakai nomor itu (perilaku lama); bila belum, sama seperti getnobuktiubahkemasan (SP_IsiNobukti).
+  public function getNoBuktiTerima (Request $req) {
+    $kmbj = $this->kmbjMilikPR($req->get('nopr'));
+    if ($kmbj) {
+      return [[
+        'Nobukti' => $kmbj->NOBUKTI,
+        'Nourut' => $kmbj->NOURUT,
+        'Terkunci' => $kmbj->TERKUNCI,
+        'Tanggal' => $kmbj->TANGGAL
+      ]];
+    }
+    return $this->getNoBukti($req);
+  }
+
   public function getDetailOutstanding (Request $req) {
 
-    $detailOutstanding = VWOutPRUKI::all()->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailOutstanding = VWOutPRUKI::all()->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailOutstanding = VWOutPRUKI::whereRaw('NOBUKTI = cast(? as varchar(50))', [$req->input('NOBUKTI')])->get()->sortBy('URUT');
     $tempOutstanding = [];
     foreach ($detailOutstanding as $do) {
       // code...
@@ -92,7 +131,10 @@ class TerimaUbahKemasanController extends Controller
   }
 
   public function getDetailPenerimaan (Request $req) {
-    $detailPenerimaan = VWUbahKemasanIN::all()->where('NOBUKTI',$req->input('NOBUKTI') )->sortBy('URUT');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailPenerimaan = VWUbahKemasanIN::all()->where('NOBUKTI',$req->input('NOBUKTI') )->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailPenerimaan = VWUbahKemasanIN::whereRaw('NOBUKTI = cast(? as varchar(50))', [$req->input('NOBUKTI')])->get()->sortBy('URUT');
     $tempPenerimaan = [];
     foreach ($detailPenerimaan as $p) {
       // code...
@@ -119,6 +161,17 @@ class TerimaUbahKemasanController extends Controller
     $noout = $req->input('noout');
     $nossp = $req->input('nossp');
 
+    // Ditambah 2026-10-20: baris terima selalu masuk ke KMBJ milik PR (lihat kmbjMilikPR). Pakai
+    // nomor itu supaya SP_InsertOutUKI tidak membuat header kedua (duplicate key). Bila KMBJ itu
+    // berada di periode terkunci, tolak (return 3) - stok bulan yang sudah ditutup tidak boleh berubah.
+    $kmbj = $this->kmbjMilikPR($noout);
+    if ($kmbj) {
+      if ($kmbj->TERKUNCI) {
+        return 3;
+      }
+      $nossp = $kmbj->NOBUKTI;
+      $nourut = $kmbj->NOURUT;
+    }
 
     DB::connection('SML')->statement('delete	TempOutstandingPO where IDUser = :idUser',['idUser' => $username ]);
 
@@ -157,7 +210,10 @@ class TerimaUbahKemasanController extends Controller
       array_push($tempOutstanding, $o);
     }
 
-    $penerimaan = VWUbahKemasanIN::all()->where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = VWUbahKemasanIN::all()->where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = VWUbahKemasanIN::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -179,9 +235,12 @@ class TerimaUbahKemasanController extends Controller
       $checkSaldo = 0;
 
       $check2 = DB::connection('SML')->select('exec Sp_CekStockAkhirLok ?,?,?,?',[$req->input('nosat'), $tanggal,$req->input('kodelokasi'),  $req->input('kodebrg') ]);
-      return $check2;
+      // Dinonaktifkan 2026-10-20: sisa debug - hapus item tidak pernah dijalankan (langsung kembali).
+      // return $check2;
       if ($check2) {
-        if (((int)$check2[0]->SALDOQNT - (int)$req->input('qntDB')) < 0 ) {
+        // Dinonaktifkan 2026-10-20: (int) memotong desimal (0.5 dianggap 0) -> pakai (float).
+        // if (((int)$check2[0]->SALDOQNT - (int)$req->input('qntDB')) < 0 ) {
+        if (((float)$check2[0]->SALDOQNT - (float)$req->input('qntDB')) < 0 ) {
           // return 'a';
           $checkSaldo = 1;
         }

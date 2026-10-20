@@ -48,7 +48,21 @@
       <div class="card-body">
       <div class="row">
         <div class="col-12" style="padding-left: 20px; padding-right: 20px; overflow:auto;">
-          <table class="data-table" id="tabel_gudang" style=" background: white;">
+          {{-- Ditambahkan 2026-10-20: kotak cari + pilihan jumlah baris (data dimuat per halaman dari server). --}}
+          <div class="po-toolbar wms-toolbar">
+            <input type="search" class="po-search-inp" id="cari_barcodebarang" placeholder="Cari kode / nama barang" autocomplete="off">
+            <div class="po-len-wrap">
+              <label for="tampil_barcodebarang">Tampilkan</label>
+              <select class="po-len-inp" id="tampil_barcodebarang">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="-1">Semua</option>
+              </select>
+            </div>
+          </div>
+          <table class="data-table" id="tabel_gudang" style=" background: white;" data-wms-asli>
             <thead>
               <tr>
                 <th width="15%">Kode</th>
@@ -59,6 +73,7 @@
               </tr>
             </thead>
             <tbody id="gudang_data">
+              {{-- Diubah 2026-10-20: baris diisi DataTables per halaman (initTabelBarcodeBarang) - render lama:
               @if (count($gudang) > 0)
                 @for ($i = 0; $i < count($gudang); $i++)
                   <tr id="{!! $i !!}-tr" onclick="select({!! $i !!}, {!! $i !!}, '{!! $gudang[$i]->KODEBRG !!}', '{!! $gudang[$i]->NAMABRG !!}','{!! $gudang[$i]->KODEBRG !!}', {!! $gudang[$i]->KODEBRG !!}, {!! $gudang[$i]->KODEBRG !!})">
@@ -80,6 +95,7 @@
 
                 </tr>
               @endif
+              --}}
             </tbody>
           </table>
         </div>
@@ -107,27 +123,89 @@
   var g_kodelokasi = "", g_namalokasi = "", g_kodegdgraklokasi = "", g_koderaklokasi = "" , g_urutLokasi = "" , g_qntMax= 0, g_barcodeloc = '' ;
   // start document ready
 	$(document).ready(function(){
-    var table = $('#tabel_gudang').DataTable({"lengthMenu": [[-1, 10, 25, 50, 100], ["All", 10, 25, 50, 100]]});
-    table.on('search', function () {
-      $('#gudang_data > tr').each(function() {
-        $(this).css('background-color', '');
-      });
-      g_id = "", g_kode = "", g_nama = "", g_produksi = "", g_rusak = "", g_alamat = "";
-    } );
-    table.on('order', function () {
-      $('#gudang_data > tr').each(function() {
-        $(this).css('background-color', '');
-      });
-      g_id = "", g_kode = "", g_nama = "", g_produksi = "", g_rusak = "", g_alamat = "";
-    } );
-    // Ditambahkan 2026-10-19: tabel sekarang berhalaman - pindah halaman juga mereset pilihan baris.
-    table.on('page', function () {
-      $('#gudang_data > tr').each(function() {
-        $(this).css('background-color', '');
-      });
-      g_id = "", g_kode = "", g_nama = "", g_produksi = "", g_rusak = "", g_alamat = "";
-    } );
+    // Diubah 2026-10-20: tabel diisi per halaman dari server (initTabelBarcodeBarang) - init lama:
+    // var table = $('#tabel_gudang').DataTable({"lengthMenu": [[-1, 10, 25, 50, 100], ["All", 10, 25, 50, 100]]});
+    // table.on('search' / 'order' / 'page', ...) -> sekarang di initTabelBarcodeBarang()
+    initTabelBarcodeBarang();
 	});
+
+  // Ditambahkan 2026-10-20: tabel Barcode Barang per halaman dari server (barcodebarangdata). Kotak cari
+  // mencari kode/nama barang di seluruh data, "Tampilkan" mengatur jumlah baris per halaman.
+  var tabelBarcodeBarang = null;
+  var timerCariBarcodeBarang = null;
+
+  function teksBarcodeBarang(v) {
+    return $('<div>').text(v == null ? '' : v).html();
+  }
+
+  function resetPilihBarcodeBarang() {
+    $('#gudang_data > tr').each(function() {
+      $(this).css('background-color', '');
+    });
+    g_id = "", g_kode = "", g_nama = "", g_produksi = "", g_rusak = "", g_alamat = "";
+  }
+
+  function initTabelBarcodeBarang() {
+    tabelBarcodeBarang = $('#tabel_gudang').DataTable({
+      serverSide: true,
+      processing: true,
+      ajax: {
+        url: "{!! url('barcodebarangdata') !!}",
+        type: "POST",
+        data: function (d) {
+          d._token = $("#_token").val();
+          delete d.columns;
+        },
+        error: function (err) {
+          console.log(err);
+          alertify.warning('Gagal memuat data barang, silahkan refresh browser');
+        }
+      },
+      dom: "r<'po-table-wrap't><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+      pageLength: Number($("#tampil_barcodebarang").val()) || 10,
+      order: [[0, 'asc']],
+      columns: [
+        { data: 'KODEBRG', render: teksBarcodeBarang },
+        { data: 'NAMABRG', render: teksBarcodeBarang }
+      ],
+      createdRow: function (row, data, index) {
+        row.id = index + '-tr';
+      },
+      language: {
+        emptyTable: 'Tidak ada data barang ditemukan.',
+        zeroRecords: 'Tidak ada data yang cocok dengan pencarian',
+        processing: 'Memuat data...'
+      },
+      drawCallback: function () {
+        if (window.wmsAturTinggiTabel) { setTimeout(window.wmsAturTinggiTabel, 0); }
+      }
+    });
+    tabelBarcodeBarang.on('search', resetPilihBarcodeBarang);
+    tabelBarcodeBarang.on('order', resetPilihBarcodeBarang);
+    tabelBarcodeBarang.on('page', resetPilihBarcodeBarang);
+    tabelBarcodeBarang.on('length', resetPilihBarcodeBarang);
+  }
+
+  $(document).on('input', '#cari_barcodebarang', function () {
+    var kata = this.value;
+    clearTimeout(timerCariBarcodeBarang);
+    timerCariBarcodeBarang = setTimeout(function () {
+      if (tabelBarcodeBarang && tabelBarcodeBarang.search() !== kata) { tabelBarcodeBarang.search(kata).draw(); }
+    }, 400);
+  });
+
+  $(document).on('change', '#tampil_barcodebarang', function () {
+    if (tabelBarcodeBarang) { tabelBarcodeBarang.page.len(Number(this.value)).draw(); }
+  });
+
+  // Klik baris -> fungsi select() lama dengan data baris yang sama (kode dikirim sebagai teks).
+  $(document).on('click', '#gudang_data > tr', function () {
+    if (!tabelBarcodeBarang) { return; }
+    var d = tabelBarcodeBarang.row(this).data();
+    if (!d) { return; }
+    var i = this.id.replace('-tr', '');
+    select(i, i, d.KODEBRG, d.NAMABRG, d.KODEBRG, d.KODEBRG, d.KODEBRG);
+  });
 
   function buttonPrintPenerimaan() {
 
@@ -257,7 +335,14 @@
   }
 
   // start refresh tabel
+  // Diubah 2026-10-20: Refresh memuat ulang halaman tabel yang sedang tampil (cari & Tampilkan tetap).
   function loadAll() {
+    resetPilihBarcodeBarang();
+    if (tabelBarcodeBarang) { tabelBarcodeBarang.ajax.reload(null, false); }
+  }
+
+  {{-- loadAll lama (memuat semua barang sekaligus lewat loadAllbarcodebarang) - tidak dipakai sejak 2026-10-20:
+  function loadAllLama() {
     $('#tabel_gudang').DataTable().destroy();
     $('#gudang_data > tr').each(function() {
       $(this).css('background-color', '');
@@ -318,6 +403,7 @@
       g_id = "", g_kode = "", g_nama = "", g_produksi = "", g_rusak = "", g_alamat = "";
     } );
   }
+  --}}
   // end refresh table
 
   function select(_row, _id, _kode, _nama, _produksi, _rusak, _alamat) {
@@ -924,6 +1010,11 @@
   // end hapus Rak Lokasi
 
   function buttonPrintPenerimaan() {
+   // Ditambahkan 2026-10-20: tanpa baris dipilih QR belum dibuat -> sebelumnya error JS, sekarang diberi pesan.
+   if (g_kode === "" || g_nama === "" || !document.getElementById(`tempqrcodeprint`)) {
+     alertify.warning("Tidak ada baris dipilih");
+     return;
+   }
    var xnama = g_nama +'/'+ g_kode;
 
     console.log(g_barcodeloc)

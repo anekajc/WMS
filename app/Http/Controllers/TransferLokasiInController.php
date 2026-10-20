@@ -41,7 +41,10 @@ class TransferLokasiInController extends Controller
     }
     //
     // $penerimaan = VWTRansferOut::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
-    $penerimaan = VWTranLokasiOut::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = VWTranLokasiOut::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = VWTranLokasiOut::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -79,7 +82,10 @@ class TransferLokasiInController extends Controller
 
   public function getDetailOutstanding (Request $req) {
 
-    $detailOutstanding = VWOutPRTLO::all()->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailOutstanding = VWOutPRTLO::all()->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailOutstanding = VWOutPRTLO::whereRaw('NOBUKTI = cast(? as varchar(50))', [$req->input('NOBUKTI')])->get()->sortBy('URUT');
     $tempOutstanding = [];
     foreach ($detailOutstanding as $do) {
       // code...
@@ -90,7 +96,10 @@ class TransferLokasiInController extends Controller
   }
 
   public function getDetailPenerimaan (Request $req) {
-    $detailPenerimaan = VWTranLokasiOut::all()->where('NOBUKTI',$req->input('NOBUKTI') )->sortBy('URUT');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailPenerimaan = VWTranLokasiOut::all()->where('NOBUKTI',$req->input('NOBUKTI') )->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailPenerimaan = VWTranLokasiOut::whereRaw('NOBUKTI = cast(? as varchar(50))', [$req->input('NOBUKTI')])->get()->sortBy('URUT');
     $tempPenerimaan = [];
     foreach ($detailPenerimaan as $p) {
       // code...
@@ -160,7 +169,10 @@ class TransferLokasiInController extends Controller
       array_push($tempOutstanding, $o);
     }
 
-    $penerimaan = VWTranLokasiOut::all()->where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = VWTranLokasiOut::all()->where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = VWTranLokasiOut::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...

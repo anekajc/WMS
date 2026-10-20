@@ -32,7 +32,10 @@ class NewPutAwayController extends Controller
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0();
 
 
-    $penerimaan = vwShowAlokasiBrg::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('urut')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = vwShowAlokasiBrg::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('urut')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = vwShowAlokasiBrg::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('urut')->groupBy('NOBUKTI');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -49,7 +52,10 @@ class NewPutAwayController extends Controller
 
   public function loadAll () {
     $periode = NewPeriode::where('user_id' , \Auth::id())->first();
-    $penerimaan = vwShowAlokasiBrg::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('urut')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = vwShowAlokasiBrg::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('urut')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = vwShowAlokasiBrg::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('urut')->groupBy('NOBUKTI');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -96,7 +102,10 @@ class NewPutAwayController extends Controller
     // $gudang = DB::connection("SML")->select('select * from DBGUDANG where KODEGDG <> :id', ['id' => 'GTC']);
 
       // $check = DB::connection("SML")->select('select * from dbBeli where nobukti = :nobukti AND month(tanggal) = :bulan AND year(tanggal) = :tahun',['nobukti' => $nobukti, 'bulan'=> $periode->bulan, 'tahun'=>$periode->tahun]);
-      $check = VWOUTPENERIMAANBRGWEB::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->where('NoBukti1',$nobukti )->where('Kodebrg', $nobarang)->where('Urut', $urut);
+      // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+      // $check = VWOUTPENERIMAANBRGWEB::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->where('NoBukti1',$nobukti )->where('Kodebrg', $nobarang)->where('Urut', $urut);
+      // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+      $check = VWOUTPENERIMAANBRGWEB::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->whereRaw('NoBukti1 = cast(? as varchar(50))', [$nobukti])->whereRaw('Kodebrg = cast(? as varchar(50))', [$nobarang])->where('Urut', $urut)->get();
       $tempCheck = [];
       foreach ($check as $p) {
         // code...
@@ -146,7 +155,10 @@ class NewPutAwayController extends Controller
 
 
     public function getDetailPenerimaan (Request $req) {
-      $detailPenerimaan = vwShowAlokasiBrg::all()->where('NOBUKTI',$req->input('NOBUKTI') )->sortBy('URUT');
+      // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+      // $detailPenerimaan = vwShowAlokasiBrg::all()->where('NOBUKTI',$req->input('NOBUKTI') )->sortBy('URUT');
+      // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+      $detailPenerimaan = vwShowAlokasiBrg::whereRaw('NOBUKTI = cast(? as varchar(50))', [$req->input('NOBUKTI')])->get()->sortBy('URUT');
       $tempPenerimaan = [];
       foreach ($detailPenerimaan as $p) {
         // code...

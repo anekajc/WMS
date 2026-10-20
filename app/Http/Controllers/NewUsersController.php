@@ -29,7 +29,7 @@ class NewUsersController extends Controller
     $periode = NewPeriode::where('user_id' , \Auth::id())->first();
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0();
 
-    $listData = DB::connection('SML')->select("select name, username, level,id from new_users where deleted = 0 and username != 'SA' ");
+    $listData = DB::connection('SML')->select("select name, username, level,id, status from new_users where deleted = 0 and username != 'SA' "); // 2026-10-20: + status untuk kartu User Online
 
 
 
@@ -42,7 +42,7 @@ class NewUsersController extends Controller
   }
 
   public function loadAll () {
-    $listData = DB::connection('SML')->select("select name, username, level,id from new_users where deleted = 0 and username != 'SA' ");
+    $listData = DB::connection('SML')->select("select name, username, level,id, status from new_users where deleted = 0 and username != 'SA' "); // 2026-10-20: + status untuk kartu User Online
     return $listData;
   }
 

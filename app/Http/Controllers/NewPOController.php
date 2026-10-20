@@ -49,7 +49,10 @@ class NewPOController extends Controller
       array_push($tempPembelian1, $p);
     }
     $po = vwOUtPOWMS::all();
-    $poGroup = vwOUtPOWMS::all()->sortBy('NoBukti')->sortBy('Urut')->groupBy('NoBukti');
+    // Dinonaktifkan 2026-10-20: mengambil ulang view yang sama dengan $po di atas (query kedua, lambat).
+    // $poGroup = vwOUtPOWMS::all()->sortBy('NoBukti')->sortBy('Urut')->groupBy('NoBukti');
+    // Pengganti: pakai data $po yang sudah diambil (isi sama, satu query lebih sedikit).
+    $poGroup = $po->sortBy('NoBukti')->sortBy('Urut')->groupBy('NoBukti');
 
     $tempPo = [];
     foreach ($poGroup as $pG) {

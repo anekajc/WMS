@@ -909,14 +909,14 @@
               <td>' + result[i].NAMA + '</td>\
               <td>' + result[i].Alamat + '</td>';
             if (result[i].IsProduksi == 1) {
-              str = str + '<td><i class="fas fa-check-circle green"></i></td>';
+              str = str + '<td><i class="bi bi-check-circle text-success"></i></td>'; // 2026-10-20: ikon sama dengan tampilan awal (fas tidak dimuat)
             } else {
-              str = str + '<td><i class="fas fa-times-circle red"></i></td>';
+              str = str + '<td><i class="bi bi-x-circle text-danger"></i></td>'; // 2026-10-20: ikon sama dengan tampilan awal (fas tidak dimuat)
             }
             if (result[i].IsRusak == 1) {
-              str = str + '<td><i class="fas fa-check-circle green"></i></td>';
+              str = str + '<td><i class="bi bi-check-circle text-success"></i></td>'; // 2026-10-20: ikon sama dengan tampilan awal (fas tidak dimuat)
             } else {
-              str = str + '<td><i class="fas fa-times-circle red"></i></td>';
+              str = str + '<td><i class="bi bi-x-circle text-danger"></i></td>'; // 2026-10-20: ikon sama dengan tampilan awal (fas tidak dimuat)
             }
             str = str + '</tr>';
           }

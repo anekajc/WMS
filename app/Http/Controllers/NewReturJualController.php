@@ -40,7 +40,10 @@ class NewReturJualController extends Controller
       // code...
       array_push($tempOutstanding, $o);
     }
-    $returGudang = VwSpbRjual::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $returGudang = VwSpbRjual::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $returGudang = VwSpbRjual::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
     $tempReturGudang = [];
     foreach ($returGudang as $o) {
       // code...
@@ -72,7 +75,10 @@ class NewReturJualController extends Controller
       // code...
       array_push($tempOutstanding, $o);
     }
-    $returGudang = VwSpbRjual::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $returGudang = VwSpbRjual::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $returGudang = VwSpbRjual::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
     $tempReturGudang = [];
     foreach ($returGudang as $o) {
       // code...
@@ -88,7 +94,10 @@ class NewReturJualController extends Controller
 
   public function getDetailReturGudang (Request $req) {
     $periode = NewPeriode::where('user_id' , \Auth::id())->first();
-    $detailReturGudang = VwSpbRjual::all()->where('NOBUKTI', $req->input('NOBUKTI'))->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailReturGudang = VwSpbRjual::all()->where('NOBUKTI', $req->input('NOBUKTI'))->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailReturGudang = VwSpbRjual::whereRaw('NOBUKTI = cast(? as varchar(50))', [$req->input('NOBUKTI')])->where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT');
     $tempReturGudang = [];
     foreach ($detailReturGudang as $dr) {
       // code...
@@ -185,7 +194,10 @@ class NewReturJualController extends Controller
 
   public function getDetailOutstanding (Request $req) {
 
-    $detailOutstanding = VWOUtPrRJUal::all()->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT');
+    // Dinonaktifkan 2026-10-20: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailOutstanding = VWOUtPrRJUal::all()->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailOutstanding = VWOUtPrRJUal::whereRaw('NOBUKTI = cast(? as varchar(50))', [$req->input('NOBUKTI')])->get()->sortBy('URUT');
     $tempOutstanding = [];
     foreach ($detailOutstanding as $do) {
       // code...

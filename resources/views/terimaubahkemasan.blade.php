@@ -61,7 +61,7 @@
                         <tr>
                           <td class="text-center">
                             <button style="" class="btn btn-warning btn-sm" type="button"   onclick="buttonDetail('{{ $outstandingArray[$i][0]->NOBUKTI }}')" ><i class="bi bi-info-lg"></i></button>
-                            <button class="btn btn-success btn-sm" type="button" onclick="buttonAdd('{{ $outstandingArray[$i][0]->NOBUKTI }}')"><i class="bi bi-bag-plus-fill"></i></button>
+                            <button style="width: 30px;" class="btn btn-primary btn-sm" type="button" title="Tambah" onclick="buttonAdd('{{ $outstandingArray[$i][0]->NOBUKTI }}')"><i class="bi bi-plus-lg" style="font-size: 16px;"></i></button>
                           </td>
                           <td>{{ $outstandingArray[$i][0]->NOBUKTI }}</td>
                           <td>{{ $outstandingArray[$i][0]->NOKMBJ }}</td>
@@ -1047,8 +1047,12 @@ function buttonAdd (NOBUKTI) {
   // document.getElementById("input_add_nokmbj").value = addDataArray[0].NOKMBJ
   // document.getElementById("input_add_namacust").value = addDataArray[0].NAMACUSTSUPP
   console.log(addDataArray[0].NOBUKTI)
+  // Diubah 2026-10-20: url lama getnobuktiubahkemasan selalu memberi nomor KMBJ baru, padahal baris
+  // terima masuk ke KMBJ milik PR -> simpan gagal (duplicate key). Sekarang memakai KMBJ milik PR.
+  // url: "{!! url('getnobuktiubahkemasan') !!}",
+  let kmbjTerkunci = false
   $.ajax({
-    url: "{!! url('getnobuktiubahkemasan') !!}",
+    url: "{!! url('getnobuktiterimaubahkemasan') !!}",
     type: "get",
     async: false,
     data: {
@@ -1060,11 +1064,18 @@ function buttonAdd (NOBUKTI) {
       console.log('===============')
       document.getElementById("input_add_nokmbj").value = res[0].Nobukti
       document.getElementById("input_add_noUrut").value = res[0].Nourut
+      kmbjTerkunci = !!res[0].Terkunci
     },
     error: function(err) {
       console.log(err)
     }
   })
+
+  // Ditambah 2026-10-20: KMBJ milik PR di periode terkunci tidak boleh ditambah (stok bulan tutup).
+  if (kmbjTerkunci) {
+    alertify.warning('Dokumen ' + document.getElementById("input_add_nokmbj").value + ' untuk PR ini ada di periode yang sudah dikunci, tidak bisa diterima')
+    return
+  }
 
   let rowTable = ""
   addDataArray.forEach((item, i) => {
@@ -1466,9 +1477,19 @@ function submitAdd() {
     },
     success: function(res) {
       console.log(res ,'!')
+      // Ditambah 2026-10-20: server menolak (3) bila KMBJ milik PR ada di periode terkunci.
+      if (res == 3) {
+        alertify.warning('Dokumen KMBJ untuk PR ini ada di periode yang sudah dikunci, tidak bisa diterima')
+        return
+      }
       $("#form").modal('toggle')
       alertify.success('Ubah kemasan telah ditambah');
       loadAll()
+    },
+    // Ditambah 2026-10-20: dulu kegagalan simpan tidak memberi pesan apa pun.
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Gagal menyimpan: ' + ((err.responseJSON && err.responseJSON.message) || 'terjadi kesalahan, silahkan refresh browser'))
     }})
 
 
@@ -1669,7 +1690,7 @@ function loadAll () {
         rowTable  += `<tr>
         <td class="text-center">
         <button style="" class="btn btn-warning btn-sm" type="button"   onclick="buttonDetail('${item[0].NOBUKTI}')" ><i class="bi bi-info-lg"></i></button>
-        <button class="btn btn-success btn-sm" type="button" onclick="buttonAdd('${item[0].NOBUKTI}')"><i class="bi bi-bag-plus-fill"></i></button></td>
+        <button style="width: 30px;" class="btn btn-primary btn-sm" type="button" title="Tambah" onclick="buttonAdd('${item[0].NOBUKTI}')"><i class="bi bi-plus-lg" style="font-size: 16px;"></i></button></td>
         <td>${item[0].NOBUKTI}</td>
         <td>${item[0].NOKMBJ}</td>
         <td>${date1}</td>
@@ -2119,7 +2140,8 @@ function buttonKoreksiDelete(index) {
           },
           success: function(res) {
             console.log(res)
-            return
+            // Dinonaktifkan 2026-10-20: sisa debug - hapus item tidak pernah menampilkan hasil.
+            // return
             if (res == 3) {
               alertify.warning("Stok receiving tidak mencukupi")
             } else {

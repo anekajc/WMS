@@ -49,13 +49,18 @@ class BarangJadiController extends Controller {
 
 	    $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0();
 
-			$barangjadi = VWDBBarang::where('KODEGRP', 'BJ')->paginate(10000);
-			$design = LokasiSQL::all();
-			$keterangan = LokasiSQL::all();
-			$merk = LokasiSQL::all();
-			$warna = LokasiSQL::all();
-			$dimensi = LokasiSQL::all();
-			$lokasi = LokasiSQL::all();
+			// Diubah 2026-10-20 (lemot): 10.000 baris tidak lagi dirender di HTML - tabel diisi per halaman
+			// lewat dataTabel(); LokasiSQL cukup dibaca sekali (6 variabel di bawah isinya sama).
+			// $barangjadi = VWDBBarang::where('KODEGRP', 'BJ')->paginate(10000);
+			// $design = LokasiSQL::all();
+			// $keterangan = LokasiSQL::all();
+			// $merk = LokasiSQL::all();
+			// $warna = LokasiSQL::all();
+			// $dimensi = LokasiSQL::all();
+			// $lokasi = LokasiSQL::all();
+			$barangjadi = collect();
+			$lokasi = LokasiSQL::orderBy('BarcodeLoc')->get(['BarcodeLoc', 'NamaLokasi']);
+			$design = $keterangan = $merk = $warna = $dimensi = $lokasi;
 			$periode = NewPeriode::where('user_id', \Auth::id())->first();
 	 		return view("barangjadi")
 				->with('menul0', $menul0)
@@ -80,6 +85,50 @@ class BarangJadiController extends Controller {
 		return VWDBBarang::where('KODEGRP', 'BJ')->paginate(100000, ['*'], 'page', $page);
 	}
 
+	// Ditambahkan 2026-10-20: data tabel Barang per halaman untuk DataTables (serverSide) - cari,
+	// urut, dan Tampilkan dikerjakan di SQL. Paging pakai ROW_NUMBER karena SQL Server 2008 R2
+	// belum mengenal OFFSET/FETCH yang dipakai paginate() Laravel 13.
+	public function dataTabel(Request $req) {
+		$kolomUrut = [1 => 'KODEBRG', 2 => 'NAMABRG', 3 => 'pAgen', 4 => 'SAT1', 5 => 'ISI1', 6 => 'SAT2', 7 => 'ISI2',
+			8 => 'SAT3', 9 => 'ISI3', 10 => 'ISAKTIF', 11 => 'QntMin', 12 => 'QntMax'];
+		$kolomAmbil = 'KODEBRG, NAMABRG, pAgen, SAT1, ISI1, SAT2, ISI2, SAT3, ISI3, ISAKTIF, QntMin, QntMax, Berat';
+
+		$urut = $req->input('order.0', []);
+		$kolom = $kolomUrut[(int) ($urut['column'] ?? 1)] ?? 'KODEBRG';
+		$arah = strtolower($urut['dir'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+
+		$where = "KODEGRP = 'BJ'";
+		$bind = [];
+		$cari = trim((string) $req->input('search.value', ''));
+		if ($cari !== '') {
+			$pola = '%' . str_replace(['[', '%', '_'], ['[[]', '[%]', '[_]'], $cari) . '%';
+			$where .= ' and (KODEBRG like cast(? as varchar(200)) or NAMABRG like cast(? as varchar(200)))';
+			$bind = [$pola, $pola];
+		}
+
+		$db = DB::connection('sqlsrv');
+		$total = (int) $db->selectOne("select count(*) as n from vwDBBarang where KODEGRP = 'BJ'")->n;
+		$tersaring = $cari === '' ? $total : (int) $db->selectOne("select count(*) as n from vwDBBarang where $where", $bind)->n;
+
+		$mulai = max(0, (int) $req->input('start', 0));
+		$panjang = (int) $req->input('length', 10);
+		$sql = "select $kolomAmbil from (select row_number() over (order by $kolom $arah, KODEBRG asc) as rn_urut, $kolomAmbil"
+			. " from vwDBBarang where $where) x";
+		if ($panjang > 0) {
+			$sql .= ' where rn_urut between ? and ?';
+			$bind[] = $mulai + 1;
+			$bind[] = $mulai + $panjang;
+		}
+		$sql .= ' order by rn_urut';
+
+		return [
+			'draw' => (int) $req->input('draw', 0),
+			'recordsTotal' => $total,
+			'recordsFiltered' => $tersaring,
+			'data' => $db->select($sql, $bind),
+		];
+	}
+
 
 	public function loadkodebrg(Request $req) {
 		
@@ -90,6 +139,11 @@ class BarangJadiController extends Controller {
 	}
 
 	public function onChangeHeader (Request $req) {
+    // Ditambahkan 2026-10-20 (keamanan): nama kolom masuk langsung ke SQL, jadi dibatasi ke kolom
+    // yang memang diubah dari halaman ini (Berat/Volume).
+    if (! in_array(strtolower((string) $req->field), ['berat'], true)) {
+      return response('Kolom tidak diizinkan', 422);
+    }
     $query = 'update dbbarang set ' . $req->field . ' = :value where kodebrg = :nobukti';
     $res = DB::connection('SML')->update($query, ["value" => $req->value , "nobukti" => $req->nobukti]);
     return $res;
