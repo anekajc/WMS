@@ -41,7 +41,10 @@ class NewPenyerahanKonsiController extends Controller
     }
     //
     // $penerimaan = VWTRansferOut::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
-    $penerimaan = VWSerahKonsiOut::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = VWSerahKonsiOut::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = VWSerahKonsiOut::query()->where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -78,7 +81,10 @@ class NewPenyerahanKonsiController extends Controller
 
   public function getDetailOutstanding (Request $req) {
 
-    $detailOutstanding = VWOutSerahKonsi::all()->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailOutstanding = VWOutSerahKonsi::all()->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailOutstanding = VWOutSerahKonsi::query()->whereRaw('NOBUKTI = cast(? as varchar(100))', [$req->input('NOBUKTI')])->get()->sortBy('URUT');
     $tempOutstanding = [];
     foreach ($detailOutstanding as $do) {
       // code...
@@ -89,7 +95,10 @@ class NewPenyerahanKonsiController extends Controller
   }
 
   public function getDetailPenerimaan (Request $req) {
-    $detailPenerimaan = VWSerahKonsiOut::all()->where('NOBUKTI',$req->input('NOBUKTI') )->sortBy('URUT');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailPenerimaan = VWSerahKonsiOut::all()->where('NOBUKTI',$req->input('NOBUKTI') )->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailPenerimaan = VWSerahKonsiOut::query()->whereRaw('NOBUKTI = cast(? as varchar(100))', [$req->input('NOBUKTI')])->get()->sortBy('URUT');
     $tempPenerimaan = [];
     foreach ($detailPenerimaan as $p) {
       // code...
@@ -193,7 +202,10 @@ class NewPenyerahanKonsiController extends Controller
       array_push($tempOutstanding, $o);
     }
 
-    $penerimaan = VWSerahKonsiOut::all()->where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = VWSerahKonsiOut::all()->where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = VWSerahKonsiOut::query()->where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...

@@ -49,7 +49,10 @@ class NewPermintaanPersiapanNonSOController extends Controller
 
 
     // $penerimaan = vwShowOutBrg::all()->where('Bulan' ,$periode->bulan)->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
-    $penerimaan = vwShowOutBrgNonSO::all()->where('Bulan' ,$periode->bulan)->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = vwShowOutBrgNonSO::all()->where('Bulan' ,$periode->bulan)->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = vwShowOutBrgNonSO::query()->where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
 
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
@@ -66,7 +69,10 @@ class NewPermintaanPersiapanNonSOController extends Controller
   }
 
   public function detailPenerimaan (Request $req) {
-    $penerimaan = vwShowOutBrgNonSO::all()->where('NOBUKTI' ,$req->input('nobukti'))->sortBy('URUT');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = vwShowOutBrgNonSO::all()->where('NOBUKTI' ,$req->input('nobukti'))->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = vwShowOutBrgNonSO::query()->whereRaw('NOBUKTI = cast(? as varchar(100))', [$req->input('nobukti')])->get()->sortBy('URUT');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...

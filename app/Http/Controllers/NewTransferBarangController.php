@@ -40,7 +40,10 @@ class NewTransferBarangController extends Controller
 
     //
     // $penerimaan = VWTRansferOut::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
-    $penerimaan = VWTRansferOut::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = VWTRansferOut::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = VWTRansferOut::query()->where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -88,7 +91,10 @@ class NewTransferBarangController extends Controller
       array_push($tempOutstanding, $o);
     }
 
-    $penerimaan = VWTRansferOut::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = VWTRansferOut::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = VWTRansferOut::query()->where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -103,7 +109,10 @@ class NewTransferBarangController extends Controller
   }
 
   public function getDetailPenerimaan (Request $req) {
-    $detailPenerimaan = VWTRansferOut::all()->where('NOBUKTI',$req->input('NOBUKTI') )->sortBy('URUT');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailPenerimaan = VWTRansferOut::all()->where('NOBUKTI',$req->input('NOBUKTI') )->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailPenerimaan = VWTRansferOut::query()->whereRaw('NOBUKTI = cast(? as varchar(100))', [$req->input('NOBUKTI')])->get()->sortBy('URUT');
     $tempPenerimaan = [];
     foreach ($detailPenerimaan as $p) {
       // code...
@@ -114,7 +123,10 @@ class NewTransferBarangController extends Controller
 
   public function getDetailOutstanding (Request $req) {
 
-    $detailOutstanding = VWOutBRGTRansfer::all()->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailOutstanding = VWOutBRGTRansfer::all()->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailOutstanding = VWOutBRGTRansfer::query()->whereRaw('NOBUKTI = cast(? as varchar(100))', [$req->input('NOBUKTI')])->get()->sortBy('URUT');
     $tempOutstanding = [];
     foreach ($detailOutstanding as $do) {
       // code...
@@ -162,6 +174,13 @@ class NewTransferBarangController extends Controller
     }
     $tempValues = [$notrf, $nourut, $noout, $username, $date];
     DB::connection('SML')->statement('exec SP_InsertOutBrgTRansfer ?,?,?,?,?', $tempValues);
+    // Ditambah 2026-10-21: SP_InsertOutBrgTRansfer membatalkan sendiri (rollback) bila detail gagal
+    // ditulis (GDGASAL/GDGTUJUAN NULL karena TFL tidak punya Permintaan Transfer), tanpa error ke PHP.
+    // Dulu tetap dijawab 1 (sukses) padahal tidak ada yang tersimpan.
+    $tersimpan = DB::connection('SML')->select('select top 1 1 ada from DBTRANSFERDET where NOBUKTI = :nobukti', ["nobukti" => $notrf]);
+    if (!$tersimpan) {
+      return 5;
+    }
     return 1;
 
 

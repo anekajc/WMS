@@ -86,7 +86,10 @@ class PackingController extends Controller
 
   public function getDetailOutstanding (Request $req) {
 
-    $detailOutstanding = OutSOPACKINGWEB::all()->where('NOSO', $req->input('NOBUKTI'))->sortBy('URUT');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailOutstanding = OutSOPACKINGWEB::all()->where('NOSO', $req->input('NOBUKTI'))->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailOutstanding = OutSOPACKINGWEB::query()->whereRaw('NOSO = cast(? as varchar(100))', [$req->input('NOBUKTI')])->get()->sortBy('URUT');
     $tempOutstanding = [];
     foreach ($detailOutstanding as $do) {
       // code...
@@ -113,7 +116,10 @@ public function checkAdd (Request $req) {
 
   public function getDetailOutstandingKolli (Request $req) {
 
-    $detailOutstanding = OutSOPACKINGWEB::all()->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailOutstanding = OutSOPACKINGWEB::all()->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailOutstanding = OutSOPACKINGWEB::query()->whereRaw('NOBUKTI = cast(? as varchar(100))', [$req->input('NOBUKTI')])->get()->sortBy('URUT');
     $tempOutstanding = [];
     foreach ($detailOutstanding as $do) {
       // code...
@@ -125,7 +131,10 @@ public function checkAdd (Request $req) {
 
   public function getDetailPenerimaan (Request $req) {
     // return $req->input('NOBUKTI');
-    $detailPenerimaan = vwpersiapanPACKING::all()->where('nobukti',$req->input('NOBUKTI'))->sortBy('Urut');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailPenerimaan = vwpersiapanPACKING::all()->where('nobukti',$req->input('NOBUKTI'))->sortBy('Urut');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailPenerimaan = vwpersiapanPACKING::query()->whereRaw('nobukti = cast(? as varchar(100))', [$req->input('NOBUKTI')])->get()->sortBy('Urut');
     // $detailPenerimaan = OutSOPACKINGWEB::all()->where('NOBUKTI',$req->input('NOBUKTI'))->sortBy('URUT');
     $tempPenerimaan = [];
     foreach ($detailPenerimaan as $p) {

@@ -64,7 +64,7 @@
                         <tr>
                           <td class="text-center">
                             <button style="" class="btn btn-warning btn-sm" type="button"   onclick="buttonDetail('{{ $outstandingArray[$i]->NObukti }}')" ><i class="bi bi-info-lg"></i></button>
-                            <button class="btn btn-success btn-sm" type="button" onclick="buttonAdd('{{ $outstandingArray[$i]->NObukti }}')"><i class="bi bi-bag-plus-fill"></i></button>
+                            <button style="width: 30px;" class="btn btn-primary btn-sm" type="button" title="Tambah" onclick="buttonAdd('{{ $outstandingArray[$i]->NObukti }}')"><i class="bi bi-plus-lg" style="font-size: 16px;"></i></button>
                           </td>
                           <td>{{ $outstandingArray[$i]->NObukti }}</td>
                           <td>{{ $outstandingArray[$i]->KOdebrg }}</td>
@@ -1426,7 +1426,7 @@ function loadAll () {
         rowTable  += `<tr>
         <td class="text-center">
         <button style="" class="btn btn-warning btn-sm" type="button"   onclick="buttonDetail('${item.NObukti}')" ><i class="bi bi-info-lg"></i></button>
-        <button class="btn btn-success btn-sm" type="button" onclick="buttonAdd('${item.NObukti}')"><i class="bi bi-bag-plus-fill"></i></button></td>
+        <button style="width: 30px;" class="btn btn-primary btn-sm" type="button" title="Tambah" onclick="buttonAdd('${item.NObukti}')"><i class="bi bi-plus-lg" style="font-size: 16px;"></i></button></td>
         <td>${item.NObukti}</td>
         <td>${ item.KOdebrg}</td>
         <td>${ item.NamaBrg}</td>

@@ -84,7 +84,10 @@ $outstanding = DB::connection("SML")->select('exec sp_sosiapkirimBooking ?,?,?',
       array_push($tempPenerimaan, $p);
     }
 //asli
-    $penerimaanperiod = vwShowOutBrgperiod::all()->where('Bulan' ,$periode->bulan)->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaanperiod = vwShowOutBrgperiod::all()->where('Bulan' ,$periode->bulan)->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaanperiod = vwShowOutBrgperiod::query()->where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
  //$penerimaanperiod =[];  
 
 
@@ -106,7 +109,10 @@ $tempPenerimaanperiod = [];
   }
 
   public function detailPenerimaan (Request $req) {
-    $penerimaan = vwShowOutBrg::all()->where('NOBUKTI' ,$req->input('nobukti'))->sortBy('URUT');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = vwShowOutBrg::all()->where('NOBUKTI' ,$req->input('nobukti'))->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = vwShowOutBrg::query()->whereRaw('NOBUKTI = cast(? as varchar(100))', [$req->input('nobukti')])->get()->sortBy('URUT');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -116,7 +122,10 @@ $tempPenerimaanperiod = [];
   }
 
   public function detailPenerimaanperiod (Request $req) {
-    $penerimaanperiod = vwShowOutBrgperiod::all()->where('NOBUKTI' ,$req->input('nobukti'))->sortBy('URUT');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaanperiod = vwShowOutBrgperiod::all()->where('NOBUKTI' ,$req->input('nobukti'))->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaanperiod = vwShowOutBrgperiod::query()->whereRaw('NOBUKTI = cast(? as varchar(100))', [$req->input('nobukti')])->get()->sortBy('URUT');
     $tempPenerimaanperiod = [];
     foreach ($penerimaanperiod as $p2) {
       // code...

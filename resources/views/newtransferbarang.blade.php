@@ -56,7 +56,7 @@
                         <tr>
                           <td class="text-center">
                             <button style="" class="btn btn-warning btn-sm" type="button"   onclick="buttonDetail('{{ $outstandingArray[$i][0]->NOBUKTI }}')" ><i class="bi bi-info-lg"></i></button>
-                            <button class="btn btn-success btn-sm" type="button" onclick="buttonAdd('{{ $outstandingArray[$i][0]->NOBUKTI }}')"><i class="bi bi-bag-plus-fill"></i></button>
+                            <button style="width: 30px;" class="btn btn-primary btn-sm" type="button" title="Tambah" onclick="buttonAdd('{{ $outstandingArray[$i][0]->NOBUKTI }}')"><i class="bi bi-plus-lg" style="font-size: 16px;"></i></button>
                           </td>
                           <td>{{ $outstandingArray[$i][0]->NOBUKTI }}</td>
                           <td>{!! date("Y/m/d", strtotime($outstandingArray[$i][0]->TANGGAL)) !!}</td>
@@ -1701,6 +1701,11 @@ function submitAdd() {
         setNewNoBukti()
         alertify.warning('Nobukti telah di refresh, silahkan submit ulang');
       }
+      // Ditambah 2026-10-21: dulu bila SP gagal (mis. gudang asal/tujuan tidak ada karena TFL tidak punya
+      // Permintaan Transfer) layar diam saja walau tidak ada yang tersimpan.
+      if (res == 5) {
+        alertify.error('Transfer gagal disimpan: gudang asal/tujuan tidak ditemukan (TFL tidak punya Permintaan Transfer)');
+      }
 
     },
     error: function (err) {
@@ -1746,7 +1751,7 @@ function loadAll () {
         rowTable  += `<tr>
         <td class="text-center">
         <button style="" class="btn btn-warning btn-sm" type="button"   onclick="buttonDetail('${item[0].NOBUKTI}')" ><i class="bi bi-info-lg"></i></button>
-        <button class="btn btn-success btn-sm" type="button" onclick="buttonAdd('${item[0].NOBUKTI}')"><i class="bi bi-bag-plus-fill"></i></button></td>
+        <button style="width: 30px;" class="btn btn-primary btn-sm" type="button" title="Tambah" onclick="buttonAdd('${item[0].NOBUKTI}')"><i class="bi bi-plus-lg" style="font-size: 16px;"></i></button></td>
         <td>${item[0].NOBUKTI}</td>
         <td>${date1}</td>
         <td>${item[0].NamaGudangAsal}</td>

@@ -910,6 +910,11 @@
 
 
     function loadAll () {
+      // Ditambah 2026-10-21: halaman scan ini tidak punya tabel daftar (#tabel / #tabel_data) sejak versi
+      // lama (ada di dalam komentar HTML), jadi loadAll() setelah edit/hapus koreksi akan error JS. Lewati saja.
+      if (!document.getElementById("tabel_data")) {
+        return
+      }
       $.ajax({
         url: "{!! url('loadallpicking') !!}",
         type: "get",

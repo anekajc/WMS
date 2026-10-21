@@ -104,7 +104,7 @@
                         <tr>
                           <td class="text-center">
                             <button style="" class="btn btn-warning btn-sm" type="button"   onclick="buttonDetail('{{$outstandingArray[$i][0]->NOSO}}')" ><i class="bi bi-info-lg"></i></button>
-                            <button class="btn btn-success btn-sm" type="button" onclick="buttonAdd('{{$outstandingArray[$i][0]->NOSO}}','{{$outstandingArray[$i][0]->gdgpl}}')"><i class="bi bi-bag-plus-fill"></i></button>
+                            <button style="width: 30px;" class="btn btn-primary btn-sm" type="button" title="Tambah" onclick="buttonAdd('{{$outstandingArray[$i][0]->NOSO}}','{{$outstandingArray[$i][0]->gdgpl}}')"><i class="bi bi-plus-lg" style="font-size: 16px;"></i></button>
                           </td>
 <!-- cetak kolli -->
 
@@ -4412,7 +4412,7 @@
       rowTable  += `<tr>
       <td class="text-center">
       <button style="" class="btn btn-warning btn-sm" type="button"   onclick="buttonDetail('${item[0].NOSO}')" ><i class="bi bi-info-lg"></i></button>
-      <button class="btn btn-success btn-sm" type="button" onclick="buttonAdd('${item[0].NOSO}')"><i class="bi bi-bag-plus-fill"></i></button>
+      <button style="width: 30px;" class="btn btn-primary btn-sm" type="button" title="Tambah" onclick="buttonAdd('${item[0].NOSO}')"><i class="bi bi-plus-lg" style="font-size: 16px;"></i></button>
       </td>
 
       <td>${item[0].NOSO}</td>

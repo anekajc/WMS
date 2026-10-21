@@ -1597,7 +1597,9 @@ function buttonAdd () {
   console.log(timestamp)
 
 
-  let akses = $("#akses_ishapus").val();
+  // Dinonaktifkan 2026-10-21: tombol Add PL memeriksa hak hapus, seharusnya hak tambah.
+  // let akses = $("#akses_ishapus").val();
+  let akses = $("#akses_istambah").val();
 
   if (!Number(akses)) {
     alertify.warning('No access')

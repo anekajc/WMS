@@ -40,7 +40,10 @@ class QCPickingController extends Controller
     // }
     //
     // $penerimaan = VWTRansferOut::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
-    $penerimaan = VWQCPicking::all()->where('BUlan',$periode->bulan )->where('tahun', $periode->tahun)->sortBy('urut')->groupBy('NObukti');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = VWQCPicking::all()->where('BUlan',$periode->bulan )->where('tahun', $periode->tahun)->sortBy('urut')->groupBy('NObukti');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = VWQCPicking::query()->where('BUlan', $periode->bulan)->where('tahun', $periode->tahun)->get()->sortBy('urut')->groupBy('NObukti');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -77,7 +80,10 @@ class QCPickingController extends Controller
 
   public function getDetailOutstanding (Request $req) {
 
-    $detailOutstanding = VWOutPicking::all()->where('NObukti', $req->input('NOBUKTI'))->sortBy('urut');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailOutstanding = VWOutPicking::all()->where('NObukti', $req->input('NOBUKTI'))->sortBy('urut');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailOutstanding = VWOutPicking::query()->whereRaw('NObukti = cast(? as varchar(100))', [$req->input('NOBUKTI')])->get()->sortBy('urut');
     $tempOutstanding = [];
     foreach ($detailOutstanding as $do) {
       // code...
@@ -88,7 +94,10 @@ class QCPickingController extends Controller
   }
 
   public function getDetailPenerimaan (Request $req) {
-    $detailPenerimaan = VWQCPicking::all()->where('NObukti',$req->input('NOBUKTI') )->sortBy('urut');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailPenerimaan = VWQCPicking::all()->where('NObukti',$req->input('NOBUKTI') )->sortBy('urut');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailPenerimaan = VWQCPicking::query()->whereRaw('NObukti = cast(? as varchar(100))', [$req->input('NOBUKTI')])->get()->sortBy('urut');
     $tempPenerimaan = [];
     foreach ($detailPenerimaan as $p) {
       // code...
@@ -141,7 +150,10 @@ class QCPickingController extends Controller
       array_push($tempOutstanding, $o);
     }
 
-    $penerimaan = VWQCPicking::all()->where('BUlan',$periode->bulan )->where('tahun', $periode->tahun)->sortBy('urut')->groupBy('NObukti');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = VWQCPicking::all()->where('BUlan',$periode->bulan )->where('tahun', $periode->tahun)->sortBy('urut')->groupBy('NObukti');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = VWQCPicking::query()->where('BUlan', $periode->bulan)->where('tahun', $periode->tahun)->get()->sortBy('urut')->groupBy('NObukti');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...

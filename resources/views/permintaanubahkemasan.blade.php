@@ -218,7 +218,9 @@
             </div>
             <div class="col-4 text-right">
 
-                <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" >+</button>
+                {{-- Dinonaktifkan 2026-10-21: tombol browse teks "+" diganti ikon kaca pembesar (fungsi sama). --}}
+                {{-- <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" >+</button> --}}
+                <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" title="Cari Barang"><i class="bi bi-search"></i></button>
               </div>
             <div class="col-12">
               <input id="AddAddKodeBrg" type="text" class="form-control" disabled>
@@ -482,7 +484,8 @@
                 <tr>
                   <th scope="col">Kode Barang</th>
                   <th scope="col">Nama Barang</th>
-                  <th scope="col">Actions</th>
+                  {{-- Dinonaktifkan 2026-10-21: pilih barang dengan klik baris, kolom Actions tidak dipakai. --}}
+                  {{-- <th scope="col">Actions</th> --}}
 
                 </tr>
               </thead>
@@ -786,12 +789,14 @@ $(document).ready(function(){
 
 
 
-      $("#tabel_add_list_item").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-           "columnDefs": [
-        {  "className": "text-center", "targets": [2] },
-      ]});
+      // Dinonaktifkan 2026-10-21: tabel pemilih barang sekarang dibuat saat modal dibuka
+      // (buttonAddListBarang, klik baris, tanpa kolom Actions).
+      // $("#tabel_add_list_item").DataTable({
+      //   "lengthChange": false,
+      //     "paging": false ,
+      //      "columnDefs": [
+      //   {  "className": "text-center", "targets": [2] },
+      // ]});
 
       $("#tabel_add_list_lokasi").DataTable({
         "lengthChange": false,
@@ -1229,44 +1234,67 @@ function buttonAddListBarang () {
   // $('#form').css('opacity', .8);
   modal.style.display = "none";
 
-  $('#tabel_add_list_item').DataTable().destroy();
-
-  $.ajax({
-    url: "{!! url('permintaanpenyerahangudanglistbarang') !!}",
-    type: "get",
-    async: false,
-    success: function(res) {
-      console.log(res)
-      listBarang = res
-
-
-    }
-  })
-
-  let rowTable = ""
-  listBarang.forEach((item, i) => {
-    rowTable+= `
-      <tr>
-      <td>${item.KODEBRG}</td>
-      <td>${item.NAMABRG}</td>
-      <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddAddInsertItem(${i})" type="button" ><i class="bi bi-plus"></i></button></td>
-      </tr>
-    `
-
-  });
-  document.getElementById("tabel_data_add_list_item").innerHTML = rowTable
-
-  // tabel_data_add_list_item
-
-
-
-
-  $("#tabel_add_list_item").DataTable({
-    "lengthChange": false,
-      "paging": false ,
-       "columnDefs": [
-    {  "className": "text-center", "targets": [2] },
-  ]});
+  // Dinonaktifkan 2026-10-21: daftar barang (±2,9 MB) dimuat ulang tiap klik lalu semua baris
+  // dirender sekaligus dengan tombol + per baris (lambat). Diganti: dimuat sekali per halaman,
+  // DataTables deferRender + paging, pilih barang dengan klik baris.
+  // $('#tabel_add_list_item').DataTable().destroy();
+  //
+  // $.ajax({
+  //   url: "{!! url('permintaanpenyerahangudanglistbarang') !!}",
+  //   type: "get",
+  //   async: false,
+  //   success: function(res) {
+  //     console.log(res)
+  //     listBarang = res
+  //   }
+  // })
+  //
+  // let rowTable = ""
+  // listBarang.forEach((item, i) => {
+  //   rowTable+= `
+  //     <tr>
+  //     <td>${item.KODEBRG}</td>
+  //     <td>${item.NAMABRG}</td>
+  //     <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddAddInsertItem(${i})" type="button" ><i class="bi bi-plus"></i></button></td>
+  //     </tr>
+  //   `
+  // });
+  // document.getElementById("tabel_data_add_list_item").innerHTML = rowTable
+  //
+  // $("#tabel_add_list_item").DataTable({
+  //   "lengthChange": false,
+  //     "paging": false ,
+  //      "columnDefs": [
+  //   {  "className": "text-center", "targets": [2] },
+  // ]});
+  if (!listBarang.length) {
+    $.ajax({
+      url: "{!! url('permintaanpenyerahangudanglistbarang') !!}",
+      type: "get",
+      async: false,
+      success: function(res) {
+        listBarang = res
+      }
+    })
+  }
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_item')) {
+    $('#tabel_add_list_item').DataTable().search('').draw()
+  } else {
+    $("#tabel_add_list_item").DataTable({
+      data: listBarang.map((item, i) => ({ i: i, KODEBRG: item.KODEBRG || '', NAMABRG: item.NAMABRG || '' })),
+      deferRender: true,
+      columns: [{ data: 'KODEBRG' }, { data: 'NAMABRG' }],
+      lengthChange: true,
+      lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+      pageLength: 10,
+      createdRow: function (row) { row.classList.add('pick-row') },
+      language: { lengthMenu: 'Tampilkan _MENU_', emptyTable: 'Tidak ada data', zeroRecords: 'Tidak ada data yang cocok dengan pencarian' }
+    })
+    $('#tabel_add_list_item tbody').on('click', 'tr.pick-row', function () {
+      const data = $('#tabel_add_list_item').DataTable().row(this).data()
+      if (data) buttonAddAddInsertItem(data.i)
+    })
+  }
 
 
 

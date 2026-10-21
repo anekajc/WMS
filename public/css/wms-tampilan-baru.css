@@ -793,3 +793,7 @@
   border-radius: var(--radius, 12px);
   box-shadow: none;
 }
+
+/* Modal pemilih: baris dipilih dengan klik (tanpa tombol + per baris), seperti newSML. */
+#content-blade .modal table tr.pick-row { cursor: pointer; }
+#content-blade .modal table tr.pick-row:hover > td { background-color: #eef0fe !important; }

@@ -83,7 +83,10 @@ class PersiapanSpbController extends Controller
 
   public function getDetailOutstanding (Request $req) {
 
-    $detailOutstanding = OutSOSPBWEB::all()->where('NOSO', $req->input('NOBUKTI'))->sortBy('URUT');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailOutstanding = OutSOSPBWEB::all()->where('NOSO', $req->input('NOBUKTI'))->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailOutstanding = OutSOSPBWEB::query()->whereRaw('NOSO = cast(? as varchar(100))', [$req->input('NOBUKTI')])->get()->sortBy('URUT');
     $tempOutstanding = [];
     foreach ($detailOutstanding as $do) {
       // code...
@@ -95,7 +98,10 @@ class PersiapanSpbController extends Controller
 
   public function getDetailOutstandingKolli (Request $req) {
 
-    $detailOutstanding = OutSOSPBWEB::all()->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailOutstanding = OutSOSPBWEB::all()->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailOutstanding = OutSOSPBWEB::query()->whereRaw('NOBUKTI = cast(? as varchar(100))', [$req->input('NOBUKTI')])->get()->sortBy('URUT');
     $tempOutstanding = [];
     foreach ($detailOutstanding as $do) {
       // code...
@@ -107,7 +113,10 @@ class PersiapanSpbController extends Controller
 
   public function getDetailPenerimaan (Request $req) {
     // return $req->input('NOBUKTI');
-    $detailPenerimaan = Vwpersiapanspb::all()->where('nobukti',$req->input('NOBUKTI'))->sortBy('Urut');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailPenerimaan = Vwpersiapanspb::all()->where('nobukti',$req->input('NOBUKTI'))->sortBy('Urut');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailPenerimaan = Vwpersiapanspb::query()->whereRaw('nobukti = cast(? as varchar(100))', [$req->input('NOBUKTI')])->get()->sortBy('Urut');
     // $detailPenerimaan = OutSOSPBWEB::all()->where('NOBUKTI',$req->input('NOBUKTI'))->sortBy('URUT');
     $tempPenerimaan = [];
     foreach ($detailPenerimaan as $p) {

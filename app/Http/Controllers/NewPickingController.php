@@ -32,7 +32,10 @@ class NewPickingController extends Controller
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0();
 
 
-    $penerimaan = VwPersiapan::all()->where('bulan',$periode->bulan )->where('tahun', $periode->tahun)->sortBy('urut')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = VwPersiapan::all()->where('bulan',$periode->bulan )->where('tahun', $periode->tahun)->sortBy('urut')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = VwPersiapan::query()->where('bulan', $periode->bulan)->where('tahun', $periode->tahun)->get()->sortBy('urut')->groupBy('NOBUKTI');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -49,7 +52,10 @@ class NewPickingController extends Controller
 
   public function loadAll () {
     $periode = NewPeriode::where('user_id' , \Auth::id())->first();
-    $penerimaan = VwPersiapan::all()->where('bulan',$periode->bulan )->where('tahun', $periode->tahun)->sortBy('urut')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = VwPersiapan::all()->where('bulan',$periode->bulan )->where('tahun', $periode->tahun)->sortBy('urut')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = VwPersiapan::query()->where('bulan', $periode->bulan)->where('tahun', $periode->tahun)->get()->sortBy('urut')->groupBy('NOBUKTI');
     $tempPenerimaan = [];
 
     foreach ($penerimaan as $p) {
@@ -75,7 +81,10 @@ class NewPickingController extends Controller
 
 
 
-    $check = VWOUTPERSIAPANBRG::all()->where('NoBukti',$nobukti )->where('Kodebrg', $nobarang)->where('Urut',$urut );
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $check = VWOUTPERSIAPANBRG::all()->where('NoBukti',$nobukti )->where('Kodebrg', $nobarang)->where('Urut',$urut );
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $check = VWOUTPERSIAPANBRG::query()->whereRaw('NoBukti = cast(? as varchar(100))', [$nobukti])->whereRaw('Kodebrg = cast(? as varchar(100))', [$nobarang])->where('Urut', $urut)->get();
 
 
     $tempCheck= [];
@@ -136,7 +145,10 @@ class NewPickingController extends Controller
     $tanggal = date("Y-m-d");
     $nosat = $req->input('NOSAT');
 
-    $check = VWOUTPERSIAPANBRG::all()->where('NoBukti',$nobukti )->where('Kodebrg', $nobarang)->where('Urut',$urut );
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $check = VWOUTPERSIAPANBRG::all()->where('NoBukti',$nobukti )->where('Kodebrg', $nobarang)->where('Urut',$urut );
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $check = VWOUTPERSIAPANBRG::query()->whereRaw('NoBukti = cast(? as varchar(100))', [$nobukti])->whereRaw('Kodebrg = cast(? as varchar(100))', [$nobarang])->where('Urut', $urut)->get();
 
 
     $tempCheck= [];
@@ -203,7 +215,10 @@ class NewPickingController extends Controller
     $urut = $req->input('urut');
     $periode = NewPeriode::where('user_id' , \Auth::id())->first();
 
-    $check = VWOUTPERSIAPANBRG::all()->where('NoBukti',$nobukti )->where('Kodebrg', $nobarang)->where('Urut',$urut );
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $check = VWOUTPERSIAPANBRG::all()->where('NoBukti',$nobukti )->where('Kodebrg', $nobarang)->where('Urut',$urut );
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $check = VWOUTPERSIAPANBRG::query()->whereRaw('NoBukti = cast(? as varchar(100))', [$nobukti])->whereRaw('Kodebrg = cast(? as varchar(100))', [$nobarang])->where('Urut', $urut)->get();
 
 
     $tempCheck= [];
@@ -229,11 +244,90 @@ class NewPickingController extends Controller
   ];
 } else {
 
+  // Dinonaktifkan 2026-10-21: stok semua barang setahun dihitung dulu, baru disaring ke barang yang di-scan (lambat).
+  // $lokasi =  DB::connection('SML')->select("
+  // 
+  //  declare @Kodegdg Varchar(20)
+  // select @Kodegdg= :kodegdg
+  // set @Kodegdg=ISNULL(@Kodegdg,'')
+  // 
+  // select B.BarcodeLoc,10000 qntMax,
+  // isnull(b.SALDOQNT,0) StockLokasi ,10000 - isnull(B.SALDOQNT,0) SisaKapasitas
+  // ,B.KodeGdg
+  // from DBBARANG A
+  //  left outer join (select  KODEBRG,BARCODELoc,SUM(SaldoQnt) SaldoQnt,KODEGDG
+  // 				from (
+  // 					select  KodeBrg,barcode BARCODELoc,QntAwal SaldoQnt ,KODEGDG
+  // 					from 	DBSTOCKBRGSIG
+  // 					where         Tahun=year(GETDATE()) and  Bulan= case when year(GETDATE())=2024 then 2 else 1 End
+  // 
+  // 					union all
+  // 
+  // 					select 	KodeBrg,Barcode BARCODELoc ,
+  // 					SUM(QntDb)-SUM(QntCr) SaldoQnt,Kodegdg
+  // 					from 	vwKartuStockSIG
+  // 					where 	year(Tanggal)=year(GETDATE())  and Tanggal<=GETDATE()
+  // 					and Tipe not in ('AWL')
+  // 					and KodeGdg <>'GTC'
+  // 
+  // 					group by KodeBrg,Barcode,Kodegdg
+  // 
+  // 					) A
+  // 
+  // 
+  // 				group by KODEBRG,BARCODELoc,KODEGDG
+  // 				having SUM(SaldoQnt) >0
+  //  ) B on A.KODEBRG=B.KODEBRG
+  // where A.KODEBRG= :nobarang
+  //   and B.KodeGdg like case when @Kodegdg='' then '%%' else @Kodegdg End
+  // and B.SALDOQNT>0 and B.KODEGDG <>'GTC' and (B.BARCODELoc like ('%REC%') or B.BARCODELoc like ('%KIT%') /*OR B.BARCODELoc like ('%DIS%')*/ OR B.BARCODELoc like ('%LSA%'))
+  // and b.KODEGDG in ('GMPL','GSML','GSML2','GKSI 4','GSAMPLE','GSML3','GTRANSIT')
+  // 
+  // 
+  // union all
+  // 
+  // select A.BarcodeLoc,A.qntMax,
+  // isnull(b.SALDOQNT,0) StockLokasi ,A.qntMax - isnull(B.SALDOQNT,0) SisaKapasitas
+  // ,c.KodeGdg
+  // from dbBarangLokasiSIG A
+  // left outer join dbLokasiSIG C on A.BarcodeLoc=c.BarcodeLoc
+  //  left outer join (select  KODEBRG,BARCODE,SUM(SaldoQnt) SaldoQnt,KODEGDG
+  // 				from (
+  // 					select  KodeBrg,barcode ,QntAwal SaldoQnt ,KODEGDG
+  // 					from 	DBSTOCKBRGSIG
+  // 					where         Tahun=year(GETDATE()) and  Bulan= case when year(GETDATE())=2024 then 2 else 1 End
+  // 
+  // 					union all
+  // 
+  // 					select 	KodeBrg,Barcode ,
+  // 					SUM(QntDb)-SUM(QntCr) SaldoQnt,Kodegdg
+  // 					from 	vwKartuStockSIG
+  // 					where 	year(Tanggal)=year(GETDATE())  and Tanggal<=GETDATE()
+  // 					and Tipe not in ('AWL')
+  // 					and KodeGdg <>'GTC'
+  // 
+  // 					group by KodeBrg,Barcode,Kodegdg
+  // 
+  // 					) A
+  // 
+  // 
+  // 				group by KODEBRG,BARCODE,KODEGDG
+  // 				having SUM(SaldoQnt) >0
+  //  ) B on A.KodeBarang=B.KODEBRG and A.BarcodeLoc=B.BARCODE and C.KodeGdg=b.KODEGDG
+  // where A.KodeBarang=:nobarang1
+  // and B.SALDOQNT>0 and C.KODEGDG <>'GTC'
+  // and C.KodeGdg like case when @Kodegdg='' then '%%' else @Kodegdg End
+  // and b.KODEGDG in ('GMPL','GSML','GSML2','GKSI 4','GSAMPLE','GSML3','GTRANSIT')
+  // and  (A.BarcodeLoc not like ('%REC%') AND A.BARCODELoc NOT like ('%KIT%') AND A.BARCODELoc NOT like ('%DIS%'))
+  // ", ["nobarang" => $nobarang,"nobarang1" => $nobarang,"kodegdg" => $kodegdg]);
+  // Pengganti: saringan kode barang yang sama dipasang di dalam subquery stok (hasil sama, lebih cepat).
   $lokasi =  DB::connection('SML')->select("
 
  declare @Kodegdg Varchar(20)
 select @Kodegdg= :kodegdg
 set @Kodegdg=ISNULL(@Kodegdg,'')
+ declare @KodeBrgCari Varchar(100)
+select @KodeBrgCari= :nobarangcari
 
 select B.BarcodeLoc,10000 qntMax,
 isnull(b.SALDOQNT,0) StockLokasi ,10000 - isnull(B.SALDOQNT,0) SisaKapasitas
@@ -243,7 +337,7 @@ isnull(b.SALDOQNT,0) StockLokasi ,10000 - isnull(B.SALDOQNT,0) SisaKapasitas
 				from (
 					select  KodeBrg,barcode BARCODELoc,QntAwal SaldoQnt ,KODEGDG
 					from 	DBSTOCKBRGSIG
-					where         Tahun=year(GETDATE()) and  Bulan= case when year(GETDATE())=2024 then 2 else 1 End
+					where         Tahun=year(GETDATE()) and  Bulan= case when year(GETDATE())=2024 then 2 else 1 End and KodeBrg=@KodeBrgCari
 
 					union all
 
@@ -252,7 +346,7 @@ isnull(b.SALDOQNT,0) StockLokasi ,10000 - isnull(B.SALDOQNT,0) SisaKapasitas
 					from 	vwKartuStockSIG
 					where 	year(Tanggal)=year(GETDATE())  and Tanggal<=GETDATE()
 					and Tipe not in ('AWL')
-					and KodeGdg <>'GTC'
+					and KodeGdg <>'GTC' and KodeBrg=@KodeBrgCari
 
 					group by KodeBrg,Barcode,Kodegdg
 
@@ -279,7 +373,7 @@ isnull(b.SALDOQNT,0) StockLokasi ,A.qntMax - isnull(B.SALDOQNT,0) SisaKapasitas
 				from (
 					select  KodeBrg,barcode ,QntAwal SaldoQnt ,KODEGDG
 					from 	DBSTOCKBRGSIG
-					where         Tahun=year(GETDATE()) and  Bulan= case when year(GETDATE())=2024 then 2 else 1 End
+					where         Tahun=year(GETDATE()) and  Bulan= case when year(GETDATE())=2024 then 2 else 1 End and KodeBrg=@KodeBrgCari
 
 					union all
 
@@ -288,7 +382,7 @@ isnull(b.SALDOQNT,0) StockLokasi ,A.qntMax - isnull(B.SALDOQNT,0) SisaKapasitas
 					from 	vwKartuStockSIG
 					where 	year(Tanggal)=year(GETDATE())  and Tanggal<=GETDATE()
 					and Tipe not in ('AWL')
-					and KodeGdg <>'GTC'
+					and KodeGdg <>'GTC' and KodeBrg=@KodeBrgCari
 
 					group by KodeBrg,Barcode,Kodegdg
 
@@ -303,7 +397,7 @@ isnull(b.SALDOQNT,0) StockLokasi ,A.qntMax - isnull(B.SALDOQNT,0) SisaKapasitas
   and C.KodeGdg like case when @Kodegdg='' then '%%' else @Kodegdg End
   and b.KODEGDG in ('GMPL','GSML','GSML2','GKSI 4','GSAMPLE','GSML3','GTRANSIT')
 and  (A.BarcodeLoc not like ('%REC%') AND A.BARCODELoc NOT like ('%KIT%') AND A.BARCODELoc NOT like ('%DIS%'))
-  ", ["nobarang" => $nobarang,"nobarang1" => $nobarang,"kodegdg" => $kodegdg]);
+  ", ["nobarang" => $nobarang,"nobarang1" => $nobarang,"kodegdg" => $kodegdg,"nobarangcari" => $nobarang]);
 }
 
       return ["check" => $tempCheck ,"lokasi" => $lokasi];
@@ -318,7 +412,10 @@ and  (A.BarcodeLoc not like ('%REC%') AND A.BARCODELoc NOT like ('%KIT%') AND A.
     $urut = $req->input('urut');
     $periode = NewPeriode::where('user_id' , \Auth::id())->first();
 
-    $check = VWOUTPERSIAPANBRG::all()->where('NoBukti',$nobukti )->where('Kodebrg', $nobarang)->where('Urut',$urut );
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $check = VWOUTPERSIAPANBRG::all()->where('NoBukti',$nobukti )->where('Kodebrg', $nobarang)->where('Urut',$urut );
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $check = VWOUTPERSIAPANBRG::query()->whereRaw('NoBukti = cast(? as varchar(100))', [$nobukti])->whereRaw('Kodebrg = cast(? as varchar(100))', [$nobarang])->where('Urut', $urut)->get();
 
     $tempCheck= [];
     foreach ($check as $p) {
@@ -330,7 +427,10 @@ and  (A.BarcodeLoc not like ('%REC%') AND A.BARCODELoc NOT like ('%KIT%') AND A.
     $nobarangLPB = $req->input('nobarangLPB');
     $urutLPB = $req->input('urutLPB');
       // ->orWhere('trans', 'UKO')->get()
-      $checkLPB = VWOUTPENERIMAANBRGWEB::all()->where('NoBukti1',$nobuktiLPB )->where('Kodebrg', $nobarangLPB)->where('Urut', $urutLPB)->whereIn('trans', ['UKI' , 'PBL' , 'RSPB','TRI','RPJ']);
+      // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+      // $checkLPB = VWOUTPENERIMAANBRGWEB::all()->where('NoBukti1',$nobuktiLPB )->where('Kodebrg', $nobarangLPB)->where('Urut', $urutLPB)->whereIn('trans', ['UKI' , 'PBL' , 'RSPB','TRI','RPJ']);
+      // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+      $checkLPB = VWOUTPENERIMAANBRGWEB::query()->whereRaw('NoBukti1 = cast(? as varchar(100))', [$nobuktiLPB])->whereRaw('Kodebrg = cast(? as varchar(100))', [$nobarangLPB])->where('Urut', $urutLPB)->whereIn('trans', ['UKI' , 'PBL' , 'RSPB','TRI','RPJ'])->get();
       $tempCheckLPB = [];
       foreach ($checkLPB as $p) {
         // code...
@@ -342,7 +442,10 @@ and  (A.BarcodeLoc not like ('%REC%') AND A.BARCODELoc NOT like ('%KIT%') AND A.
   }
 
   public function getDetailPenerimaan (Request $req) {
-    $detailPenerimaan = VwPersiapan::all()->where('NOBUKTI',$req->input('NOBUKTI') )->sortBy('KODEBRG');
+    // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailPenerimaan = VwPersiapan::all()->where('NOBUKTI',$req->input('NOBUKTI') )->sortBy('KODEBRG');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailPenerimaan = VwPersiapan::query()->whereRaw('NOBUKTI = cast(? as varchar(100))', [$req->input('NOBUKTI')])->get()->sortBy('KODEBRG');
     $tempPenerimaan = [];
     foreach ($detailPenerimaan as $p) {
       // code...
