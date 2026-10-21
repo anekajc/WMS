@@ -38,6 +38,16 @@ diurutkan sejak versi lama.)
 Sisa ±15 dtk di Picking List SO/Booking berasal dari stored procedure `sp_sosiapkirim` /
 `sp_sosiapkirimBooking` (7–8 dtk). SP itu tidak diubah karena dipakai bersama aplikasi lain.
 
+**Tambahan (permintaan user, masih lemot saat dibuka):** `loadAll` Picking List SO dan Booking
+dulu satu permintaan sinkron (`async:false`) yang mengambil tiga bagian berurutan: SP outstanding
+(±8 dtk), daftar Picking List (±3–4 dtk), transaksi per periode (±2 dtk). Layar membeku ±15 dtk.
+Sekarang controller `loadAll` menerima `?bagian=outstanding|penerimaan|periode` (tanpa parameter =
+semua, seperti dulu), dan halaman mengambil ketiganya **bersamaan** tanpa membekukan layar
+(tanda "Memuat data..." di samping tombol Add PL). Kode gambar tabel tidak diubah (dipindah ke
+`loadAllTampil()`). Isi gabungan tiga bagian sudah dibandingkan: sama persis dengan permintaan lama.
+Waktu muat ≈ bagian terlama, **±8 dtk** (dulu ±15 dtk). `getMenuL0()` di `loadAll` (hasilnya tidak
+dipakai) dinonaktifkan. Butuh server yang melayani beberapa permintaan sekaligus (php-fpm, sudah).
+
 Controller: `NewPermintaanPersiapanController`, `NewPermintaanPersiapanNonSOController`,
 `NewPermintaanPersiapanBooController`, `NewPickingController`, `QCPickingController`,
 `PackingController`, `PersiapanSpbController`, `NewReturBeliController`,
@@ -98,3 +108,17 @@ tombol di modal lain adalah aksi asli (edit, hapus, cetak, buka qty reject), jad
 3. **Transfer Barang**: 8 TFL yang tampil adalah sisa 2024–2025 tanpa Permintaan Transfer, jadi
    tidak bisa disimpan (sekarang muncul pesan). Nomor TRF terakhir dibuat Januari 2024; alur TFL
    sekarang lewat Transfer Gudang Out (FLK), yang dipakai rutin.
+
+## Animasi memuat data (permintaan user, 21 Okt 2026)
+
+Animasi "Memuat data..." disalin dari newSML (chip gelap + lingkaran berputar, lapisan putih
+transparan; muncul setelah ±0,15 dtk supaya pemuatan cepat tidak berkedip).
+
+- `public/css/wms-tampilan-baru.css`: kelas `.wms-memuat`, `.wms-proses-overlay`,
+  `.wms-loading-chip`, `.wms-loading-spin` (hanya menambah).
+- `public/js/wms-tampilan-baru.js`: fungsi bersama `wmsMemuat(true|false)` (lapisan di atas area
+  tab/tabel, untuk pemuatan async) dan `wmsProses(teks, kerja)` (lapisan seluruh layar untuk
+  pemuatan sinkron; digambar dulu baru pekerjaannya dijalankan). Bisa dipakai menu lain.
+- Dipasang di halaman yang memuat data lewat AJAX saat dibuka: Picking List SO dan Booking
+  (`wmsMemuat`, juga saat memuat ulang setelah simpan/hapus) dan Picking List Non SO (`wmsProses`).
+  Menu lain datanya sudah ikut halaman dari server, jadi tidak ada jeda memuat terpisah.

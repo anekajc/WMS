@@ -659,7 +659,9 @@ $(document).ready(function(){
     // ]});
 
     console.log('ready function')
-    loadAll()
+    // Diubah 2026-10-21: loadAll() sinkron (layar diam ±4 dtk) dibungkus animasi memuat gaya newSML.
+    // loadAll()
+    if (window.wmsProses) wmsProses('Memuat data...', loadAll); else loadAll()
 
 
 });

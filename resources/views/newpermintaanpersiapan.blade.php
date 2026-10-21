@@ -1941,32 +1941,82 @@ function submitAdd () {
 
 
 
+// Ditambah 2026-10-21: dulu satu permintaan sinkron (async:false) mengambil SP outstanding (±8 dtk),
+// daftar Picking List (±3 dtk) dan transaksi per periode (±2 dtk) berurutan, layar membeku ±15 dtk.
+// Sekarang ketiganya diambil bersamaan (tidak membekukan layar), lalu tabel digambar dengan kode lama.
+let loadAllUrut = 0
+// Diubah 2026-10-21: tanda memuat memakai animasi bersama gaya newSML (wmsMemuat di wms-tampilan-baru.js).
+// function loadAllTandaMemuat (tampil) {
+//   let el = document.getElementById('plMemuat')
+//   if (!el) {
+//     const kotak = document.querySelector('.wms-tab-aksi')
+//     if (!kotak) return
+//     el = document.createElement('span')
+//     el.id = 'plMemuat'
+//     el.className = 'text-muted mr-2'
+//     el.style.fontSize = '13px'
+//     el.innerHTML = '<span class="spinner-border spinner-border-sm mr-1" role="status"></span>Memuat data...'
+//     kotak.prepend(el)
+//   }
+//   el.style.display = tampil ? '' : 'none'
+// }
+function loadAllTandaMemuat (tampil) {
+  if (window.wmsMemuat) wmsMemuat(tampil)
+}
 function loadAll () {
   addDataArray = []
-  $.ajax({
-    url: "{!! url('newpermintaanpersiapanloadall') !!}",
-    type: "get",
-    async: false,
-    data: {
-    },
-    success: function(res) {
-      console.log(res , ' !!!!!!!!!!!!!!!!!!!!!!!!! ')
-
-      // return
-
-      dataRefreshOutstanding = res.outstanding
-      dataRefreshOutstandingReguler = res.outstandingReguler
-      console.log(dataRefreshOutstanding)
-      console.log(res.penerimaan, '=========')
-      dataRefreshPenerimaan = res.penerimaan
-      dataRefreshPenerimaanperiod = res.penerimaanperiod
-      document.getElementById("akses_istambah").value = res.akses.ISTAMBAH
-      document.getElementById("akses_iskoreksi").value = res.akses.ISKOREKSI
-      document.getElementById("akses_iscetak").value = res.akses.ISCETAK
-      document.getElementById("akses_ishapus").value = res.akses.ISHAPUS
+  const urut = ++loadAllUrut
+  const ambil = bagian => $.ajax({ url: "{!! url('newpermintaanpersiapanloadall') !!}", type: "get", data: { bagian } })
+  loadAllTandaMemuat(true)
+  $.when(ambil('outstanding'), ambil('penerimaan'), ambil('periode')).done(function (r1, r2, r3) {
+    if (urut !== loadAllUrut) return
+    const res = {
+      outstanding: r1[0].outstanding,
+      outstandingReguler: r1[0].outstandingReguler,
+      penerimaan: r2[0].penerimaan,
+      penerimaanperiod: r3[0].penerimaanperiod,
+      akses: r1[0].akses
     }
+    dataRefreshOutstanding = res.outstanding
+    dataRefreshOutstandingReguler = res.outstandingReguler
+    dataRefreshPenerimaan = res.penerimaan
+    dataRefreshPenerimaanperiod = res.penerimaanperiod
+    document.getElementById("akses_istambah").value = res.akses.ISTAMBAH
+    document.getElementById("akses_iskoreksi").value = res.akses.ISKOREKSI
+    document.getElementById("akses_iscetak").value = res.akses.ISCETAK
+    document.getElementById("akses_ishapus").value = res.akses.ISHAPUS
+    loadAllTampil()
+    loadAllTandaMemuat(false)
+  }).fail(function () {
+    if (urut !== loadAllUrut) return
+    loadAllTandaMemuat(false)
+    alertify.warning('Gagal memuat data, silahkan refresh browser')
   })
-  // return
+}
+
+// Dinonaktifkan 2026-10-21: pengambilan data sinkron, diganti loadAll() paralel di atas.
+// Isi tampilan tabel di bawah tidak diubah, hanya dipindah ke loadAllTampil().
+// function loadAll () {
+//   addDataArray = []
+//   $.ajax({
+//     url: "{!! url('newpermintaanpersiapanloadall') !!}",
+//     type: "get",
+//     async: false,
+//     data: {
+//     },
+//     success: function(res) {
+//       console.log(res , ' !!!!!!!!!!!!!!!!!!!!!!!!! ')
+//       dataRefreshOutstanding = res.outstanding
+//       dataRefreshOutstandingReguler = res.outstandingReguler
+//       dataRefreshPenerimaan = res.penerimaan
+//       dataRefreshPenerimaanperiod = res.penerimaanperiod
+//       document.getElementById("akses_istambah").value = res.akses.ISTAMBAH
+//       document.getElementById("akses_iskoreksi").value = res.akses.ISKOREKSI
+//       document.getElementById("akses_iscetak").value = res.akses.ISCETAK
+//       document.getElementById("akses_ishapus").value = res.akses.ISHAPUS
+//     }
+//   })
+function loadAllTampil () {
 
   let rowTableReguler = ``
   dataRefreshOutstandingReguler.forEach((item, i) => {

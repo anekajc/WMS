@@ -797,3 +797,58 @@
 /* Modal pemilih: baris dipilih dengan klik (tanpa tombol + per baris), seperti newSML. */
 #content-blade .modal table tr.pick-row { cursor: pointer; }
 #content-blade .modal table tr.pick-row:hover > td { background-color: #eef0fe !important; }
+
+/* Animasi "Memuat data..." - disalin dari newSML purchasing/purchaseOrder (.po-loading-chip).
+   wmsMemuat(true/false) menutup area tab/tabel; wmsProses(teks, kerja) menutup seluruh layar
+   selama pekerjaan sinkron (lihat public/js/wms-tampilan-baru.js). */
+.wms-memuat-wadah { position: relative; }
+.wms-memuat {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  min-height: 140px;
+  background: rgba(255, 255, 255, .62);
+  z-index: 40;
+  animation: wmsMunculLoading .34s ease-out both;
+}
+.wms-proses-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255, 255, 255, .35);
+  z-index: 2000;
+  cursor: progress;
+  animation: wmsMunculLoading .34s ease-out both;
+}
+@keyframes wmsMunculLoading {
+  0%, 45% { opacity: 0; }
+  100% { opacity: 1; }
+}
+.wms-loading-chip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  white-space: nowrap;
+  padding: 9px 18px;
+  border-radius: 999px;
+  background: rgba(31, 36, 48, .92);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .18);
+}
+.wms-memuat .wms-loading-chip { top: 70px; }
+.wms-loading-spin {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, .35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: wmsPutarLoading .6s linear infinite;
+}
+@keyframes wmsPutarLoading {
+  to { transform: rotate(360deg); }
+}

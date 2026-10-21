@@ -208,4 +208,46 @@
     eksporBungkus.wmsTerbungkus = true
     window.exportTableToExcel = eksporBungkus
   })
+
+  // Animasi "Memuat data..." seperti newSML (purchaseOrder: poTampilMemuatAwal / poProses).
+  // wmsMemuat(true|false, target?) - lapisan di atas area tab/tabel (default #myTabContent,
+  //   kalau tidak ada .wms-kartu pertama) untuk pemuatan AJAX async.
+  // wmsProses(teks, kerja) - lapisan seluruh layar untuk pekerjaan SINKRON (async:false):
+  //   lapisan digambar dulu, baru kerja() dijalankan, supaya animasinya sempat tampil.
+  window.wmsMemuat = function (tampil, target) {
+    var $wadah = target ? $(target) : $('#myTabContent')
+    if (!$wadah.length) { $wadah = $('.wms-kartu').first() }
+    if (!$wadah.length) { return }
+    $wadah.children('.wms-memuat').remove()
+    if (!tampil) { return }
+    $wadah.addClass('wms-memuat-wadah').append(
+      '<div class="wms-memuat"><span class="wms-loading-chip"><span class="wms-loading-spin"></span>Memuat data...</span></div>'
+    )
+  }
+
+  var wmsSibuk = 0
+  window.wmsProses = function (teks, kerja) {
+    if (wmsSibuk) { return kerja() }
+    wmsSibuk++
+    var lapisan = document.getElementById('wmsProsesOverlay')
+    if (!lapisan) {
+      lapisan = document.createElement('div')
+      lapisan.id = 'wmsProsesOverlay'
+      lapisan.className = 'wms-proses-overlay'
+      lapisan.innerHTML = '<span class="wms-loading-chip"><span class="wms-loading-spin"></span><span class="wms-proses-teks"></span></span>'
+      document.body.appendChild(lapisan)
+    }
+    lapisan.querySelector('.wms-proses-teks').textContent = teks || 'Memproses...'
+    lapisan.style.display = 'block'
+    requestAnimationFrame(function () {
+      setTimeout(function () {
+        try {
+          kerja()
+        } finally {
+          wmsSibuk = Math.max(0, wmsSibuk - 1)
+          if (!wmsSibuk) { lapisan.style.display = 'none' }
+        }
+      }, 0)
+    })
+  }
 })(window.jQuery)

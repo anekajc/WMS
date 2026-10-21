@@ -49,7 +49,12 @@ class NewPermintaanPersiapanController extends Controller
     $akses = NewAksesMenu::where('USERID', \Auth::id())-> where('L1', $kodemenu)->first();
 
     $periode = NewPeriode::where('user_id' , \Auth::id())->first();
-    $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0();
+    // Dinonaktifkan 2026-10-21: hasilnya tidak dipakai/dikirim, hanya menambah 6 query menu.
+    // $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0();
+
+    // Ditambah 2026-10-21: ?bagian=outstanding|penerimaan|periode -> hanya bagian itu yang diambil,
+    // supaya halaman bisa memuat ketiganya bersamaan (paralel). Tanpa parameter = semua, seperti dulu.
+    $bagian = request()->input('bagian');
 
     // sp_sosiapkirim
 
@@ -59,7 +64,9 @@ class NewPermintaanPersiapanController extends Controller
     //     orderBy('TANGGAL', 'DESC')->selectRaw('vwOutBarang.*')->get();
 //
     //asli
-   $outstandingReguler = DB::connection("SML")->select('exec sp_sosiapkirim ?,?,?',[ $periode->bulan , $periode->tahun ,\Auth::user()->username ]);
+   // Dinonaktifkan 2026-10-21: diganti versi yang bisa dipanggil per bagian (isi sama).
+   // $outstandingReguler = DB::connection("SML")->select('exec sp_sosiapkirim ?,?,?',[ $periode->bulan , $periode->tahun ,\Auth::user()->username ]);
+   $outstandingReguler = (!$bagian || $bagian === 'outstanding') ? DB::connection("SML")->select('exec sp_sosiapkirim ?,?,?',[ $periode->bulan , $periode->tahun ,\Auth::user()->username ]) : [];
   //   $outstandingReguler = DB::connection("SML")->select('exec sp_sosiapkirim ?,?,?',[ 1 , 2026 ,'sa' ]);
   //   $outstandingReguler = [];
 
@@ -76,7 +83,9 @@ class NewPermintaanPersiapanController extends Controller
    // $penerimaan = vwShowOutBrg::all()->where('Bulan' ,$periode->bulan)->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
     
 //asli
-    $penerimaan = vwShowOutBrg::all()->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-21: diganti versi yang bisa dipanggil per bagian (isi sama).
+    // $penerimaan = vwShowOutBrg::all()->sortBy('URUT')->groupBy('NOBUKTI');
+    $penerimaan = (!$bagian || $bagian === 'penerimaan') ? vwShowOutBrg::all()->sortBy('URUT')->groupBy('NOBUKTI') : [];
   //      $penerimaan =[];
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
@@ -87,8 +96,9 @@ class NewPermintaanPersiapanController extends Controller
     // Dinonaktifkan 2026-10-21: memuat seluruh view lalu menyaring di PHP (lambat).
     // $penerimaanperiod = vwShowOutBrgperiod::all()->where('Bulan' ,$periode->bulan)->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
     // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
-    $penerimaanperiod = vwShowOutBrgperiod::query()->where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
- //$penerimaanperiod =[];  
+    // $penerimaanperiod = vwShowOutBrgperiod::query()->where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
+    $penerimaanperiod = (!$bagian || $bagian === 'periode') ? vwShowOutBrgperiod::query()->where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI') : [];
+ //$penerimaanperiod =[];
 
 
 $tempPenerimaanperiod = [];
