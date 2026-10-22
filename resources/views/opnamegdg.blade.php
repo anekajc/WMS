@@ -916,7 +916,9 @@ function buttonVerifikasi (NOBUKTI) {
 
 
         document.getElementById("input_verifikasi_nosat").value = res[0].SATUAN
-         loadAll();
+        // Dinonaktifkan 2026-10-22: memuat ulang 3 tabel (3 query) sebelum modal dibuka membuat tombol
+        // Verifikasi lambat; daftar tetap dimuat ulang setelah verifikasi disimpan (submitVerifikasi).
+        //  loadAll();
 
         $("#formVerifikasi").modal('toggle')
       }
@@ -1447,7 +1449,17 @@ function buttonDelete (nobukti , urut) {
         success: function(res) {
 
           loadAll()
-          alertify.success("Berhasil hapus opname")
+          // Dinonaktifkan 2026-10-22: pesan sukses muncul walau opname yang sudah diverifikasi tidak terhapus.
+          // alertify.success("Berhasil hapus opname")
+          if (res == 3) {
+            alertify.warning("Opname sudah diverifikasi, tidak bisa dihapus")
+          } else {
+            alertify.success("Berhasil hapus opname")
+          }
+        },
+        error: function (err) {
+          console.log(err)
+          alertify.warning('Terjadi kesalahan pada server silahkan refresh browser')
         }
       })
     }

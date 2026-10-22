@@ -594,7 +594,9 @@ $(document).ready(function(){
         "lengthChange": false,
           "paging": false ,
            "columnDefs": [
-        { "type": "date", "targets": [6] },
+        // Dinonaktifkan 2026-10-22: kolom 6 adalah Selisih (angka), kolom Tanggal ada di indeks 8.
+        // { "type": "date", "targets": [6] },
+        { "type": "date", "targets": [8] },
         {  "className": "text-center", "targets": [0], "orderable" :false },
         {  "className": "text-right", "targets": [4], }
       ]});
@@ -603,7 +605,9 @@ $(document).ready(function(){
         "lengthChange": false,
           "paging": false ,
            "columnDefs": [
-        { "type": "date", "targets": [6] },
+        // Dinonaktifkan 2026-10-22: kolom 6 adalah Selisih (angka), kolom Tanggal ada di indeks 8.
+        // { "type": "date", "targets": [6] },
+        { "type": "date", "targets": [8] },
         {  "className": "text-center", "targets": [0], "orderable" :false },
         {  "className": "text-right", "targets": [4], }
       ]});
@@ -987,7 +991,9 @@ function buttonDelete (nobukti , urut , pVerifikasiAudit) {
       "lengthChange": false,
         "paging": false ,
          "columnDefs": [
-      { "type": "date", "targets": [6] },
+      // Dinonaktifkan 2026-10-22: kolom 6 adalah Selisih (angka), kolom Tanggal ada di indeks 8.
+      // { "type": "date", "targets": [6] },
+      { "type": "date", "targets": [8] },
       {  "className": "text-center", "targets": [0], "orderable" :false },
       {  "className": "text-right", "targets": [4], },
     ]});
@@ -1034,7 +1040,9 @@ function buttonDelete (nobukti , urut , pVerifikasiAudit) {
       "lengthChange": false,
         "paging": false ,
          "columnDefs": [
-      { "type": "date", "targets": [6] },
+      // Dinonaktifkan 2026-10-22: kolom 6 adalah Selisih (angka), kolom Tanggal ada di indeks 8.
+      // { "type": "date", "targets": [6] },
+      { "type": "date", "targets": [8] },
       {  "className": "text-center", "targets": [0], "orderable" :false },
       {  "className": "text-right", "targets": [4], },
     ]});

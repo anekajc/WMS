@@ -33,7 +33,10 @@ class NewOpnameGudangController extends Controller
     $gudang = DB::connection("SML")->select('select * from DBGUDANG where KODEGDG <> :id', ['id' => 'GTC']);
 
 
-    $penerimaan = vwDetailKoreksiWEb::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('urut')->groupBy('Nobukti');
+    // Dinonaktifkan 2026-10-22: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = vwDetailKoreksiWEb::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('urut')->groupBy('Nobukti');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = vwDetailKoreksiWEb::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('urut')->groupBy('Nobukti');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -52,7 +55,10 @@ class NewOpnameGudangController extends Controller
 
   public function loadAll () {
     $periode = NewPeriode::where('user_id' , \Auth::id())->first();
-    $penerimaan = vwDetailKoreksiWEb::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('urut')->groupBy('Nobukti');
+    // Dinonaktifkan 2026-10-22: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = vwDetailKoreksiWEb::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('urut')->groupBy('Nobukti');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = vwDetailKoreksiWEb::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('urut')->groupBy('Nobukti');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -65,7 +71,10 @@ class NewOpnameGudangController extends Controller
   }
 
   public function getDetailPenerimaan (Request $req) {
-    $detailPenerimaan = vwDetailKoreksiWEb::all()->where('Nobukti',$req->input('NOBUKTI') )->sortBy('urut');
+    // Dinonaktifkan 2026-10-22: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailPenerimaan = vwDetailKoreksiWEb::all()->where('Nobukti',$req->input('NOBUKTI') )->sortBy('urut');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailPenerimaan = vwDetailKoreksiWEb::whereRaw('Nobukti = cast(? as varchar(50))', [(string) $req->input('NOBUKTI')])->get()->sortBy('urut');
     $tempPenerimaan = [];
     foreach ($detailPenerimaan as $p) {
       // code...

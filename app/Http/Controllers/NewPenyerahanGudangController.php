@@ -41,7 +41,10 @@ class NewPenyerahanGudangController extends Controller
     }
     //
     // $penerimaan = VWTRansferOut::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
-    $penerimaan = VWPenyerahanOut::all()->where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-22: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = VWPenyerahanOut::all()->where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = VWPenyerahanOut::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -60,7 +63,10 @@ class NewPenyerahanGudangController extends Controller
 
   public function getDetailOutstanding (Request $req) {
 
-    $detailOutstanding = VWOutBRGPemakaian::all()->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT');
+    // Dinonaktifkan 2026-10-22: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailOutstanding = VWOutBRGPemakaian::all()->where('NOBUKTI', $req->input('NOBUKTI'))->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailOutstanding = VWOutBRGPemakaian::whereRaw('NOBUKTI = cast(? as varchar(50))', [(string) $req->input('NOBUKTI')])->get()->sortBy('URUT');
     $tempOutstanding = [];
     foreach ($detailOutstanding as $do) {
       // code...
@@ -71,7 +77,10 @@ class NewPenyerahanGudangController extends Controller
   }
 
   public function getDetailPenerimaan (Request $req) {
-    $detailPenerimaan = VWPenyerahanOut::all()->where('NOBUKTI',$req->input('NOBUKTI') )->sortBy('URUT');
+    // Dinonaktifkan 2026-10-22: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $detailPenerimaan = VWPenyerahanOut::all()->where('NOBUKTI',$req->input('NOBUKTI') )->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $detailPenerimaan = VWPenyerahanOut::whereRaw('NOBUKTI = cast(? as varchar(50))', [(string) $req->input('NOBUKTI')])->get()->sortBy('URUT');
     $tempPenerimaan = [];
     foreach ($detailPenerimaan as $p) {
       // code...
@@ -91,7 +100,10 @@ class NewPenyerahanGudangController extends Controller
       array_push($tempOutstanding, $o);
     }
 
-    $penerimaan = VWPenyerahanOut::all()->where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-22: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = VWPenyerahanOut::all()->where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = VWPenyerahanOut::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -157,7 +169,9 @@ class NewPenyerahanGudangController extends Controller
       $check2 = DB::connection('SML')->select('exec Sp_CekStockAkhir ?,?,?,?',[$d['NOSAT'], $date, $d['Kodegdg'],  $d['KODEBRG']]);
       // array_push($checkSaldo, ["input" => (float)$d['inputQntTerima']    , "saldoqnt" => (float)$check2[0]->SALDOQNT ]);
       if ($check2) {
-        if ((int)$d['inputQntTerima'] > (int)$check2[0]->SALDOQNT ) {
+        // Dinonaktifkan 2026-10-22: (int) memotong qty desimal (1,5 > 1,2 dianggap 1 > 1 = lolos).
+        // if ((int)$d['inputQntTerima'] > (int)$check2[0]->SALDOQNT ) {
+        if ((float)$d['inputQntTerima'] > (float)$check2[0]->SALDOQNT ) {
           // return 'a';
           $checkSaldo = 1;
         }
@@ -177,6 +191,12 @@ class NewPenyerahanGudangController extends Controller
     }
     $tempValues = [$nopbg, $nourut, $noout, $username, $date];
     DB::connection('SML')->statement('exec SP_InsertOutPmkBhn ?,?,?,?,?', $tempValues);
+    // Ditambahkan 2026-10-22: SP menyalin lewat header DboutBRG. Kalau header dokumen Out tidak ada
+    // (mis. SML/PLN/00007/0825), tidak ada yang tersimpan tapi dulu layar tetap "PBG telah ditambah".
+    $tersimpan = DB::connection('SML')->select('select top 1 NOBUKTI from DBPenyerahanBhndet where NOBUKTI = :nobukti', ["nobukti" => $nopbg]);
+    if (!$tersimpan) {
+      return 4;
+    }
     return 1;
 
 
@@ -186,15 +206,32 @@ class NewPenyerahanGudangController extends Controller
   public function spKoreksi (Request $req) {
 
       $checkSaldo = 0;
+    // Ditambahkan 2026-10-22: hapus item (D) mengembalikan stok, jadi tidak perlu cek saldo.
+    // Dulu kalau Sp_CekStockAkhir tidak mengembalikan baris, hapus ditolak (3) tanpa pesan yang benar.
+    if ($req->input('choice') != 'D') {
     $check2 = DB::connection('SML')->select('exec Sp_CekStockAkhir ?,?,?,?',[$req->input('nosat'),   $req->input('inputDate'), $req->input('kodegdg'),  $req->input('kodebrg')]);
     if ($check2) {
-      if ((int)$req['qntTerima'] > (int)$check2[0]->SALDOQNT ) {
+      // Ditambahkan 2026-10-22: saat edit (U), saldo dari Sp_CekStockAkhir (s.d. tanggal dokumen) sudah
+      // dikurangi qty lama item ini, jadi stok yang tersedia = saldo + qty lama. Dulu menaikkan qty
+      // ditolak "Stok gudang tidak mencukupi" walau stok sebenarnya cukup.
+      $qntLama = 0;
+      if ($req->input('choice') == 'U') {
+        $lama = VWPenyerahanOut::whereRaw('NOBUKTI = cast(? as varchar(50))', [(string) $req->input('nopbg')])
+          ->where('URUT', $req->input('urut'))->first();
+        if ($lama && $lama->KODEBRG == $req->input('kodebrg') && $lama->NOSAT == $req->input('nosat')) {
+          $qntLama = (float) $lama->Qntx;
+        }
+      }
+      // Dinonaktifkan 2026-10-22: (int) memotong qty desimal.
+      // if ((int)$req['qntTerima'] > (int)$check2[0]->SALDOQNT ) {
+      if ((float)$req['qntTerima'] > (float)$check2[0]->SALDOQNT + $qntLama ) {
         // return 'a';
         $checkSaldo = 1;
       }
     } else {
       // return 'b';
       $checkSaldo = 1;
+    }
     }
 
     if ($checkSaldo)  {

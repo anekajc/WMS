@@ -1283,6 +1283,7 @@ function buttonAddListBarang () {
     $("#tabel_add_list_item").DataTable({
       data: listBarang.map((item, i) => ({ i: i, KODEBRG: item.KODEBRG || '', NAMABRG: item.NAMABRG || '' })),
       deferRender: true,
+      autoWidth: false, // Ditambahkan 2026-10-22: tabel dibuat saat modal masih tersembunyi; tanpa ini lebar kolom jadi sempit
       columns: [{ data: 'KODEBRG' }, { data: 'NAMABRG' }],
       lengthChange: true,
       lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],

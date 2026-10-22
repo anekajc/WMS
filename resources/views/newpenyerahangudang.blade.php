@@ -57,7 +57,9 @@
                         <tr>
                           <td class="text-center">
                             <button style="" class="btn btn-warning btn-sm" type="button"   onclick="buttonDetail('{{ $outstandingArray[$i][0]->NOBUKTI }}')" ><i class="bi bi-info-lg"></i></button>
-                            <button class="btn btn-success btn-sm" type="button" onclick="buttonAdd('{{ $outstandingArray[$i][0]->NOBUKTI }}')"><i class="bi bi-bag-plus-fill"></i></button>
+                            {{-- Dinonaktifkan 2026-10-22: tombol keranjang diganti tombol + (sama dengan In Bound / Out Bound). --}}
+                            {{-- <button class="btn btn-success btn-sm" type="button" onclick="buttonAdd('{{ $outstandingArray[$i][0]->NOBUKTI }}')"><i class="bi bi-bag-plus-fill"></i></button> --}}
+                            <button style="width: 30px;" class="btn btn-primary btn-sm" type="button" title="Tambah" onclick="buttonAdd('{{ $outstandingArray[$i][0]->NOBUKTI }}')"><i class="bi bi-plus-lg" style="font-size: 16px;"></i></button>
                           </td>
                           <td>{{ $outstandingArray[$i][0]->NOBUKTI }}</td>
                           <td>{!! date("Y/m/d", strtotime($outstandingArray[$i][0]->TANGGAL)) !!}</td>
@@ -957,8 +959,18 @@ function submitAddKoreksi () {
     success: function(res) {
       console.log(res ,'succes add koreksi')
       refreshKoreksi(nopbg)
-      alertify.success('Item telah ditambah');
+      // Dinonaktifkan 2026-10-22: pesan sukses selalu muncul walau server menolak (3 = stok kurang).
+      // alertify.success('Item telah ditambah');
+      if (res == 1) {
+        alertify.success('Item telah ditambah');
+      } else if (res == 3) {
+        alertify.warning('Stok gudang tidak mencukupi');
+      }
       loadAll()
+    },
+    error: function (err) {
+      console.log(err)
+      alertify.warning('Terjadi kesalahan pada server, silahkan refresh browser')
     }
   })
 }
@@ -1070,13 +1082,19 @@ function submitEditKoreksi () {
       success: function(res) {
         console.log(res ,'succes edit koreksi')
         refreshKoreksi(nopbg)
-        if (res == 5 ) {
+        // Dinonaktifkan 2026-10-22: controller mengembalikan 1 saat berhasil, jadi pesan sukses tidak pernah muncul.
+        // if (res == 5 ) {
+        if (res == 1 || res == 5 ) {
         alertify.success('Item telah diedit');
       }
         if (res == 3 ) {
           alertify.warning('Stok gudang tidak mencukupi');
         }
         loadAll()
+      },
+      error: function (err) {
+        console.log(err)
+        alertify.warning('Terjadi kesalahan pada server, silahkan refresh browser')
       }
     })
 }
@@ -1238,6 +1256,11 @@ function submitAdd() {
         alertify.warning('Stok gudang tidak mencukupi');
       }
 
+      // Ditambahkan 2026-10-22: tidak ada baris yang tersimpan (data dokumen Out tidak lengkap).
+      if (res == 4 ) {
+        alertify.error('Gagal disimpan: data dokumen Out ' + noout + ' tidak lengkap (header tidak ditemukan). Hubungi kantor.');
+      }
+
     },
   error:function (err) {
     console.log(err)
@@ -1397,7 +1420,7 @@ function loadAll () {
         rowTable  += `<tr>
         <td class="text-center">
         <button style="" class="btn btn-warning btn-sm" type="button"   onclick="buttonDetail('${item[0].NOBUKTI}')" ><i class="bi bi-info-lg"></i></button>
-        <button class="btn btn-success btn-sm" type="button" onclick="buttonAdd('${item[0].NOBUKTI}')"><i class="bi bi-bag-plus-fill"></i></button></td>
+        <button style="width: 30px;" class="btn btn-primary btn-sm" type="button" title="Tambah" onclick="buttonAdd('${item[0].NOBUKTI}')"><i class="bi bi-plus-lg" style="font-size: 16px;"></i></button></td>
         <td>${item[0].NOBUKTI}</td>
         <td>${date1}</td>
         <td>${item[0].NamaGudangAsal}</td>
@@ -1551,8 +1574,18 @@ function buttonKoreksiDelete(index) {
           success: function(res) {
             console.log(res ,'succes delete koreksi')
             refreshKoreksi(nopbg)
-            alertify.success('Item telah didelete');
+            // Dinonaktifkan 2026-10-22: pesan sukses selalu muncul apa pun hasil server.
+            // alertify.success('Item telah didelete');
+            if (res == 1) {
+              alertify.success('Item telah didelete');
+            } else {
+              alertify.warning('Item gagal dihapus');
+            }
             loadAll()
+          },
+          error: function (err) {
+            console.log(err)
+            alertify.warning('Terjadi kesalahan pada server, silahkan refresh browser')
           }
         })
 

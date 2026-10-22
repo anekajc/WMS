@@ -33,12 +33,15 @@ class TransferLokasiSiteController extends Controller
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0();
 
 
-    $penerimaan = vwShowAlokasiBrg::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('urut')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-22: seluruh view alokasi dimuat tiap halaman dibuka, padahal
+    // halaman Transfer Lokasi (scan) tidak menampilkan data ini sama sekali (lambat).
+    // $penerimaan = vwShowAlokasiBrg::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('urut')->groupBy('NOBUKTI');
+    // $tempPenerimaan = [];
+    // foreach ($penerimaan as $p) {
+    //   // code...
+    //   array_push($tempPenerimaan, $p);
+    // }
     $tempPenerimaan = [];
-    foreach ($penerimaan as $p) {
-      // code...
-      array_push($tempPenerimaan, $p);
-    }
 
 
     return view('transferlokasisite' , [
@@ -76,6 +79,10 @@ class TransferLokasiSiteController extends Controller
         return 2;
       }
       // return '444';
+      // Dinonaktifkan 2026-10-22: tiap scan lokasi awal mengirim ±19 ribu barang (±8 dtk). Bagian kedua UNION
+      // mengambil semua barang aktif non-JS, jadi barang lolos = barang aktif non-JS (sudah dibuktikan sama
+      // dengan data asli). Pengecekan barang sekarang per kode lewat cekBarang() saat barang di-scan.
+      return 1;
       return DB::connection('SML')->select("select b.NAMABRG, b.KODEBRG, b.SAT1, b.SAT2, b.SAT3, b.ISI1, b.ISI2, b.ISI3 from dbBarangLokasiSIG a join dbbarang b on a.KodeBarang = b.KODEBRG where a.BarcodeLoc = :barcodeloc and b.ISAKTIF = 1 and b.KODEGRP <> 'JS'
 
         UNION all
@@ -88,6 +95,14 @@ class TransferLokasiSiteController extends Controller
 
         ", ["barcodeloc" => $req->kodelokasi,"barcodeloc1" => $req->kodelokasi] );
       // select * from dbBarangLokasiSIG where BarcodeLoc = 'GSML2101'
+  }
+
+  // Ditambahkan 2026-10-22: pengganti daftar barang dari cekLokasiAwal. Syarat sama (ISAKTIF = 1 dan
+  // KODEGRP <> 'JS'), kode harus persis sama seperti perbandingan di halaman dulu (el.KODEBRG == kode2).
+  public function cekBarang (Request $req) {
+      $kode = (string) $req->input('kodebarang');
+      $barang = DB::connection('SML')->select("select NAMABRG, KODEBRG, SAT1, SAT2, SAT3, ISI1, ISI2, ISI3 from dbbarang where KODEBRG = ? and ISAKTIF = 1 and KODEGRP <> 'JS'", [$kode]);
+      return array_values(array_filter($barang, fn($b) => $b->KODEBRG === $kode));
   }
 
   public function cekLokasiTujuan (Request $req) {
@@ -130,7 +145,9 @@ class TransferLokasiSiteController extends Controller
     $checkSaldo = 0;
     $check2 = DB::connection('SML')->select('exec Sp_CekStockAkhirLok ?,?,?,?',[$req->input('nosat'), $tanggal,$req->input('lokasiasal'),  $req->input('kodebarang') ]);
     if ($check2) {
-    if ((int)$req->input('qnt1') > (int)$check2[0]->SALDOQNT ) {
+    // Dinonaktifkan 2026-10-22: (int) memotong qty desimal (1,5 > 1,2 dianggap 1 > 1 = lolos).
+    // if ((int)$req->input('qnt1') > (int)$check2[0]->SALDOQNT ) {
+    if ((float)$req->input('qnt1') > (float)$check2[0]->SALDOQNT ) {
       // return 'a';
       $checkSaldo = 1;
     }

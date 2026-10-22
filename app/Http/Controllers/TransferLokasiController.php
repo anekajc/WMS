@@ -28,7 +28,10 @@ class TransferLokasiController extends Controller
     $periode = NewPeriode::where('user_id' , \Auth::id())->first();
     $menul0 = app('App\Http\Controllers\NewMenuController')->getMenuL0();
 
-    $penerimaan = vwShowOutBrgTFLokasi::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-22: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = vwShowOutBrgTFLokasi::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = vwShowOutBrgTFLokasi::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -90,7 +93,10 @@ class TransferLokasiController extends Controller
   }
 
   public function detailPenerimaan (Request $req) {
-    $penerimaan = vwShowOutBrgTFLokasi::all()->where('NOBUKTI' ,$req->input('nobukti'))->sortBy('URUT');
+    // Dinonaktifkan 2026-10-22: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = vwShowOutBrgTFLokasi::all()->where('NOBUKTI' ,$req->input('nobukti'))->sortBy('URUT');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = vwShowOutBrgTFLokasi::whereRaw('NOBUKTI = cast(? as varchar(50))', [(string) $req->input('nobukti')])->get()->sortBy('URUT');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...
@@ -107,7 +113,10 @@ class TransferLokasiController extends Controller
     $periode = NewPeriode::where('user_id' , \Auth::id())->first();
 
 
-    $penerimaan = vwShowOutBrgTFLokasi::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Dinonaktifkan 2026-10-22: memuat seluruh view lalu menyaring di PHP (lambat).
+    // $penerimaan = vwShowOutBrgTFLokasi::all()->where('Bulan',$periode->bulan )->where('Tahun', $periode->tahun)->sortBy('URUT')->groupBy('NOBUKTI');
+    // Pengganti: saringan yang sama langsung di query database (hasil sama, jauh lebih cepat).
+    $penerimaan = vwShowOutBrgTFLokasi::where('Bulan', $periode->bulan)->where('Tahun', $periode->tahun)->get()->sortBy('URUT')->groupBy('NOBUKTI');
     $tempPenerimaan = [];
     foreach ($penerimaan as $p) {
       // code...

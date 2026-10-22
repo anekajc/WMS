@@ -777,7 +777,31 @@
     //   return
     // }
     detailBarang = {}
-    let barang = tempListBarang.filter(function (el){
+    // Dinonaktifkan 2026-10-22: barang dulu dicari di daftar ±19 ribu barang hasil scan lokasi awal (lambat).
+    // Sekarang dicek per kode ke server (syarat sama: barang aktif dan bukan grup JS).
+    let barang = []
+    // Seperti dulu: sebelum lokasi awal valid (input terkunci), barang belum bisa diterima.
+    if (!document.getElementById("input_add_kode1").readOnly) {
+      alertify.warning('Barang tidak terdaftar di lokasi')
+      resetScannerKode2()
+      return
+    }
+    $.ajax({
+      url: "{!! url('transferlokasisitecekbarang') !!}",
+      type: "post",
+      async: false,
+      data: {
+        _token : $("#_token").val(),
+        kodebarang: kode2
+      },
+      success: function(res) {
+        barang = res
+      },
+      error: function (err) {
+        console.log(err)
+      }
+    })
+    /* let barang = tempListBarang.filter(function (el){
       // console.log(el)
       // console.log(el.KODEBRG , kode2)
       // if( el.KODEBRG == kode2 ) {
@@ -786,7 +810,7 @@
       //   return
       // }
       return el.KODEBRG == kode2
-    })
+    }) */
     console.log(barang , kode2)
     console.log(barang.length)
     if (!barang.length) {

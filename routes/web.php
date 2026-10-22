@@ -313,6 +313,8 @@ Route::get('/getnobuktiterimaubahkemasan' , [TerimaUbahKemasanController::class,
 Route::get('/transferlokasisite' , [TransferLokasiSiteController::class, 'index'])->middleware('auth');
 Route::post('/transferlokasisiteceklokasiawal' , [TransferLokasiSiteController::class, 'cekLokasiAwal'])->middleware('auth');
 Route::post('/transferlokasisiteceklokasitujuan' , [TransferLokasiSiteController::class, 'cekLokasiTujuan'])->middleware('auth');
+// Ditambahkan 2026-10-22: cek 1 barang saat scan (pengganti daftar ±19 ribu barang dari ceklokasiawal).
+Route::post('/transferlokasisitecekbarang' , [TransferLokasiSiteController::class, 'cekBarang'])->middleware('auth');
 Route::post('/transferlokasisitecekkodegdg' , [TransferLokasiSiteController::class, 'cekKodeGdg'])->middleware('auth');
 Route::get('/getnobuktitransferlokasisite' , [TransferLokasiSiteController::class, 'getNoBukti'])->middleware('auth');
 Route::post('/transferlokasisitespadd' , [TransferLokasiSiteController::class, 'spAdd'])->middleware('auth');

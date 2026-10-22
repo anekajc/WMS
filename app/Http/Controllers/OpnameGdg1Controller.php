@@ -39,19 +39,22 @@ class OpnameGdg1Controller extends Controller
     where YEAR(a.tanggal) = :tahun and MONTH(a.tanggal) = :bulan
     ",["tahun" => $periode->tahun , "bulan"=> $periode->bulan]);
 
-    $tempOutstanding = DB::connection('SML')->select('
-    select c.NAMABRG, YEAR(a.tanggal) TAHUN, MONTH(a.tanggal) BULAN, a.tanggal, a.nourut , b.* from dbkoreksiopndet b
-    left outer join dbkoreksiopn a   on a.nobukti = b.nobukti
-    left outer join dbbarang c on c.kodebrg = b.kodebrg
-    where isnull(selisih,0) = 0 and YEAR(a.tanggal) = :tahun and MONTH(a.tanggal) = :bulan and b.pVerifikasi = 1
-    ',["tahun" => $periode->tahun , "bulan"=> $periode->bulan]);
-
-    $tempPenerimaan = DB::connection('SML')->select('
-    select c.NAMABRG, YEAR(a.tanggal) TAHUN, MONTH(a.tanggal) BULAN, a.tanggal, a.nourut , b.* from dbkoreksiopndet b
-    left outer join dbkoreksiopn a   on a.nobukti = b.nobukti
-    left outer join dbbarang c on c.kodebrg = b.kodebrg
-    where isnull(selisih,0) <> 0 and YEAR(a.tanggal) = :tahun and MONTH(a.tanggal) = :bulan and b.pVerifikasi = 1
-    ',["tahun" => $periode->tahun , "bulan"=> $periode->bulan]);
+    // Dinonaktifkan 2026-10-22: dua query di bawah membaca data yang sama dengan $tempMain (hanya
+    // disaring selisih & pVerifikasi). Sekarang disaring dari $tempMain (1 query, isi sama persis).
+    // $tempOutstanding = DB::connection('SML')->select('
+    // select c.NAMABRG, YEAR(a.tanggal) TAHUN, MONTH(a.tanggal) BULAN, a.tanggal, a.nourut , b.* from dbkoreksiopndet b
+    // left outer join dbkoreksiopn a   on a.nobukti = b.nobukti
+    // left outer join dbbarang c on c.kodebrg = b.kodebrg
+    // where isnull(selisih,0) = 0 and YEAR(a.tanggal) = :tahun and MONTH(a.tanggal) = :bulan and b.pVerifikasi = 1
+    // ',["tahun" => $periode->tahun , "bulan"=> $periode->bulan]);
+    //
+    // $tempPenerimaan = DB::connection('SML')->select('
+    // select c.NAMABRG, YEAR(a.tanggal) TAHUN, MONTH(a.tanggal) BULAN, a.tanggal, a.nourut , b.* from dbkoreksiopndet b
+    // left outer join dbkoreksiopn a   on a.nobukti = b.nobukti
+    // left outer join dbbarang c on c.kodebrg = b.kodebrg
+    // where isnull(selisih,0) <> 0 and YEAR(a.tanggal) = :tahun and MONTH(a.tanggal) = :bulan and b.pVerifikasi = 1
+    // ',["tahun" => $periode->tahun , "bulan"=> $periode->bulan]);
+    [$tempOutstanding, $tempPenerimaan] = $this->pisahClearNonClear($tempMain);
 
 
 
@@ -122,19 +125,21 @@ class OpnameGdg1Controller extends Controller
 
 
 
-    $tempOutstanding = DB::connection('SML')->select('
-    select c.NAMABRG , YEAR(a.tanggal) TAHUN, MONTH(a.tanggal) BULAN, a.tanggal, a.nourut , b.* from dbkoreksiopndet b
-    left outer join dbkoreksiopn a   on a.nobukti = b.nobukti
-    left outer join dbbarang c on c.kodebrg = b.kodebrg
-    where isnull(selisih,0) = 0 and YEAR(a.tanggal) = :tahun and MONTH(a.tanggal) = :bulan and b.pVerifikasi = 1
-    ',["tahun" => $periode->tahun , "bulan"=> $periode->bulan]);
-
-    $tempPenerimaan = DB::connection('SML')->select('
-    select c.NAMABRG , YEAR(a.tanggal) TAHUN, MONTH(a.tanggal) BULAN, a.tanggal, a.nourut , b.* from dbkoreksiopndet b
-    left outer join dbkoreksiopn a   on a.nobukti = b.nobukti
-    left outer join dbbarang c on c.kodebrg = b.kodebrg
-    where isnull(selisih,0) <> 0 and YEAR(a.tanggal) = :tahun and MONTH(a.tanggal) = :bulan and b.pVerifikasi = 1
-    ',["tahun" => $periode->tahun , "bulan"=> $periode->bulan]);
+    // Dinonaktifkan 2026-10-22: dua query di bawah membaca data yang sama dengan $tempMain (hanya
+    // disaring selisih & pVerifikasi). Sekarang disaring dari $tempMain (1 query, isi sama persis).
+    // $tempOutstanding = DB::connection('SML')->select('
+    // select c.NAMABRG , YEAR(a.tanggal) TAHUN, MONTH(a.tanggal) BULAN, a.tanggal, a.nourut , b.* from dbkoreksiopndet b
+    // left outer join dbkoreksiopn a   on a.nobukti = b.nobukti
+    // left outer join dbbarang c on c.kodebrg = b.kodebrg
+    // where isnull(selisih,0) = 0 and YEAR(a.tanggal) = :tahun and MONTH(a.tanggal) = :bulan and b.pVerifikasi = 1
+    // ',["tahun" => $periode->tahun , "bulan"=> $periode->bulan]);
+    //
+    // $tempPenerimaan = DB::connection('SML')->select('
+    // select c.NAMABRG , YEAR(a.tanggal) TAHUN, MONTH(a.tanggal) BULAN, a.tanggal, a.nourut , b.* from dbkoreksiopndet b
+    // left outer join dbkoreksiopn a   on a.nobukti = b.nobukti
+    // left outer join dbbarang c on c.kodebrg = b.kodebrg
+    // where isnull(selisih,0) <> 0 and YEAR(a.tanggal) = :tahun and MONTH(a.tanggal) = :bulan and b.pVerifikasi = 1
+    // ',["tahun" => $periode->tahun , "bulan"=> $periode->bulan]);
 
     $tempMain = DB::connection('SML')->select("
     select c.NAMABRG, YEAR(a.tanggal) TAHUN, MONTH(a.tanggal) BULAN, a.tanggal, a.nourut ,
@@ -144,6 +149,7 @@ class OpnameGdg1Controller extends Controller
     left outer join dbbarang c on c.kodebrg = b.kodebrg
     where YEAR(a.tanggal) = :tahun and MONTH(a.tanggal) = :bulan
     ",["tahun" => $periode->tahun , "bulan"=> $periode->bulan]);
+    [$tempOutstanding, $tempPenerimaan] = $this->pisahClearNonClear($tempMain);
 
     return [
       "outstandingArray" => $tempOutstanding,
@@ -153,6 +159,22 @@ class OpnameGdg1Controller extends Controller
     ];
   }
 
+
+  // Ditambahkan 2026-10-22: pengganti 2 query lama. Clear = verifikasi & selisih 0 (isnull(selisih,0) = 0
+  // and pVerifikasi = 1), Non Clear = verifikasi & selisih <> 0. Hasil sudah dibandingkan dengan query lama.
+  private function pisahClearNonClear ($main) {
+    $clear = [];
+    $nonClear = [];
+    foreach ($main as $r) {
+      if ((int)$r->pVerifikasi !== 1) continue;
+      if ((float)($r->Selisih ?? 0) == 0) {
+        $clear[] = $r;
+      } else {
+        $nonClear[] = $r;
+      }
+    }
+    return [$clear, $nonClear];
+  }
 
   public function cekBarang (Request $req) {
       $date = date("Y-m-d");
@@ -208,7 +230,9 @@ class OpnameGdg1Controller extends Controller
 
       if ($check2) {
 
-        if ((int)$check2[0]->SALDOQNT == 0) {
+        // Dinonaktifkan 2026-10-22: (int) membuat stok desimal (mis. 0,5) dianggap 0 lalu ditolak.
+        // if ((int)$check2[0]->SALDOQNT == 0) {
+        if ((float)$check2[0]->SALDOQNT == 0) {
           $checkSaldo = 1;
         }
       // if ((int)$req->input('qnt') > (int)$check2[0]->SALDOQNT ) {
@@ -349,6 +373,13 @@ class OpnameGdg1Controller extends Controller
 
     $choice = $req->input('choice');
     $nobukti =  $req->input('nobukti');
+
+    // Ditambahkan 2026-10-22: SP_KOREKSIOPNWEB menolak hapus kalau opname sudah diverifikasi (tidak ada
+    // baris pVerifikasi=0), tapi dulu layar tetap "Berhasil hapus opname". Syarat yang sama dicek di sini.
+    $belumVerifikasi = DB::connection('SML')->select('select top 1 nobukti from DBKOREKSIOPNDET where nobukti = ? and isnull(pVerifikasi,0) = 0', [$nobukti]);
+    if (!$belumVerifikasi) {
+      return 3;
+    }
 
     // $note = $req->input('note');
     // $keterangan = $req->input('keterangan');

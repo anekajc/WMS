@@ -198,7 +198,9 @@
             </div>
             <div class="col-4 text-right">
 
-                <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" >+</button>
+                {{-- Dinonaktifkan 2026-10-22: tombol browse teks "+" diganti ikon kaca pembesar (fungsi sama). --}}
+                {{-- <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" >+</button> --}}
+                <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" title="Cari Barang"><i class="bi bi-search"></i></button>
               </div>
             <div class="col-12">
               <input id="AddAddKodeBrg" type="text" class="form-control" disabled>
@@ -246,7 +248,9 @@
             </div>
             <div class="col-4 text-right">
 
-                <button type="button" onclick="buttonAddListLokasi('AddAddLokasiTujuan')" class="btn btn-primary" >+</button>
+                {{-- Dinonaktifkan 2026-10-22: tombol browse teks "+" diganti ikon kaca pembesar (fungsi sama). --}}
+                {{-- <button type="button" onclick="buttonAddListLokasi('AddAddLokasiTujuan')" class="btn btn-primary" >+</button> --}}
+                <button type="button" onclick="buttonAddListLokasi('AddAddLokasiTujuan')" class="btn btn-primary" title="Cari Lokasi"><i class="bi bi-search"></i></button>
               </div>
             <div class="col-12">
               <input id="AddAddLokasiTujuan" type="text"  class="form-control" disabled>
@@ -263,7 +267,9 @@
 
             <div class="col-4 text-right">
 
-                <button type="button" onclick="buttonAddListLokasi('AddAddLokasiAsal')" class="btn btn-primary" >+</button>
+                {{-- Dinonaktifkan 2026-10-22: tombol browse teks "+" diganti ikon kaca pembesar (fungsi sama). --}}
+                {{-- <button type="button" onclick="buttonAddListLokasi('AddAddLokasiAsal')" class="btn btn-primary" >+</button> --}}
+                <button type="button" onclick="buttonAddListLokasi('AddAddLokasiAsal')" class="btn btn-primary" title="Cari Lokasi"><i class="bi bi-search"></i></button>
               </div>
               <div class="col-12">
                 <input id="AddAddLokasiAsal" type="text"  class="form-control" disabled>
@@ -352,7 +358,9 @@
                     </div>
                     <div class="col-4 text-right">
 
-                        <button type="button" onclick="buttonAddListLokasi('AddEditLokasiTujuan')" class="btn btn-primary" >+</button>
+                        {{-- Dinonaktifkan 2026-10-22: tombol browse teks "+" diganti ikon kaca pembesar (fungsi sama). --}}
+                        {{-- <button type="button" onclick="buttonAddListLokasi('AddEditLokasiTujuan')" class="btn btn-primary" >+</button> --}}
+                        <button type="button" onclick="buttonAddListLokasi('AddEditLokasiTujuan')" class="btn btn-primary" title="Cari Lokasi"><i class="bi bi-search"></i></button>
                       </div>
                     <div class="col-12">
                       <input id="AddEditLokasiTujuan" type="text"  class="form-control" disabled>
@@ -367,7 +375,9 @@
                       </div>
                       <div class="col-4 text-right">
 
-                          <button type="button" onclick="buttonAddListLokasi('AddEditLokasiAsal')" class="btn btn-primary" >+</button>
+                          {{-- Dinonaktifkan 2026-10-22: tombol browse teks "+" diganti ikon kaca pembesar (fungsi sama). --}}
+                          {{-- <button type="button" onclick="buttonAddListLokasi('AddEditLokasiAsal')" class="btn btn-primary" >+</button> --}}
+                          <button type="button" onclick="buttonAddListLokasi('AddEditLokasiAsal')" class="btn btn-primary" title="Cari Lokasi"><i class="bi bi-search"></i></button>
                         </div>
                       <div class="col-12">
                         <input id="AddEditLokasiAsal" type="text"  class="form-control" disabled>
@@ -462,7 +472,8 @@
                 <tr>
                   <th scope="col">Kode Barang</th>
                   <th scope="col">Nama Barang</th>
-                  <th scope="col">Actions</th>
+                  {{-- Dinonaktifkan 2026-10-22: pilih barang dengan klik baris, kolom Actions tidak dipakai. --}}
+                  {{-- <th scope="col">Actions</th> --}}
 
                 </tr>
               </thead>
@@ -520,7 +531,8 @@
                 <tr>
                   <th scope="col">Kode Gudang</th>
                   <th scope="col">Lokasi</th>
-                  <th scope="col">Actions</th>
+                  {{-- Dinonaktifkan 2026-10-22: pilih lokasi dengan klik baris, kolom Actions tidak dipakai. --}}
+                  {{-- <th scope="col">Actions</th> --}}
 
                 </tr>
               </thead>
@@ -800,6 +812,7 @@
 <script type="text/javascript">
 
 let listBarang = []
+let listBarangReq = null // Ditambahkan 2026-10-22: muat daftar barang di belakang layar
 let listLokasi = []
 
 let listItemForm = []
@@ -820,21 +833,35 @@ $(document).ready(function(){
 
 
 
-      $("#tabel_add_list_item").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-           "columnDefs": [
-        {  "className": "text-center", "targets": [2] },
-      ]});
+      // Dinonaktifkan 2026-10-22: tabel pemilih barang & lokasi sekarang dibuat saat modal dibuka
+      // (buttonAddListBarang / buttonAddListLokasi, klik baris, tanpa kolom Actions).
+      // $("#tabel_add_list_item").DataTable({
+      //   "lengthChange": false,
+      //     "paging": false ,
+      //      "columnDefs": [
+      //   {  "className": "text-center", "targets": [2] },
+      // ]});
+      //
+      // $("#tabel_add_list_lokasi").DataTable({
+      //   "lengthChange": false,
+      //     "paging": false ,
+      //      "columnDefs": [
+      //   {  "className": "text-center", "targets": [2] },
+      // ]});
 
-      $("#tabel_add_list_lokasi").DataTable({
-        "lengthChange": false,
-          "paging": false ,
-           "columnDefs": [
-        {  "className": "text-center", "targets": [2] },
-      ]});
+      // Ditambahkan 2026-10-22: daftar barang (±19 ribu, ±7 dtk) dimuat di belakang layar saat halaman
+      // terbuka, supaya pemilih barang langsung tampil saat tombol kaca pembesar diklik.
+      listBarangReq = $.ajax({
+        url: "{!! url('transferlokasilistbarang') !!}",
+        type: "get",
+        success: function(res) { if (!listBarang.length) listBarang = res },
+        complete: function() { listBarangReq = null }
+      })
 
 });
+
+// Ditambahkan 2026-10-22: id input lokasi yang sedang dicari lewat modal pemilih lokasi.
+let lokasiTujuanAktif = ''
 
 function loadAll () {
   $('#tabel').DataTable().destroy();
@@ -922,7 +949,10 @@ function closeForm () {
 
 function buttonAddListLokasi (idTujuan ) {
 
-  let kodebaranglistlokasi = $("#AddAddKodeBrg").val()
+  // Dinonaktifkan 2026-10-22: saat Edit Item, kode barang dibaca dari form Add (kosong), jadi muncul
+  // "Pilih barang terlebih dahulu" dan lokasi tidak bisa diganti. Sekarang dibaca dari form yang sesuai.
+  // let kodebaranglistlokasi = $("#AddAddKodeBrg").val()
+  let kodebaranglistlokasi = String(idTujuan).indexOf('AddEdit') === 0 ? $("#AddEditKodeBrg").val() : $("#AddAddKodeBrg").val()
 
   if (!kodebaranglistlokasi) {
     alertify.warning('Pilih barang terlebih dahulu')
@@ -935,7 +965,11 @@ function buttonAddListLokasi (idTujuan ) {
   // $('#form').css('opacity', .8);
   modal.style.display = "none";
 
-  $('#tabel_add_list_lokasi').DataTable().destroy();
+  // Dinonaktifkan 2026-10-22: daftar lokasi dengan tombol + per baris. Diganti: klik baris.
+  // $('#tabel_add_list_lokasi').DataTable().destroy();
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_lokasi')) {
+    $('#tabel_add_list_lokasi').DataTable().destroy();
+  }
 
 
 
@@ -954,25 +988,39 @@ function buttonAddListLokasi (idTujuan ) {
     }
   })
 
-  let rowTable = ""
-  listLokasi.forEach((item, i) => {
-    rowTable+= `
-      <tr>
-      <td>${item.KodeGdg}</td>
-      <td>${item.BarcodeLoc}</td>
-      <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddAddInsertLokasi('${idTujuan}',${i})" type="button" ><i class="bi bi-plus"></i></button></td>
-      </tr>
-    `
-
-  });
-  document.getElementById("tabel_data_add_list_lokasi").innerHTML = rowTable
-
+  // let rowTable = ""
+  // listLokasi.forEach((item, i) => {
+  //   rowTable+= `
+  //     <tr>
+  //     <td>${item.KodeGdg}</td>
+  //     <td>${item.BarcodeLoc}</td>
+  //     <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddAddInsertLokasi('${idTujuan}',${i})" type="button" ><i class="bi bi-plus"></i></button></td>
+  //     </tr>
+  //   `
+  //
+  // });
+  // document.getElementById("tabel_data_add_list_lokasi").innerHTML = rowTable
+  //
+  // $("#tabel_add_list_lokasi").DataTable({
+  //   "lengthChange": false,
+  //     "paging": false ,
+  //      "columnDefs": [
+  //   {  "className": "text-center", "targets": [2] },
+  // ]});
+  lokasiTujuanAktif = idTujuan
   $("#tabel_add_list_lokasi").DataTable({
-    "lengthChange": false,
-      "paging": false ,
-       "columnDefs": [
-    {  "className": "text-center", "targets": [2] },
-  ]});
+    data: listLokasi.map((item, i) => ({ i: i, KodeGdg: item.KodeGdg || '', BarcodeLoc: item.BarcodeLoc || '' })),
+    columns: [{ data: 'KodeGdg' }, { data: 'BarcodeLoc' }],
+    lengthChange: false,
+    paging: false,
+    autoWidth: false, // tabel dibuat saat modal masih tersembunyi; tanpa ini lebar kolom jadi sempit
+    createdRow: function (row) { row.classList.add('pick-row') },
+    language: { emptyTable: 'Tidak ada data', zeroRecords: 'Tidak ada data yang cocok dengan pencarian' }
+  })
+  $('#tabel_add_list_lokasi tbody').off('click.pilihLokasi').on('click.pilihLokasi', 'tr.pick-row', function () {
+    const data = $('#tabel_add_list_lokasi').DataTable().row(this).data()
+    if (data) buttonAddAddInsertLokasi(lokasiTujuanAktif, data.i)
+  })
 
   var modal2 = document.getElementById("formAddListLokasi");
   console.log(modal2.style.display)
@@ -1183,44 +1231,72 @@ function buttonAddListBarang () {
   // $('#form').css('opacity', .8);
   modal.style.display = "none";
 
-  $('#tabel_add_list_item').DataTable().destroy();
-
-  $.ajax({
-    url: "{!! url('transferlokasilistbarang') !!}",
-    type: "get",
-    async: false,
-    success: function(res) {
-      console.log(res)
-      listBarang = res
-
-
-    }
-  })
-
-  let rowTable = ""
-  listBarang.forEach((item, i) => {
-    rowTable+= `
-      <tr>
-      <td>${item.KODEBRG}</td>
-      <td>${item.NAMABRG}</td>
-      <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddAddInsertItem(${i})" type="button" ><i class="bi bi-plus"></i></button></td>
-      </tr>
-    `
-
-  });
-  document.getElementById("tabel_data_add_list_item").innerHTML = rowTable
-
-  // tabel_data_add_list_item
-
-
-
-
-  $("#tabel_add_list_item").DataTable({
-    "lengthChange": false,
-      "paging": false ,
-       "columnDefs": [
-    {  "className": "text-center", "targets": [2] },
-  ]});
+  // Dinonaktifkan 2026-10-22: daftar barang dimuat ulang tiap klik lalu semua baris dirender
+  // sekaligus dengan tombol + per baris (lambat). Diganti: dimuat sekali per halaman,
+  // DataTables deferRender + paging, pilih barang dengan klik baris (sama dengan Permintaan UK).
+  // $('#tabel_add_list_item').DataTable().destroy();
+  //
+  // $.ajax({
+  //   url: "{!! url('transferlokasilistbarang') !!}",
+  //   type: "get",
+  //   async: false,
+  //   success: function(res) {
+  //     console.log(res)
+  //     listBarang = res
+  //   }
+  // })
+  //
+  // let rowTable = ""
+  // listBarang.forEach((item, i) => {
+  //   rowTable+= `
+  //     <tr>
+  //     <td>${item.KODEBRG}</td>
+  //     <td>${item.NAMABRG}</td>
+  //     <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddAddInsertItem(${i})" type="button" ><i class="bi bi-plus"></i></button></td>
+  //     </tr>
+  //   `
+  // });
+  // document.getElementById("tabel_data_add_list_item").innerHTML = rowTable
+  //
+  // $("#tabel_add_list_item").DataTable({
+  //   "lengthChange": false,
+  //     "paging": false ,
+  //      "columnDefs": [
+  //   {  "className": "text-center", "targets": [2] },
+  // ]});
+  if (!listBarang.length) {
+    // Belum selesai dimuat di belakang layar: batalkan, muat langsung dengan animasi memuat.
+    if (listBarangReq) { listBarangReq.abort(); listBarangReq = null }
+    wmsProses('Memuat daftar barang...', function () {
+    $.ajax({
+      url: "{!! url('transferlokasilistbarang') !!}",
+      type: "get",
+      async: false,
+      success: function(res) {
+        listBarang = res
+      }
+    })
+    })
+  }
+  if ($.fn.DataTable.isDataTable('#tabel_add_list_item')) {
+    $('#tabel_add_list_item').DataTable().search('').draw()
+  } else {
+    $("#tabel_add_list_item").DataTable({
+      data: listBarang.map((item, i) => ({ i: i, KODEBRG: item.KODEBRG || '', NAMABRG: item.NAMABRG || '' })),
+      deferRender: true,
+      autoWidth: false, // tabel dibuat saat modal masih tersembunyi; tanpa ini lebar kolom jadi sempit
+      columns: [{ data: 'KODEBRG' }, { data: 'NAMABRG' }],
+      lengthChange: true,
+      lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+      pageLength: 10,
+      createdRow: function (row) { row.classList.add('pick-row') },
+      language: { lengthMenu: 'Tampilkan _MENU_', emptyTable: 'Tidak ada data', zeroRecords: 'Tidak ada data yang cocok dengan pencarian' }
+    })
+    $('#tabel_add_list_item tbody').on('click', 'tr.pick-row', function () {
+      const data = $('#tabel_add_list_item').DataTable().row(this).data()
+      if (data) buttonAddAddInsertItem(data.i)
+    })
+  }
 
 
 

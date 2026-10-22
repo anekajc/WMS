@@ -427,7 +427,9 @@
             </div>
             <div class="col-2 text-right">
               <div class="form-group">
-            <button class="btn btn-success btn-sm text-right" onclick="resetInputAdd('input_koreksi_kodelokasi')"><i class="bi bi-arrow-clockwise"></i></button>
+            {{-- Dinonaktifkan 2026-10-22: resetInputAdd memindah fokus ke scanner form Add (tersembunyi). --}}
+            {{-- <button class="btn btn-success btn-sm text-right" onclick="resetInputAdd('input_koreksi_kodelokasi')"><i class="bi bi-arrow-clockwise"></i></button> --}}
+            <button class="btn btn-success btn-sm text-right" onclick="resetInputKoreksi('input_koreksi_kodelokasi')"><i class="bi bi-arrow-clockwise"></i></button>
             </div>
             </div>
 
@@ -464,7 +466,9 @@
 
             <div class="col-2 text-right">
               <div class="form-group">
-            <button onclick="focusScanner()" class="btn btn-success btn-sm text-right"><i class="bi bi-upc-scan"></i></button>
+            {{-- Dinonaktifkan 2026-10-22: focusScanner() memfokuskan scanner form Add, bukan form Koreksi. --}}
+            {{-- <button onclick="focusScanner()" class="btn btn-success btn-sm text-right"><i class="bi bi-upc-scan"></i></button> --}}
+            <button onclick="focusScannerKoreksi()" class="btn btn-success btn-sm text-right"><i class="bi bi-upc-scan"></i></button>
             </div>
             </div>
 
@@ -585,6 +589,12 @@
 
   let koreksiDataArray = []
 
+  // Ditambahkan 2026-10-22: gudang dari lokasi terakhir yang di-scan. Dulu dibaca dari checkLokasi
+  // (hasil scan terakhir); kalau yang terakhir di-scan barang, checkLokasi kosong -> error JS
+  // "Cannot read properties of undefined (reading 'KodeGdg')" dan item tidak masuk list.
+  let kodeGdgAdd = ''
+  let kodeGdgKoreksi = ''
+
   $(document).ready(function(){
         $("#tabel").DataTable({ "lengthChange": false,
         'order': [[1, 'asc']],
@@ -643,6 +653,7 @@
 
       if (checkLokasi.length) {
         document.getElementById("input_koreksi_kodelokasi").value = barcode
+        kodeGdgKoreksi = checkLokasi[0].KodeGdg
       } else if (checkBarang.length) {
         document.getElementById("input_koreksi_kodebarang").value = barcode
       } else {
@@ -705,6 +716,7 @@
 
       if (checkLokasi.length) {
         document.getElementById("input_add_kodelokasi").value = barcode
+        kodeGdgAdd = checkLokasi[0].KodeGdg
       } else if (checkBarang.length) {
         document.getElementById("input_add_kodebarang").value = barcode
       } else {
@@ -724,7 +736,20 @@
 
   function resetInputAdd (htmlId) {
     document.getElementById(htmlId).value = ''
+    if (htmlId === 'input_add_kodelokasi') kodeGdgAdd = ''
     focusScanner()
+  }
+
+  // Ditambahkan 2026-10-22: tombol reset Kode Brg di modal Koreksi memanggil fungsi ini sejak
+  // versi lama, tapi fungsinya tidak pernah ada (error JS "resetInputKoreksi is not defined").
+  function resetInputKoreksi (htmlId) {
+    document.getElementById(htmlId).value = ''
+    if (htmlId === 'input_koreksi_kodelokasi') kodeGdgKoreksi = ''
+    focusScannerKoreksi()
+  }
+
+  function focusScannerKoreksi () {
+    $('#input_koreksi_scanner').focus();
   }
 
   function refreshTableKoreksi (NOBUKTI) {
@@ -905,6 +930,7 @@
     console.log('tes2')
     document.getElementById("input_koreksi_kodebarang").value = ''
     document.getElementById("input_koreksi_kodelokasi").value = ''
+    kodeGdgKoreksi = ''
     document.getElementById("input_koreksi_qty").val = '0.00'
     document.getElementById("koreksiTableData").innerHTML = rowTable
 
@@ -1057,6 +1083,7 @@
 
     document.getElementById("input_add_kodebarang").value = ''
     document.getElementById("input_add_kodelokasi").value = ''
+    kodeGdgAdd = ''
     document.getElementById("input_add_scanner").value = ''
     document.getElementById("input_add_qty").value = '0.00'
 
@@ -1161,6 +1188,8 @@
         console.log('success add form')
         loadAll()
         $("#form").modal('toggle')
+        // Ditambahkan 2026-10-22: dulu tidak ada pesan setelah simpan berhasil.
+        alertify.success('Opname gudang telah ditambah');
         }
         if (res == 2) {
           setNewNoBukti()
@@ -1297,7 +1326,13 @@
       return
     }
 
-    let kodegudang = checkLokasi[0].KodeGdg
+    // Dinonaktifkan 2026-10-22: checkLokasi kosong bila scan terakhir adalah barang (error JS).
+    // let kodegudang = checkLokasi[0].KodeGdg
+    let kodegudang = kodeGdgKoreksi
+    if (!kodegudang) {
+      alertify.warning("Scan ulang kode lokasi");
+      return
+    }
     console.log(kodegudang)
     let _token = $("#_token").val();
     let item = {}
@@ -1542,7 +1577,13 @@
       return
     }
 
-    let kodegudang = checkLokasi[0].KodeGdg
+    // Dinonaktifkan 2026-10-22: checkLokasi kosong bila scan terakhir adalah barang (error JS).
+    // let kodegudang = checkLokasi[0].KodeGdg
+    let kodegudang = kodeGdgAdd
+    if (!kodegudang) {
+      alertify.warning("Scan ulang kode lokasi");
+      return
+    }
     console.log(kodegudang)
     // return
 
