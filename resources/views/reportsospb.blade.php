@@ -58,7 +58,8 @@
       <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
           <div class="row">
-            <div class="col-13" style="overflow:auto;">
+            {{-- Dinonaktifkan 2026-10-23: <div class="col-13" style="overflow:auto;"> - lebar wadah tabel disamakan dengan In Bound/Out Bound (col-12). --}}
+            <div class="col-12" style="overflow:auto;">
               <div class="container-fluid">
 
                     <table id="tabel" class="data-table"  >
@@ -84,6 +85,8 @@
                       <!-- nobukti , tanggal, nama cust, nama barang, pocust, qntso, qty, stock , sat, catatan, lokasipenerima, alamat kirim, duedate, pr, part number, merk, userid -->
 
                       <tbody id="tabel_data" class="text-left" >
+                        {{-- Dinonaktifkan 2026-10-23: (int) membuat qty desimal < 1 (mis. 0.50) tampil 0.00, dan
+                             kolom Qnt RSPB memakai syarat qntspb (qty RSPB kosong tampil kosong, bukan 0.00).
                         @for ($i = 0; $i < count($listData); $i++)
                         <tr>
                           <td>{{ $listData[$i]->noso }}</td>
@@ -102,6 +105,24 @@
                           <td>{{ (int)$listData[$i]->qntspb ? $listData[$i]->qntrspb : '0.00' }}</td>
                         </tr>
                         @endfor
+                        --}}
+                        @foreach ($listData as $d)
+                        <tr>
+                          <td>{{ $d->noso }}</td>
+                          <td>{{ $d->tglso }}</td>
+                          <td>{{ $d->kodebrg }}</td>
+                          <td>{{ $d->namabrg }}</td>
+                          <td>{{ (float)$d->qntso ? $d->qntso : '0.00' }}</td>
+                          <td>{{ $d->nopl }}</td>
+                          <td>{{ (float)$d->qntpckinglist ? $d->qntpckinglist : '0.00' }}</td>
+                          <td>{{ (float)$d->qntp ? $d->qntp : '0.00' }}</td>
+                          <td>{{ (float)$d->qntplreject ? $d->qntplreject : '0.00' }}</td>
+                          <td>{{ $d->nospb }}</td>
+                          <td>{{ (float)$d->qntspb ? $d->qntspb : '0.00' }}</td>
+                          <td>{{ $d->norspb }}</td>
+                          <td>{{ (float)$d->qntrspb ? $d->qntrspb : '0.00' }}</td>
+                        </tr>
+                        @endforeach
                       </tbody>
 
 
@@ -212,7 +233,9 @@ $(document).ready(function(){
          // "paging": false ,
            "columnDefs": [
         // { "type": "date", "targets": [2] },
-        {  "className": "text-right", "targets": [5],  },
+        // Dinonaktifkan 2026-10-23: kolom 5 adalah No PL (teks); yang rata kanan seharusnya kolom qty.
+        // {  "className": "text-right", "targets": [5],  },
+        {  "className": "text-right", "targets": [4, 6, 7, 8, 10, 12],  },
       ]});
 });
 
@@ -237,14 +260,67 @@ function buttonOpenFilter () {
 
 }
 
-function submitFilter () {
-  // console.log(tanggal)
-  let _token = $("#_token").val();
-  
+// Dinonaktifkan 2026-10-23: kolom Qnt RSPB menampilkan qntspb; nilai kosong tertulis "null";
+// layar membeku tanpa tanda memuat; kalau server gagal, tidak ada pesan.
+// function submitFilter () {
+//   // console.log(tanggal)
+//   let _token = $("#_token").val();
+//
+//
+//   let bln = $("#input_date_month").val();
+//   let thn = $("#input_date_year").val();
+//
+//   $.ajax({
+//     url: "{!! url('reportsospbspfilter') !!}",
+//     type: "post",
+//     async: false,
+//     data: {
+//       _token,
+//       bln,
+//       thn
+//     },
+//     success: function(res) {
+//     console.log(res)
+//     $('#tabel').DataTable().destroy();
+//     let rowTable = ""
+//     // tabel_data_add_list_lokasi
+//     res.forEach((item, i) => {
+//
+//       rowTable += `
+//       <tr>
+//         <td>${item.noso}</td>
+//         <td>${item.tglso}</td>
+//         <td>${item.kodebrg}</td>
+//         <td>${item.namabrg}</td>
+//         <td>${Number(item.qntso) ? item.qntso : '0.00'}</td>
+//          <td>${item.nopl}</td>
+//          <td>${Number(item.qntpckinglist) ? item.qntpckinglist : '0.00'}</td>
+//          <td>${Number(item.qntp) ? item.qntp : '0.00'}</td>
+//          <td>${Number(item.qntplreject) ? item.qntplreject : '0.00'}</td>
+//          <td>${item.nospb}</td>
+//          <td>${Number(item.qntspb) ? item.qntspb : '0.00'}</td>
+//          <td>${item.norspb}</td>
+//          <td>${Number(item.qntrspb) ? item.qntspb : '0.00'}</td>
+//       </tr>`
+//     });
+//
+//     document.getElementById("tabel_data").innerHTML = rowTable
+//     $("#tabel").DataTable({
+//          "columnDefs": [
+//       {  "className": "text-right", "targets": [5],  },
+//     ]});
+//   }});
+//
+//   $("#form").modal('toggle')
+// }
 
+function submitFilter () {
+  let _token = $("#_token").val();
   let bln = $("#input_date_month").val();
   let thn = $("#input_date_year").val();
 
+  $("#form").modal('hide')
+  wmsProses('Memuat data...', function () {
   $.ajax({
     url: "{!! url('reportsospbspfilter') !!}",
     type: "post",
@@ -255,47 +331,39 @@ function submitFilter () {
       thn
     },
     success: function(res) {
-    console.log(res)
     $('#tabel').DataTable().destroy();
     let rowTable = ""
-    // tabel_data_add_list_lokasi
     res.forEach((item, i) => {
 
       rowTable += `
       <tr>
-        <td>${item.noso}</td>
-        <td>${item.tglso}</td>
-        <td>${item.kodebrg}</td>
-        <td>${item.namabrg}</td>
+        <td>${wmsTeks(item.noso)}</td>
+        <td>${wmsTeks(item.tglso)}</td>
+        <td>${wmsTeks(item.kodebrg)}</td>
+        <td>${wmsTeks(item.namabrg)}</td>
         <td>${Number(item.qntso) ? item.qntso : '0.00'}</td>
-         <td>${item.nopl}</td>
-         <td>${Number(item.qntpckinglist) ? item.qntpckinglist : '0.00'}</td>
-         <td>${Number(item.qntp) ? item.qntp : '0.00'}</td>
-         <td>${Number(item.qntplreject) ? item.qntplreject : '0.00'}</td>
-         <td>${item.nospb}</td>
-         <td>${Number(item.qntspb) ? item.qntspb : '0.00'}</td>
-         <td>${item.norspb}</td>
-         <td>${Number(item.qntrspb) ? item.qntspb : '0.00'}</td>
+        <td>${wmsTeks(item.nopl)}</td>
+        <td>${Number(item.qntpckinglist) ? item.qntpckinglist : '0.00'}</td>
+        <td>${Number(item.qntp) ? item.qntp : '0.00'}</td>
+        <td>${Number(item.qntplreject) ? item.qntplreject : '0.00'}</td>
+        <td>${wmsTeks(item.nospb)}</td>
+        <td>${Number(item.qntspb) ? item.qntspb : '0.00'}</td>
+        <td>${wmsTeks(item.norspb)}</td>
+        <td>${Number(item.qntrspb) ? item.qntrspb : '0.00'}</td>
       </tr>`
     });
 
-
-
-
     document.getElementById("tabel_data").innerHTML = rowTable
     $("#tabel").DataTable({
-      // 'order': [[0, 'asc']],
-      //"lengthChange": false,
-       // "paging": false ,
          "columnDefs": [
-      // { "type": "date", "targets": [2] },
-      {  "className": "text-right", "targets": [5],  },
+      {  "className": "text-right", "targets": [4, 6, 7, 8, 10, 12],  },
     ]});
-  }});
-
-
-
-  $("#form").modal('toggle')
+    },
+    error: function () {
+      alertify.error('Gagal memuat data, silakan coba lagi')
+    }
+  });
+  })
 }
 
 

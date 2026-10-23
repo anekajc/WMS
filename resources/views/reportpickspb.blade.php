@@ -58,7 +58,8 @@
       <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
           <div class="row">
-            <div class="col-10" style="overflow:auto;">
+            {{-- Dinonaktifkan 2026-10-23: <div class="col-10" style="overflow:auto;"> - lebar wadah tabel disamakan dengan In Bound/Out Bound (col-12). --}}
+            <div class="col-12" style="overflow:auto;">
               <div class="container-fluid">
 
                     <table id="tabel" class="data-table"  >
@@ -79,6 +80,7 @@
                       <!-- nobukti , tanggal, nama cust, nama barang, pocust, qntso, qty, stock , sat, catatan, lokasipenerima, alamat kirim, duedate, pr, part number, merk, userid -->
 
                       <tbody id="tabel_data" class="text-left" >
+                        {{-- Dinonaktifkan 2026-10-23: (int) membuat qty desimal < 1 (mis. 0.50) tampil 0.00.
                         @for ($i = 0; $i < count($listData); $i++)
                         <tr>
                           <td>{{ $listData[$i]->nopicking }}</td>
@@ -94,6 +96,21 @@
 
                         </tr>
                         @endfor
+                        --}}
+                        @foreach ($listData as $d)
+                        <tr>
+                          <td>{{ $d->nopicking }}</td>
+                          <td>{{ $d->tglpicking }}</td>
+                          <td>{{ $d->kodebrg }}</td>
+                          <td>{{ $d->namabrg }}</td>
+                          <td>{{ (float)$d->qntpickinglist ? $d->qntpickinglist : '0.00' }}</td>
+                          <td>{{ (float)$d->qntpicking ? $d->qntpicking : '0.00' }}</td>
+                          <td>{{ (float)$d->qntrejectpicking ? $d->qntrejectpicking : '0.00' }}</td>
+                          <td>{{ $d->nospb }}</td>
+                          <td>{{ (float)$d->qntspb ? $d->qntspb : '0.00' }}</td>
+                          <td>{{ (float)$d->qntrspb ? $d->qntrspb : '0.00' }}</td>
+                        </tr>
+                        @endforeach
                       </tbody>
 
 
@@ -159,7 +176,9 @@
 
 
       <div class="modal-footer">
-       <button type="button" class="btn btn-primary" onclick="submitFilter()">Submitxx</button>
+       {{-- Dinonaktifkan 2026-10-23: label sisa uji "Submitxx". --}}
+       {{-- <button type="button" class="btn btn-primary" onclick="submitFilter()">Submitxx</button> --}}
+       <button type="button" class="btn btn-primary" onclick="submitFilter()">Submit</button>
       </div>
 
 
@@ -188,7 +207,9 @@ $(document).ready(function(){
          // "paging": false ,
            "columnDefs": [
         // { "type": "date", "targets": [2] },
-        {  "className": "text-right", "targets": [5],  },
+        // Dinonaktifkan 2026-10-23: hanya kolom 5; semua kolom qty dibuat rata kanan.
+        // {  "className": "text-right", "targets": [5],  },
+        {  "className": "text-right", "targets": [4, 5, 6, 8, 9],  },
       ]});
 });
 
@@ -206,13 +227,64 @@ function buttonOpenFilter () {
 
 }
 
+// Dinonaktifkan 2026-10-23: memanggil URL milik Report SO-SPB (reportsospbspfilter), jadi tabel terisi
+// "undefined" setelah Submit. Nilai kosong tertulis "null"; layar membeku tanpa tanda memuat.
+// function submitFilter () {
+//   let tanggal = $("#input_date").val();
+//   console.log(tanggal)
+//   let _token = $("#_token").val();
+//
+//   $.ajax({
+//     url: "{!! url('reportsospbspfilter') !!}",
+//     type: "post",
+//     async: false,
+//     data: {
+//       tanggal,
+//       _token
+//     },
+//     success: function(res) {
+//     console.log(res)
+//     $('#tabel').DataTable().destroy();
+//     let rowTable = ""
+//     res.forEach((item, i) => {
+//
+//       rowTable += `
+//       <tr>
+//
+//         <td>${item.nopicking}</td>
+//         <td>${item.tglpicking}</td>
+//         <td>${item.kodebrg}</td>
+//         <td>${item.namabrg}</td>
+//         <td>${Number(item.qntpickinglist) ? item.qntpickinglist : '0.00'}</td>
+//          <td>${Number(item.qntpicking) ? item.qntpicking : '0.00'}</td>
+//          <td>${Number(item.qntrejectpicking) ? item.qntrejectpicking : '0.00'}</td>
+//          <td>${item.nospb}</td>
+//          <td>${Number(item.qntspb) ? item.qntspb : '0.00'}</td>
+//          <td>${Number(item.qntrspb) ? item.qntrspb : '0.00'}</td>
+//
+//       </tr>`
+//     });
+//
+//     document.getElementById("tabel_data").innerHTML = rowTable
+//     $("#tabel").DataTable({
+//          "columnDefs": [
+//       {  "className": "text-right", "targets": [5],  },
+//     ]});
+//   }});
+//
+//   $("#form").modal('toggle')
+// }
+
+// Catatan: Sp_ReportPickSpb menampilkan SEMUA outstanding (filter periode di SP dikomentari sejak
+// versi lama), jadi Submit = muat ulang data terbaru.
 function submitFilter () {
   let tanggal = $("#input_date").val();
-  console.log(tanggal)
   let _token = $("#_token").val();
 
+  $("#form").modal('hide')
+  wmsProses('Memuat data...', function () {
   $.ajax({
-    url: "{!! url('reportsospbspfilter') !!}",
+    url: "{!! url('reportpickspbspfilter') !!}",
     type: "post",
     async: false,
     data: {
@@ -220,46 +292,36 @@ function submitFilter () {
       _token
     },
     success: function(res) {
-    console.log(res)
     $('#tabel').DataTable().destroy();
     let rowTable = ""
-    // tabel_data_add_list_lokasi
     res.forEach((item, i) => {
 
       rowTable += `
       <tr>
-
-        <td>${item.nopicking}</td>
-        <td>${item.tglpicking}</td>
-        <td>${item.kodebrg}</td>
-        <td>${item.namabrg}</td>
+        <td>${wmsTeks(item.nopicking)}</td>
+        <td>${wmsTeks(item.tglpicking)}</td>
+        <td>${wmsTeks(item.kodebrg)}</td>
+        <td>${wmsTeks(item.namabrg)}</td>
         <td>${Number(item.qntpickinglist) ? item.qntpickinglist : '0.00'}</td>
-         <td>${Number(item.qntpicking) ? item.qntpicking : '0.00'}</td>
-         <td>${Number(item.qntrejectpicking) ? item.qntrejectpicking : '0.00'}</td>
-         <td>${item.nospb}</td>
-         <td>${Number(item.qntspb) ? item.qntspb : '0.00'}</td>
-         <td>${Number(item.qntrspb) ? item.qntrspb : '0.00'}</td>
-
+        <td>${Number(item.qntpicking) ? item.qntpicking : '0.00'}</td>
+        <td>${Number(item.qntrejectpicking) ? item.qntrejectpicking : '0.00'}</td>
+        <td>${wmsTeks(item.nospb)}</td>
+        <td>${Number(item.qntspb) ? item.qntspb : '0.00'}</td>
+        <td>${Number(item.qntrspb) ? item.qntrspb : '0.00'}</td>
       </tr>`
     });
 
-
-
-
     document.getElementById("tabel_data").innerHTML = rowTable
     $("#tabel").DataTable({
-      // 'order': [[0, 'asc']],
-      //"lengthChange": false,
-       // "paging": false ,
          "columnDefs": [
-      // { "type": "date", "targets": [2] },
-      {  "className": "text-right", "targets": [5],  },
+      {  "className": "text-right", "targets": [4, 5, 6, 8, 9],  },
     ]});
-  }});
-
-
-
-  $("#form").modal('toggle')
+    },
+    error: function () {
+      alertify.error('Gagal memuat data, silakan coba lagi')
+    }
+  });
+  })
 }
 
 

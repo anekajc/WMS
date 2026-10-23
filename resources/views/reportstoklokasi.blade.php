@@ -209,45 +209,108 @@ function buttonOpenFilter () {
 
 }
 
+// Dinonaktifkan 2026-10-23: unduh lewat data-URI - karakter "#" memotong isi file. Diganti wmsUnduhXls (Blob).
+// function exportTableToExcel(tableID, filename = '') {
+//
+//   // makeTable()
+//   // return
+//   var downloadLink;
+//   var dataType = 'application/vnd.ms-excel';
+//   var tableSelect = document.getElementById(tableID);
+//   var tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
+//
+//   // Specify file name
+//   filename = filename?filename+'.xls':'excel_data.xls';
+//
+//   // Create download link element
+//   downloadLink = document.createElement("a");
+//
+//   document.body.appendChild(downloadLink);
+//
+//   if(navigator.msSaveOrOpenBlob){
+//       var blob = new Blob(['\ufeff', tableHTML], {
+//           type: dataType
+//       });
+//       navigator.msSaveOrOpenBlob( blob, filename);
+//   }else{
+//       // Create a link to the file
+//       downloadLink.href = 'data:' + dataType + ', ' + tableHTML;
+//
+//       // Setting the file name
+//       downloadLink.download = filename;
+//
+//       //triggering the function
+//       downloadLink.click();
+//   }
+// }
+
 function exportTableToExcel(tableID, filename = '') {
-
-  // makeTable()
-  // return
-  var downloadLink;
-  var dataType = 'application/vnd.ms-excel';
   var tableSelect = document.getElementById(tableID);
-  var tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
-
-  // Specify file name
   filename = filename?filename+'.xls':'excel_data.xls';
-
-  // Create download link element
-  downloadLink = document.createElement("a");
-
-  document.body.appendChild(downloadLink);
-
-  if(navigator.msSaveOrOpenBlob){
-      var blob = new Blob(['\ufeff', tableHTML], {
-          type: dataType
-      });
-      navigator.msSaveOrOpenBlob( blob, filename);
-  }else{
-      // Create a link to the file
-      downloadLink.href = 'data:' + dataType + ', ' + tableHTML;
-
-      // Setting the file name
-      downloadLink.download = filename;
-
-      //triggering the function
-      downloadLink.click();
-  }
+  wmsUnduhXls(tableSelect.outerHTML, filename);
 }
+
+// Dinonaktifkan 2026-10-23: nilai kosong tertulis "null"; layar membeku tanpa tanda memuat;
+// kalau server gagal tidak ada pesan.
+// function submitFilter () {
+//   let tanggal = $("#input_date").val();
+//   console.log(tanggal)
+//   let _token = $("#_token").val();
+//
+//   $.ajax({
+//     url: "{!! url('reportstoklokasispfilter') !!}",
+//     type: "post",
+//     async: false,
+//     data: {
+//       tanggal,
+//       _token
+//     },
+//     success: function(res) {
+//     console.log(res)
+//     $('#tabel').DataTable().destroy();
+//     let rowTable = ""
+//     // tabel_data_add_list_lokasi
+//     res.forEach((item, i) => {
+//
+//       rowTable += `
+//       <tr>
+//         <td>${item.KODEBRG }</td>
+//         <td>${item.PartNumber}</td>
+//         <td>${item.NAMABRG}</td>
+//         <td>${item.NAMAMERK}</td>
+//         <td>${item.NMgudang}</td>
+//         <td>${item.NamaLokasi}</td>
+//         <td>${Number(item.SALDOQNT) ? Number(item.SALDOQNT).toFixed(2) : '0.00'}</td>
+//         <td>${item.SAT1}</td>
+//       </tr>`
+//     });
+//
+//
+//
+//
+//     document.getElementById("tabel_data").innerHTML = rowTable
+//     $("#tabel").DataTable({
+//       // 'order': [[0, 'asc']],
+//       "lengthChange": false,
+//         "paging": false ,
+//          "columnDefs": [
+//       // { "type": "date", "targets": [2] },
+//       {  "className": "text-right", "targets": [6],  },
+//       {"type" : "string" , "targets" : [0]}
+//     ]});
+//   }});
+//
+//
+//
+//   $("#form").modal('toggle')
+// }
 
 function submitFilter () {
   let tanggal = $("#input_date").val();
-  console.log(tanggal)
   let _token = $("#_token").val();
 
+  $("#form").modal('hide')
+  wmsProses('Memuat data...', function () {
   $.ajax({
     url: "{!! url('reportstoklokasispfilter') !!}",
     type: "post",
@@ -257,43 +320,37 @@ function submitFilter () {
       _token
     },
     success: function(res) {
-    console.log(res)
     $('#tabel').DataTable().destroy();
     let rowTable = ""
-    // tabel_data_add_list_lokasi
     res.forEach((item, i) => {
 
       rowTable += `
       <tr>
-        <td>${item.KODEBRG }</td>
-        <td>${item.PartNumber}</td>
-        <td>${item.NAMABRG}</td>
-        <td>${item.NAMAMERK}</td>
-        <td>${item.NMgudang}</td>
-        <td>${item.NamaLokasi}</td>
+        <td>${wmsTeks(item.KODEBRG)}</td>
+        <td>${wmsTeks(item.PartNumber)}</td>
+        <td>${wmsTeks(item.NAMABRG)}</td>
+        <td>${wmsTeks(item.NAMAMERK)}</td>
+        <td>${wmsTeks(item.NMgudang)}</td>
+        <td>${wmsTeks(item.NamaLokasi)}</td>
         <td>${Number(item.SALDOQNT) ? Number(item.SALDOQNT).toFixed(2) : '0.00'}</td>
-        <td>${item.SAT1}</td>
+        <td>${wmsTeks(item.SAT1)}</td>
       </tr>`
     });
 
-
-
-
     document.getElementById("tabel_data").innerHTML = rowTable
     $("#tabel").DataTable({
-      // 'order': [[0, 'asc']],
       "lengthChange": false,
         "paging": false ,
          "columnDefs": [
-      // { "type": "date", "targets": [2] },
       {  "className": "text-right", "targets": [6],  },
       {"type" : "string" , "targets" : [0]}
     ]});
-  }});
-
-
-
-  $("#form").modal('toggle')
+    },
+    error: function () {
+      alertify.error('Gagal memuat data, silakan coba lagi')
+    }
+  });
+  })
 }
 
 

@@ -58,7 +58,8 @@
       <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
           <div class="row">
-            <div class="col-13" style="overflow:auto;">
+            {{-- Dinonaktifkan 2026-10-23: <div class="col-13" style="overflow:auto;"> - lebar wadah tabel disamakan dengan In Bound/Out Bound (col-12). --}}
+            <div class="col-12" style="overflow:auto;">
               <div class="container-fluid">
 
                     <table id="tabel" class="data-table"  >
@@ -100,12 +101,19 @@
 
                           <td>{{ $listData[$i]->NOSAT }}</td>
                           <td>{{ $listData[$i]->SATUAN }}</td>
+                          {{-- Dinonaktifkan 2026-10-23: (int) membuat qty desimal antara -1 dan 1 (mis. selisih 0.50) tampil 0.00.
                           <td>{{ (int)$listData[$i]->SaldoComp ? $listData[$i]->SaldoComp : '0.00' }}</td>
                           <td>{{ (int)$listData[$i]->QntOpname ? $listData[$i]->QntOpname : '0.00' }}</td>
 
                           <td>{{ (int)$listData[$i]->Selisih ? $listData[$i]->Selisih : '0.00' }}</td>
                           <td>{{ (int)$listData[$i]->QNTDB ? $listData[$i]->QNTDB : '0.00' }}</td>
                           <td>{{ (int)$listData[$i]->QNTCR ? $listData[$i]->QNTCR : '0.00' }}</td>
+                          --}}
+                          <td>{{ (float)$listData[$i]->SaldoComp ? $listData[$i]->SaldoComp : '0.00' }}</td>
+                          <td>{{ (float)$listData[$i]->QntOpname ? $listData[$i]->QntOpname : '0.00' }}</td>
+                          <td>{{ (float)$listData[$i]->Selisih ? $listData[$i]->Selisih : '0.00' }}</td>
+                          <td>{{ (float)$listData[$i]->QNTDB ? $listData[$i]->QNTDB : '0.00' }}</td>
+                          <td>{{ (float)$listData[$i]->QNTCR ? $listData[$i]->QNTCR : '0.00' }}</td>
                           <td>{{ $listData[$i]->KODEGDG }}</td>
                           <td>{{ $listData[$i]->LOKASI }}</td>
                           <td>{{ $listData[$i]->RAK }}</td>
@@ -264,14 +272,81 @@ function formatDate(date , pemisah = '-') {
     return [year, month, day].join(pemisah);
 }
 
+// Dinonaktifkan 2026-10-23: nilai kosong tertulis "null"; layar membeku tanpa tanda memuat;
+// kalau server gagal tidak ada pesan.
+// function submitFilter () {
+//   // console.log(tanggal)
+//   let _token = $("#_token").val();
+//
+//
+//   let bln = $("#input_date_month").val();
+//   let thn = $("#input_date_year").val();
+//
+//   $.ajax({
+//     url: "{!! url('reportopnameharianspfilter') !!}",
+//     type: "post",
+//     async: false,
+//     data: {
+//       _token,
+//       bln,
+//       thn
+//     },
+//     success: function(res) {
+//     console.log(res)
+//     $('#tabel').DataTable().destroy();
+//     let rowTable = ""
+//     // tabel_data_add_list_lokasi
+//     res.forEach((item, i) => {
+//
+//       rowTable += `
+//       <tr>
+//         <td>${item.NOBUKTI}</td>
+//         <td>${formatDate(item.tanggal , '/')}</td>
+//         <td>${item.KODEBRG}</td>
+//         <td>${item.NAMABRG}</td>
+//
+//         <td>${item.NOSAT}</td>
+//          <td>${item.SATUAN}</td>
+//          <td>${Number(item.SaldoComp) ? item.SaldoComp : '0.00'}</td>
+//          <td>${Number(item.QntOpname) ? item.QntOpname : '0.00'}</td>
+//          <td>${Number(item.Selisih) ? item.Selisih : '0.00'}</td>
+//          <td>${Number(item.QNTDB) ? item.QNTDB : '0.00'}</td>
+//          <td>${Number(item.QNTCR) ? item.QNTCR : '0.00'}</td>
+//          <td>${item.KODEGDG}</td>
+//          <td>${item.LOKASI}</td>
+//          <td>${item.RAK}</td>
+//          ${Number(item.pVerifikasi) ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>' : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'}
+//          ${Number(item.pVerifikasiAudit) ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>' : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'}
+//
+//       </tr>`
+//     });
+//
+//
+//
+//
+//     document.getElementById("tabel_data").innerHTML = rowTable
+//     $("#tabel").DataTable({
+//       // 'order': [[0, 'asc']],
+//      "lengthChange": false,
+//        "paging": false ,
+//          "columnDefs": [
+//       // { "type": "date", "targets": [2] },
+//       {  "className": "text-right", "targets": [6,7,8,9,10],  },
+//     ]});
+//   }});
+//
+//
+//
+//   $("#form").modal('toggle')
+// }
+
 function submitFilter () {
-  // console.log(tanggal)
   let _token = $("#_token").val();
-
-
   let bln = $("#input_date_month").val();
   let thn = $("#input_date_year").val();
 
+  $("#form").modal('hide')
+  wmsProses('Memuat data...', function () {
   $.ajax({
     url: "{!! url('reportopnameharianspfilter') !!}",
     type: "post",
@@ -282,52 +357,44 @@ function submitFilter () {
       thn
     },
     success: function(res) {
-    console.log(res)
     $('#tabel').DataTable().destroy();
     let rowTable = ""
-    // tabel_data_add_list_lokasi
     res.forEach((item, i) => {
 
       rowTable += `
       <tr>
-        <td>${item.NOBUKTI}</td>
+        <td>${wmsTeks(item.NOBUKTI)}</td>
         <td>${formatDate(item.tanggal , '/')}</td>
-        <td>${item.KODEBRG}</td>
-        <td>${item.NAMABRG}</td>
-
-        <td>${item.NOSAT}</td>
-         <td>${item.SATUAN}</td>
-         <td>${Number(item.SaldoComp) ? item.SaldoComp : '0.00'}</td>
-         <td>${Number(item.QntOpname) ? item.QntOpname : '0.00'}</td>
-         <td>${Number(item.Selisih) ? item.Selisih : '0.00'}</td>
-         <td>${Number(item.QNTDB) ? item.QNTDB : '0.00'}</td>
-         <td>${Number(item.QNTCR) ? item.QNTCR : '0.00'}</td>
-         <td>${item.KODEGDG}</td>
-         <td>${item.LOKASI}</td>
-         <td>${item.RAK}</td>
-         ${Number(item.pVerifikasi) ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>' : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'}
-         ${Number(item.pVerifikasiAudit) ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>' : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'}
-
+        <td>${wmsTeks(item.KODEBRG)}</td>
+        <td>${wmsTeks(item.NAMABRG)}</td>
+        <td>${wmsTeks(item.NOSAT)}</td>
+        <td>${wmsTeks(item.SATUAN)}</td>
+        <td>${Number(item.SaldoComp) ? item.SaldoComp : '0.00'}</td>
+        <td>${Number(item.QntOpname) ? item.QntOpname : '0.00'}</td>
+        <td>${Number(item.Selisih) ? item.Selisih : '0.00'}</td>
+        <td>${Number(item.QNTDB) ? item.QNTDB : '0.00'}</td>
+        <td>${Number(item.QNTCR) ? item.QNTCR : '0.00'}</td>
+        <td>${wmsTeks(item.KODEGDG)}</td>
+        <td>${wmsTeks(item.LOKASI)}</td>
+        <td>${wmsTeks(item.RAK)}</td>
+        ${Number(item.pVerifikasi) ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>' : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'}
+        ${Number(item.pVerifikasiAudit) ? '<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;"><div style="display: none">1</div></i></td>' : '<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;"><div style="display: none">0</div></i></td>'}
       </tr>`
     });
 
-
-
-
     document.getElementById("tabel_data").innerHTML = rowTable
     $("#tabel").DataTable({
-      // 'order': [[0, 'asc']],
      "lengthChange": false,
        "paging": false ,
          "columnDefs": [
-      // { "type": "date", "targets": [2] },
       {  "className": "text-right", "targets": [6,7,8,9,10],  },
     ]});
-  }});
-
-
-
-  $("#form").modal('toggle')
+    },
+    error: function () {
+      alertify.error('Gagal memuat data, silakan coba lagi')
+    }
+  });
+  })
 }
 
 

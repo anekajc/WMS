@@ -22,7 +22,9 @@ class ReportRelokasiController extends Controller
 
 
 // $outstanding = DB::connection("SML")->select('exec sp_sosiapkirim ?,?,?',[ $periode->bulan , $periode->tahun ,\Auth::user()->username ]);
-    $kodemenu = '054';
+    // Dinonaktifkan 2026-10-23: kode menu 054 adalah Report SO-SPB. Menu ini 058 (new_menureport).
+    // $kodemenu = '054';
+    $kodemenu = '058';
     $akses = NewAksesMenuReport::where('USERID', \Auth::id())-> where('L1', $kodemenu)->first();
     if(!$akses || !$akses->HASACCESS) {
        return redirect('/home');

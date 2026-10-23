@@ -58,7 +58,8 @@
       <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
           <div class="row">
-            <div class="col-13" style="overflow:auto;">
+            {{-- Dinonaktifkan 2026-10-23: <div class="col-13" style="overflow:auto;"> - lebar wadah tabel disamakan dengan In Bound/Out Bound (col-12). --}}
+            <div class="col-12" style="overflow:auto;">
               <div class="container-fluid">
 
                     <table id="tabel" class="data-table"  >
@@ -92,15 +93,25 @@
                           <td>{{ $listData[$i]->NamaBrg }}</td>
                           <td>{{ $listData[$i]->KodeGdg }}</td>
                           <td>{{ $listData[$i]->KodeLokasi }}</td>
-                          <td>{{ (int)$listData[$i]->QNT ? $listData[$i]->QNT : '0.00' }}</td>
+                          {{-- Dinonaktifkan 2026-10-23: (int) membuat qty desimal < 1 tampil 0.00. --}}
+                          {{-- <td>{{ (int)$listData[$i]->QNT ? $listData[$i]->QNT : '0.00' }}</td> --}}
+                          <td>{{ (float)$listData[$i]->QNT ? $listData[$i]->QNT : '0.00' }}</td>
                           <td>{{ $listData[$i]->SATUAN }}</td>
                           <td>{!! date("Y/m/d", strtotime($listData[$i]->TANGGAL)) !!}</td>
                           <td>{{ $listData[$i]->UserPick ? $listData[$i]->UserPick : '' }}</td>
+                          {{-- Dinonaktifkan 2026-10-23: pQC kosong (NULL, ada 56 baris di DBOutBrgDET2) tidak
+                               mendapat sel sama sekali -> jumlah kolom baris itu kurang dan DataTables memunculkan peringatan.
                           @if ($listData[$i]->pQC == 0)
                                 <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;" ><span style="display: none">0</span></i></td>
                               @elseif ($listData[$i]->pQC == 1)
                                 <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;" ><span style="display: none">1</span></i></td>
                               @endif
+                          --}}
+                          @if ((int)$listData[$i]->pQC == 1)
+                                <td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;" ><span style="display: none">1</span></i></td>
+                          @else
+                                <td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;" ><span style="display: none">0</span></i></td>
+                          @endif
                           <td>{!! $listData[$i]->TglQc ? $listData[$i]->TglQc : '' !!}</td>
                           <td>{{ $listData[$i]->UserQc ? $listData[$i]->UserQc : '' }}</td>
                         </tr>
@@ -241,14 +252,85 @@ function buttonOpenFilter () {
 
 }
 
+// Dinonaktifkan 2026-10-23: nilai kosong tertulis "null"; layar membeku tanpa tanda memuat;
+// kalau server gagal tidak ada pesan.
+// function submitFilter () {
+//   // console.log(tanggal)
+//   let _token = $("#_token").val();
+//
+//
+//   let bln = $("#input_date_month").val();
+//   let thn = $("#input_date_year").val();
+//
+//   $.ajax({
+//     url: "{!! url('reportpickingspfilter') !!}",
+//     type: "post",
+//     async: false,
+//     data: {
+//       _token,
+//       bln,
+//       thn
+//     },
+//     success: function(res) {
+//     console.log(res)
+//     $('#tabel').DataTable().destroy();
+//     let rowTable = ""
+//     // tabel_data_add_list_lokasi
+//     res.forEach((item, i) => {
+//
+//       rowTable += `
+//       <tr>
+//         <td>${item.NOBUKTI}</td>
+//         <td>${item.TANGGAL ? formatDate(item.TglPL, '/'): ''}</td>
+//         <td>${item.KODEBRG}</td>
+//         <td>${item.NamaBrg}</td>
+//          <td>${item.KodeGdg}</td>
+//           <td>${item.KodeLokasi}</td>
+//          <td>${Number(item.QNT) ? item.QNT : '0.00'}</td>
+//           <td>${item.SATUAN}</td>
+//         <td>${item.TANGGAL ? formatDate(item.TANGGAL, '/'): ''}</td>
+//           <td>${item.UserPick ? item.UserPick : ''}</td>
+//           ${item.pQC ?  `<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;" ><span style="display: none">1</span></i></td>` : `<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;" ><span style="display: none">0</span></i></td>` }
+//
+//
+//
+//           <td>${item.TglQc ? item.TglQc : ''}</td>
+//            <td>${item.UserQc ? item.UserQc : ''}</td>
+//
+//       </tr>`
+//     });
+//
+//
+//
+//
+//     document.getElementById("tabel_data").innerHTML = rowTable
+//
+//     $("#tabel").DataTable({
+//       'order': [[1, 'desc']],
+//      "lengthChange": false,
+//        "paging": false ,
+//          "columnDefs": [
+//       // { "type": "date", "targets": [2] },
+//       {  "className": "text-right", "targets": [6],  },
+//     ]});
+//
+//   }});
+//
+//
+//
+//   $("#form").modal('toggle')
+//   return
+// }
+
+// Diganti 2026-10-23: selain tanda memuat & pesan gagal, status QC dibaca dengan Number(item.pQC) -
+// dari server nilainya teks "0"/"1", dan teks "0" dianggap benar oleh JS sehingga semua baris tampil centang.
 function submitFilter () {
-  // console.log(tanggal)
   let _token = $("#_token").val();
-
-
   let bln = $("#input_date_month").val();
   let thn = $("#input_date_year").val();
 
+  $("#form").modal('hide')
+  wmsProses('Memuat data...', function () {
   $.ajax({
     url: "{!! url('reportpickingspfilter') !!}",
     type: "post",
@@ -259,54 +341,42 @@ function submitFilter () {
       thn
     },
     success: function(res) {
-    console.log(res)
     $('#tabel').DataTable().destroy();
     let rowTable = ""
-    // tabel_data_add_list_lokasi
     res.forEach((item, i) => {
 
       rowTable += `
       <tr>
-        <td>${item.NOBUKTI}</td>
-        <td>${item.TANGGAL ? formatDate(item.TglPL, '/'): ''}</td>
-        <td>${item.KODEBRG}</td>
-        <td>${item.NamaBrg}</td>
-         <td>${item.KodeGdg}</td>
-          <td>${item.KodeLokasi}</td>
-         <td>${Number(item.QNT) ? item.QNT : '0.00'}</td>
-          <td>${item.SATUAN}</td>
+        <td>${wmsTeks(item.NOBUKTI)}</td>
+        <td>${item.TglPL ? formatDate(item.TglPL, '/'): ''}</td>
+        <td>${wmsTeks(item.KODEBRG)}</td>
+        <td>${wmsTeks(item.NamaBrg)}</td>
+        <td>${wmsTeks(item.KodeGdg)}</td>
+        <td>${wmsTeks(item.KodeLokasi)}</td>
+        <td>${Number(item.QNT) ? item.QNT : '0.00'}</td>
+        <td>${wmsTeks(item.SATUAN)}</td>
         <td>${item.TANGGAL ? formatDate(item.TANGGAL, '/'): ''}</td>
-          <td>${item.UserPick ? item.UserPick : ''}</td>
-          ${item.pQC ?  `<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;" ><span style="display: none">1</span></i></td>` : `<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;" ><span style="display: none">0</span></i></td>` }
-
-
-
-          <td>${item.TglQc ? item.TglQc : ''}</td>
-           <td>${item.UserQc ? item.UserQc : ''}</td>
-
+        <td>${wmsTeks(item.UserPick)}</td>
+        ${Number(item.pQC) == 1 ?  `<td class="text-success text-center"><i class="bi bi-check2" style="-webkit-text-stroke-width: 2px;" ><span style="display: none">1</span></i></td>` : `<td class="text-danger text-center"><i class="bi bi-x" style="-webkit-text-stroke-width: 2px;" ><span style="display: none">0</span></i></td>` }
+        <td>${wmsTeks(item.TglQc)}</td>
+        <td>${wmsTeks(item.UserQc)}</td>
       </tr>`
     });
 
-
-
-
     document.getElementById("tabel_data").innerHTML = rowTable
-
     $("#tabel").DataTable({
       'order': [[1, 'desc']],
      "lengthChange": false,
        "paging": false ,
          "columnDefs": [
-      // { "type": "date", "targets": [2] },
       {  "className": "text-right", "targets": [6],  },
     ]});
-
-  }});
-
-
-
-  $("#form").modal('toggle')
-  return
+    },
+    error: function () {
+      alertify.error('Gagal memuat data, silakan coba lagi')
+    }
+  });
+  })
 }
 
 function formatDate(date , pemisah = '-') {

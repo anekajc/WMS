@@ -86,7 +86,9 @@
                           <td>{{ $listData[$i]->NamaBrg }}</td>
                           <td>{{ $listData[$i]->KodeGdg }}</td>
                           <td>{{ $listData[$i]->KodeLokasi }}</td>
-                          <td>{{ (int)$listData[$i]->QNT ? $listData[$i]->QNT : '0.00' }}</td>
+                          {{-- Dinonaktifkan 2026-10-23: (int) membuat qty desimal < 1 tampil 0.00. --}}
+                          {{-- <td>{{ (int)$listData[$i]->QNT ? $listData[$i]->QNT : '0.00' }}</td> --}}
+                          <td>{{ (float)$listData[$i]->QNT ? $listData[$i]->QNT : '0.00' }}</td>
                           <td>{{ $listData[$i]->SATUAN }}</td>
                         </tr>
                         @endfor
@@ -225,14 +227,74 @@ function buttonOpenFilter () {
 
 }
 
+// Dinonaktifkan 2026-10-23: nilai kosong tertulis "null"; layar membeku tanpa tanda memuat;
+// kalau server gagal tidak ada pesan.
+// function submitFilter () {
+//   // console.log(tanggal)
+//   let _token = $("#_token").val();
+//
+//
+//   let bln = $("#input_date_month").val();
+//   let thn = $("#input_date_year").val();
+//
+//   $.ajax({
+//     url: "{!! url('reportputawayspfilter') !!}",
+//     type: "post",
+//     async: false,
+//     data: {
+//       _token,
+//       bln,
+//       thn
+//     },
+//     success: function(res) {
+//     console.log(res)
+//     $('#tabel').DataTable().destroy();
+//     let rowTable = ""
+//     // tabel_data_add_list_lokasi
+//     res.forEach((item, i) => {
+//
+//       rowTable += `
+//       <tr>
+//         <td>${item.NOBUKTI}</td>
+//         <td>${item.tanggal ? formatDate(item.tanggal, '/'): ''}</td>
+//         <td>${item.KODEBRG}</td>
+//         <td>${item.NamaBrg}</td>
+//          <td>${item.KodeGdg}</td>
+//           <td>${item.KodeLokasi}</td>
+//          <td>${Number(item.QNT) ? item.QNT : '0.00'}</td>
+//           <td>${item.SATUAN}</td>
+//       </tr>`
+//     });
+//
+//
+//
+//
+//     document.getElementById("tabel_data").innerHTML = rowTable
+//
+//     $("#tabel").DataTable({
+//       'order': [[1, 'desc']],
+//      "lengthChange": false,
+//        "paging": false ,
+//          "columnDefs": [
+//       // { "type": "date", "targets": [2] },
+//       {  "className": "text-right", "targets": [6],  },
+//     ]});
+//
+//   }});
+//
+//
+//
+//   $("#form").modal('toggle')
+//   return
+// }
+
 function submitFilter () {
-  // console.log(tanggal)
   let _token = $("#_token").val();
-
-
   let bln = $("#input_date_month").val();
   let thn = $("#input_date_year").val();
 
+  $("#form").modal('hide')
+  wmsProses('Memuat data...', function () {
   $.ajax({
     url: "{!! url('reportputawayspfilter') !!}",
     type: "post",
@@ -243,45 +305,37 @@ function submitFilter () {
       thn
     },
     success: function(res) {
-    console.log(res)
     $('#tabel').DataTable().destroy();
     let rowTable = ""
-    // tabel_data_add_list_lokasi
     res.forEach((item, i) => {
 
       rowTable += `
       <tr>
-        <td>${item.NOBUKTI}</td>
+        <td>${wmsTeks(item.NOBUKTI)}</td>
         <td>${item.tanggal ? formatDate(item.tanggal, '/'): ''}</td>
-        <td>${item.KODEBRG}</td>
-        <td>${item.NamaBrg}</td>
-         <td>${item.KodeGdg}</td>
-          <td>${item.KodeLokasi}</td>
-         <td>${Number(item.QNT) ? item.QNT : '0.00'}</td>
-          <td>${item.SATUAN}</td>
+        <td>${wmsTeks(item.KODEBRG)}</td>
+        <td>${wmsTeks(item.NamaBrg)}</td>
+        <td>${wmsTeks(item.KodeGdg)}</td>
+        <td>${wmsTeks(item.KodeLokasi)}</td>
+        <td>${Number(item.QNT) ? item.QNT : '0.00'}</td>
+        <td>${wmsTeks(item.SATUAN)}</td>
       </tr>`
     });
 
-
-
-
     document.getElementById("tabel_data").innerHTML = rowTable
-
     $("#tabel").DataTable({
       'order': [[1, 'desc']],
      "lengthChange": false,
        "paging": false ,
          "columnDefs": [
-      // { "type": "date", "targets": [2] },
       {  "className": "text-right", "targets": [6],  },
     ]});
-
-  }});
-
-
-
-  $("#form").modal('toggle')
-  return
+    },
+    error: function () {
+      alertify.error('Gagal memuat data, silakan coba lagi')
+    }
+  });
+  })
 }
 
 function formatDate(date , pemisah = '-') {

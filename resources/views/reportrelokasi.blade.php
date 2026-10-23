@@ -88,7 +88,9 @@
                           <td>{{ $listData[$i]->tanggal }}</td>
                           <td>{{ $listData[$i]->kodebrg }}</td>
                           <td>{{ $listData[$i]->namabrg }}</td>
-                          <td>{{ (int)$listData[$i]->qnt ? $listData[$i]->qnt : '0.00' }}</td>
+                          {{-- Dinonaktifkan 2026-10-23: (int) membuat qty desimal < 1 tampil 0.00. --}}
+                          {{-- <td>{{ (int)$listData[$i]->qnt ? $listData[$i]->qnt : '0.00' }}</td> --}}
+                          <td>{{ (float)$listData[$i]->qnt ? $listData[$i]->qnt : '0.00' }}</td>
                           <td>{{ $listData[$i]->satuan }}</td>
                           <td>{{ $listData[$i]->lokasiasal }}</td>
                           <td>{{ $listData[$i]->lokasitujuan }}</td>
@@ -204,7 +206,9 @@ $(document).ready(function(){
          // "paging": false ,
            "columnDefs": [
         // { "type": "date", "targets": [2] },
-        {  "className": "text-right", "targets": [5],  },
+        // Dinonaktifkan 2026-10-23: kolom 5 adalah Satuan; yang rata kanan seharusnya kolom Qnt (4).
+        // {  "className": "text-right", "targets": [5],  },
+        {  "className": "text-right", "targets": [4],  },
       ]});
 });
 
@@ -229,14 +233,72 @@ function buttonOpenFilter () {
 
 }
 
+// Dinonaktifkan 2026-10-23: nilai kosong tertulis "null"; layar membeku tanpa tanda memuat;
+// kalau server gagal tidak ada pesan.
+// function submitFilter () {
+//   // console.log(tanggal)
+//   let _token = $("#_token").val();
+//
+//
+//   let bln = $("#input_date_month").val();
+//   let thn = $("#input_date_year").val();
+//
+//   $.ajax({
+//     url: "{!! url('reportrelokasispfilter') !!}",
+//     type: "post",
+//     async: false,
+//     data: {
+//       _token,
+//       bln,
+//       thn
+//     },
+//     success: function(res) {
+//     console.log(res)
+//     $('#tabel').DataTable().destroy();
+//     let rowTable = ""
+//     // tabel_data_add_list_lokasi
+//     res.forEach((item, i) => {
+//
+//       rowTable += `
+//       <tr>
+//         <td>${item.nobukti}</td>
+//         <td>${item.tanggal}</td>
+//         <td>${item.kodebrg}</td>
+//         <td>${item.namabrg}</td>
+//         <td>${Number(item.qnt) ? item.qnt : '0.00'}</td>
+//
+//          <td>${item.satuan}</td>
+//          <td>${item.lokasiasal}</td>
+//         <td>${item.lokasitujuan}</td>
+//       </tr>`
+//     });
+//
+//
+//
+//
+//     document.getElementById("tabel_data").innerHTML = rowTable
+//     $("#tabel").DataTable({
+//       // 'order': [[0, 'asc']],
+//       //"lengthChange": false,
+//        // "paging": false ,
+//          "columnDefs": [
+//       // { "type": "date", "targets": [2] },
+//       {  "className": "text-right", "targets": [5],  },
+//     ]});
+//   }});
+//
+//
+//
+//   $("#form").modal('toggle')
+// }
+
 function submitFilter () {
-  // console.log(tanggal)
   let _token = $("#_token").val();
-
-
   let bln = $("#input_date_month").val();
   let thn = $("#input_date_year").val();
 
+  $("#form").modal('hide')
+  wmsProses('Memuat data...', function () {
   $.ajax({
     url: "{!! url('reportrelokasispfilter') !!}",
     type: "post",
@@ -247,43 +309,34 @@ function submitFilter () {
       thn
     },
     success: function(res) {
-    console.log(res)
     $('#tabel').DataTable().destroy();
     let rowTable = ""
-    // tabel_data_add_list_lokasi
     res.forEach((item, i) => {
 
       rowTable += `
       <tr>
-        <td>${item.nobukti}</td>
-        <td>${item.tanggal}</td>
-        <td>${item.kodebrg}</td>
-        <td>${item.namabrg}</td>
+        <td>${wmsTeks(item.nobukti)}</td>
+        <td>${wmsTeks(item.tanggal)}</td>
+        <td>${wmsTeks(item.kodebrg)}</td>
+        <td>${wmsTeks(item.namabrg)}</td>
         <td>${Number(item.qnt) ? item.qnt : '0.00'}</td>
-
-         <td>${item.satuan}</td>
-         <td>${item.lokasiasal}</td>
-        <td>${item.lokasitujuan}</td>
+        <td>${wmsTeks(item.satuan)}</td>
+        <td>${wmsTeks(item.lokasiasal)}</td>
+        <td>${wmsTeks(item.lokasitujuan)}</td>
       </tr>`
     });
 
-
-
-
     document.getElementById("tabel_data").innerHTML = rowTable
     $("#tabel").DataTable({
-      // 'order': [[0, 'asc']],
-      //"lengthChange": false,
-       // "paging": false ,
          "columnDefs": [
-      // { "type": "date", "targets": [2] },
-      {  "className": "text-right", "targets": [5],  },
+      {  "className": "text-right", "targets": [4],  },
     ]});
-  }});
-
-
-
-  $("#form").modal('toggle')
+    },
+    error: function () {
+      alertify.error('Gagal memuat data, silakan coba lagi')
+    }
+  });
+  })
 }
 
 

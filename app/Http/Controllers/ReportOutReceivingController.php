@@ -53,7 +53,9 @@ class ReportOutReceivingController extends Controller
 		$bln,
         $thn
 	];
-    return DB::connection("SML")->select('exec Sp_ReportOutReceiving ?,?',[$values]);
+    // Dinonaktifkan 2026-10-23: [$values] (array di dalam array) membuat query gagal -> tombol Filter tidak berbuat apa-apa.
+    // return DB::connection("SML")->select('exec Sp_ReportOutReceiving ?,?',[$values]);
+    return DB::connection("SML")->select('exec Sp_ReportOutReceiving ?,?',$values);
   }
 
 

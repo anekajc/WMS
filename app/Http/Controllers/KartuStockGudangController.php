@@ -20,7 +20,9 @@ class KartuStockGudangController extends Controller
 
   public function index () {
 
-    $kodemenu = '051';
+    // Dinonaktifkan 2026-10-23: kode menu 051 adalah Kartu Stok. Menu ini 059 (new_menureport).
+    // $kodemenu = '051';
+    $kodemenu = '059';
     $akses = NewAksesMenuReport::where('USERID', \Auth::id())-> where('L1', $kodemenu)->first();
     if(!$akses || !$akses->HASACCESS) {
        return redirect('/home');

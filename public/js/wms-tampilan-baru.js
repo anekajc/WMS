@@ -225,6 +225,30 @@
     )
   }
 
+  // Ditambahkan 2026-10-23 (menu Report): isi sel tabel yang digambar ulang dari AJAX.
+  // null/undefined -> '' (sama dengan tampilan awal dari Blade, dulu tertulis "null"), dan karakter
+  // HTML di-escape seperti {{ }} Blade.
+  window.wmsTeks = function (v) {
+    if (v === null || v === undefined) { return '' }
+    return String(v).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    })
+  }
+
+  // Ditambahkan 2026-10-23 (menu Report): unduh isi tabel sebagai file .xls lewat Blob.
+  // Dulu lewat data-URI: karakter "#" (ada di 73 nama barang) memotong isi file, dan tabel besar
+  // bisa gagal diunduh. Isi file (HTML tabel) tetap sama.
+  window.wmsUnduhXls = function (tableHTML, filename) {
+    var blob = new Blob(['﻿', tableHTML], { type: 'application/vnd.ms-excel' })
+    if (navigator.msSaveOrOpenBlob) { return navigator.msSaveOrOpenBlob(blob, filename) }
+    var a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove() }, 1000)
+  }
+
   var wmsSibuk = 0
   window.wmsProses = function (teks, kerja) {
     if (wmsSibuk) { return kerja() }

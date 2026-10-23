@@ -83,7 +83,9 @@
                           <td>{{ $listData[$i]->NAMABRG }}</td>
                           <td>{{ $listData[$i]->NAMAMERK }}</td>
                           <td>{{ $listData[$i]->NMgudang }}</td>
-                          <td>{{ (int)$listData[$i]->SALDOQNT ? $listData[$i]->SALDOQNT : '0.00' }}</td>
+                          {{-- Dinonaktifkan 2026-10-23: (int) membuat saldo desimal < 1 tampil 0.00. --}}
+                          {{-- <td>{{ (int)$listData[$i]->SALDOQNT ? $listData[$i]->SALDOQNT : '0.00' }}</td> --}}
+                          <td>{{ (float)$listData[$i]->SALDOQNT ? $listData[$i]->SALDOQNT : '0.00' }}</td>
                           <td>{{ $listData[$i]->SAT1 }}</td>
                         </tr>
                         @endfor
@@ -201,11 +203,67 @@ function buttonOpenFilter () {
 
 }
 
+// Dinonaktifkan 2026-10-23: nilai kosong tertulis "null"; layar membeku tanpa tanda memuat;
+// kalau server gagal tidak ada pesan.
+// function submitFilter () {
+//   let tanggal = $("#input_date").val();
+//   console.log(tanggal)
+//   let _token = $("#_token").val();
+//
+//   $.ajax({
+//     url: "{!! url('reportstokgudangspfilter') !!}",
+//     type: "post",
+//     async: false,
+//     data: {
+//       tanggal,
+//       _token
+//     },
+//     success: function(res) {
+//     console.log(res)
+//     $('#tabel').DataTable().destroy();
+//     let rowTable = ""
+//     // tabel_data_add_list_lokasi
+//     res.forEach((item, i) => {
+//
+//       rowTable += `
+//       <tr>
+//         <td>${item.KODEBRG}</td>
+//         <td>${item.PartNumber}</td>
+//         <td>${item.NAMABRG}</td>
+//         <td>${item.NAMAMERK}</td>
+//         <td>${item.NMgudang}</td>
+//         <td>${Number(item.SALDOQNT) ? item.SALDOQNT : '0.00'}</td>
+//         <td>${item.SAT1}</td>
+//       </tr>`
+//     });
+//
+//
+//
+//
+//     document.getElementById("tabel_data").innerHTML = rowTable
+//     $("#tabel").DataTable({
+//       // 'order': [[0, 'asc']],
+//       "lengthChange": false,
+//         "paging": false ,
+//          "columnDefs": [
+//       // { "type": "date", "targets": [2] },
+//       {  "className": "text-right", "targets": [5],  },
+//     ]});
+//   }});
+//
+//
+//
+//   $("#form").modal('toggle')
+// }
+
+// Catatan: sp_reportStockGDGWeb mengganti @Tgl dengan GETDATE() di awal SP (sejak versi lama),
+// jadi saldo yang tampil selalu saldo hari ini, tanggal filter tidak berpengaruh.
 function submitFilter () {
   let tanggal = $("#input_date").val();
-  console.log(tanggal)
   let _token = $("#_token").val();
 
+  $("#form").modal('hide')
+  wmsProses('Memuat data...', function () {
   $.ajax({
     url: "{!! url('reportstokgudangspfilter') !!}",
     type: "post",
@@ -215,41 +273,35 @@ function submitFilter () {
       _token
     },
     success: function(res) {
-    console.log(res)
     $('#tabel').DataTable().destroy();
     let rowTable = ""
-    // tabel_data_add_list_lokasi
     res.forEach((item, i) => {
 
       rowTable += `
       <tr>
-        <td>${item.KODEBRG}</td>
-        <td>${item.PartNumber}</td>
-        <td>${item.NAMABRG}</td>
-        <td>${item.NAMAMERK}</td>
-        <td>${item.NMgudang}</td>
+        <td>${wmsTeks(item.KODEBRG)}</td>
+        <td>${wmsTeks(item.PartNumber)}</td>
+        <td>${wmsTeks(item.NAMABRG)}</td>
+        <td>${wmsTeks(item.NAMAMERK)}</td>
+        <td>${wmsTeks(item.NMgudang)}</td>
         <td>${Number(item.SALDOQNT) ? item.SALDOQNT : '0.00'}</td>
-        <td>${item.SAT1}</td>
+        <td>${wmsTeks(item.SAT1)}</td>
       </tr>`
     });
 
-
-
-
     document.getElementById("tabel_data").innerHTML = rowTable
     $("#tabel").DataTable({
-      // 'order': [[0, 'asc']],
       "lengthChange": false,
         "paging": false ,
          "columnDefs": [
-      // { "type": "date", "targets": [2] },
       {  "className": "text-right", "targets": [5],  },
     ]});
-  }});
-
-
-
-  $("#form").modal('toggle')
+    },
+    error: function () {
+      alertify.error('Gagal memuat data, silakan coba lagi')
+    }
+  });
+  })
 }
 
 

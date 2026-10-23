@@ -90,9 +90,14 @@
                           <td>{{ $listData[$i]->TANGGAL }}</td>
                           <td>{{ $listData[$i]->KODEBRG }}</td>
                           <td>{{ $listData[$i]->NAMABARANG }}</td>
+                          {{-- Dinonaktifkan 2026-10-23: (int) membuat qty desimal < 1 tampil 0.00.
                           <td>{{ (int)$listData[$i]->QNT ? $listData[$i]->QNT : '0.00' }}</td>
                           <td>{{ (int)$listData[$i]->QNTTERIMA ? $listData[$i]->QNTTERIMA : '0.00' }}</td>
                           <td>{{ (int)$listData[$i]->QNTOUT ? $listData[$i]->QNTOUT : '0.00' }}</td>
+                          --}}
+                          <td>{{ (float)$listData[$i]->QNT ? $listData[$i]->QNT : '0.00' }}</td>
+                          <td>{{ (float)$listData[$i]->QNTTERIMA ? $listData[$i]->QNTTERIMA : '0.00' }}</td>
+                          <td>{{ (float)$listData[$i]->QNTOUT ? $listData[$i]->QNTOUT : '0.00' }}</td>
                           <td>{{ $listData[$i]->SATUAN }}</td>
                           <td>{{ $listData[$i]->NAMAGDG }}</td>
                           <td>{{ $listData[$i]->NAMACUSTSUPP }}</td>
@@ -194,7 +199,9 @@ $(document).ready(function(){
          "paging": false ,
            "columnDefs": [
         // { "type": "date", "targets": [2] },
-        {  "className": "text-right", "targets": [5],  },
+        // Dinonaktifkan 2026-10-23: hanya kolom 5; semua kolom qty dibuat rata kanan.
+        // {  "className": "text-right", "targets": [5],  },
+        {  "className": "text-right", "targets": [5, 6, 7],  },
       ]});
 });
 
@@ -212,16 +219,83 @@ function buttonOpenFilter () {
 
 }
 
+// Dinonaktifkan 2026-10-23: nilai kosong tertulis "null"; layar membeku tanpa tanda memuat;
+// kalau server gagal tidak ada pesan.
+// function submitFilter () {
+//   // console.log(submitFilter)
+//   let tanggal = new Date($("#input_date").val())
+//   let year = tanggal.getFullYear();
+//   let month = tanggal.getMonth() + 1
+//
+//   console.log(year,month)
+//   console.log(tanggal)
+//   let _token = $("#_token").val();
+//
+//   $.ajax({
+//     url: "{!! url('reportoutdispatchspfilter') !!}",
+//     type: "post",
+//     async: false,
+//     data: {
+//       year,
+//       month,
+//       _token
+//     },
+//     success: function(res) {
+//     console.log(res)
+//     $('#tabel').DataTable().destroy();
+//     let rowTable = ""
+//     // tabel_data_add_list_lokasi
+//     res.forEach((item, i) => {
+//
+//       rowTable += `
+//       <tr>
+//
+//       <td>${item.NOBUKTI }</td>
+//       <td>${item.JENISTRANSAKSI }</td>
+//       <td>${item.TANGGAL }</td>
+//       <td>${item.KODEBRG }</td>
+//       <td>${item.NAMABARANG }</td>
+//       <td>${Number(item.QNT )? item.QNT : '0.00' }</td>
+//       <td>${Number(item.QNTTERIMA) ? item.QNTTERIMA : '0.00' }</td>
+//       <td>${Number(item.QNTOUT) ? item.QNTOUT : '0.00' }</td>
+//       <td>${item.SATUAN }</td>
+//       <td>${item.NAMAGDG }</td>
+//       <td>${item.NAMACUSTSUPP }</td>
+//       <td>${item.USERQC }</td>
+//       <td>${item.TGLQC }</td>
+//
+//
+//
+//       </tr>`
+//     });
+//
+//
+//
+//
+//     document.getElementById("tabel_data").innerHTML = rowTable
+//     $("#tabel").DataTable({
+//       // 'order': [[0, 'asc']],
+//       "lengthChange": false,
+//        "paging": false ,
+//          "columnDefs": [
+//       // { "type": "date", "targets": [2] },
+//       {  "className": "text-right", "targets": [5],  },
+//     ]});
+//   }});
+//
+//
+//
+//   $("#form").modal('toggle')
+// }
+
 function submitFilter () {
-  // console.log(submitFilter)
   let tanggal = new Date($("#input_date").val())
   let year = tanggal.getFullYear();
   let month = tanggal.getMonth() + 1
-
-  console.log(year,month)
-  console.log(tanggal)
   let _token = $("#_token").val();
 
+  $("#form").modal('hide')
+  wmsProses('Memuat data...', function () {
   $.ajax({
     url: "{!! url('reportoutdispatchspfilter') !!}",
     type: "post",
@@ -232,51 +306,41 @@ function submitFilter () {
       _token
     },
     success: function(res) {
-    console.log(res)
     $('#tabel').DataTable().destroy();
     let rowTable = ""
-    // tabel_data_add_list_lokasi
     res.forEach((item, i) => {
 
       rowTable += `
       <tr>
-
-      <td>${item.NOBUKTI }</td>
-      <td>${item.JENISTRANSAKSI }</td>
-      <td>${item.TANGGAL }</td>
-      <td>${item.KODEBRG }</td>
-      <td>${item.NAMABARANG }</td>
-      <td>${Number(item.QNT )? item.QNT : '0.00' }</td>
+      <td>${wmsTeks(item.NOBUKTI)}</td>
+      <td>${wmsTeks(item.JENISTRANSAKSI)}</td>
+      <td>${wmsTeks(item.TANGGAL)}</td>
+      <td>${wmsTeks(item.KODEBRG)}</td>
+      <td>${wmsTeks(item.NAMABARANG)}</td>
+      <td>${Number(item.QNT) ? item.QNT : '0.00' }</td>
       <td>${Number(item.QNTTERIMA) ? item.QNTTERIMA : '0.00' }</td>
       <td>${Number(item.QNTOUT) ? item.QNTOUT : '0.00' }</td>
-      <td>${item.SATUAN }</td>
-      <td>${item.NAMAGDG }</td>
-      <td>${item.NAMACUSTSUPP }</td>
-      <td>${item.USERQC }</td>
-      <td>${item.TGLQC }</td>
-
-
-
+      <td>${wmsTeks(item.SATUAN)}</td>
+      <td>${wmsTeks(item.NAMAGDG)}</td>
+      <td>${wmsTeks(item.NAMACUSTSUPP)}</td>
+      <td>${wmsTeks(item.USERQC)}</td>
+      <td>${wmsTeks(item.TGLQC)}</td>
       </tr>`
     });
 
-
-
-
     document.getElementById("tabel_data").innerHTML = rowTable
     $("#tabel").DataTable({
-      // 'order': [[0, 'asc']],
       "lengthChange": false,
        "paging": false ,
          "columnDefs": [
-      // { "type": "date", "targets": [2] },
-      {  "className": "text-right", "targets": [5],  },
+      {  "className": "text-right", "targets": [5, 6, 7],  },
     ]});
-  }});
-
-
-
-  $("#form").modal('toggle')
+    },
+    error: function () {
+      alertify.error('Gagal memuat data, silakan coba lagi')
+    }
+  });
+  })
 }
 
 
