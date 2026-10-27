@@ -852,3 +852,35 @@
 @keyframes wmsPutarLoading {
   to { transform: rotate(360deg); }
 }
+
+/* Ditambahkan 2026-10-27: tombol browse kaca pembesar menempel di kanan kolom input
+   (input-group Bootstrap 4), warna soft sama dengan tombol primary di tabel. */
+.wms-browse .btn-browse {
+  color: #2563eb;
+  background: #e8edff;
+  border: 1px solid #cfdcff;
+  padding: 0 12px;
+  line-height: 1;
+  box-shadow: none;
+}
+.wms-browse .btn-browse:hover,
+.wms-browse .btn-browse:focus {
+  color: #1d4ed8;
+  background: #dbe4ff;
+  border-color: #b9cbff;
+  box-shadow: none;
+}
+.wms-browse .btn-browse:active { background: #cfdcff; }
+.wms-browse .btn-browse .bi { font-size: 14px; }
+.wms-browse > .form-control:focus { z-index: 3; }
+/* Menempel rapat: sudut yang bersentuhan dibuat siku (tema meniban radius bawaan input-group). */
+.wms-browse > .form-control {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+.wms-browse > .input-group-append { margin-left: -1px; }
+.wms-browse > .input-group-append > .btn-browse {
+  height: 100%;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}

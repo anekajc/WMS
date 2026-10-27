@@ -200,10 +200,17 @@
 
                 {{-- Dinonaktifkan 2026-10-22: tombol browse teks "+" diganti ikon kaca pembesar (fungsi sama). --}}
                 {{-- <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" >+</button> --}}
-                <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" title="Cari Barang"><i class="bi bi-search"></i></button>
+                {{-- Dinonaktifkan 2026-10-27: tombol kaca pembesar dipindah menempel di kanan kolom input (fungsi sama). --}}
+                {{-- <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" title="Cari Barang"><i class="bi bi-search"></i></button> --}}
               </div>
             <div class="col-12">
-              <input id="AddAddKodeBrg" type="text" class="form-control" disabled>
+              {{-- <input id="AddAddKodeBrg" type="text" class="form-control" disabled> --}}
+              <div class="input-group wms-browse">
+                <input id="AddAddKodeBrg" type="text" class="form-control" disabled>
+                <div class="input-group-append">
+                  <button type="button" onclick="buttonAddListBarang()" class="btn btn-browse" title="Cari Barang"><i class="bi bi-search"></i></button>
+                </div>
+              </div>
             </div>
 
           </div>
@@ -250,10 +257,17 @@
 
                 {{-- Dinonaktifkan 2026-10-22: tombol browse teks "+" diganti ikon kaca pembesar (fungsi sama). --}}
                 {{-- <button type="button" onclick="buttonAddListLokasi('AddAddLokasiTujuan')" class="btn btn-primary" >+</button> --}}
-                <button type="button" onclick="buttonAddListLokasi('AddAddLokasiTujuan')" class="btn btn-primary" title="Cari Lokasi"><i class="bi bi-search"></i></button>
+                {{-- Dinonaktifkan 2026-10-27: tombol kaca pembesar dipindah menempel di kanan kolom input (fungsi sama). --}}
+                {{-- <button type="button" onclick="buttonAddListLokasi('AddAddLokasiTujuan')" class="btn btn-primary" title="Cari Lokasi"><i class="bi bi-search"></i></button> --}}
               </div>
             <div class="col-12">
-              <input id="AddAddLokasiTujuan" type="text"  class="form-control" disabled>
+              {{-- <input id="AddAddLokasiTujuan" type="text"  class="form-control" disabled> --}}
+              <div class="input-group wms-browse">
+                <input id="AddAddLokasiTujuan" type="text"  class="form-control" disabled>
+                <div class="input-group-append">
+                  <button type="button" onclick="buttonAddListLokasi('AddAddLokasiTujuan')" class="btn btn-browse" title="Cari Lokasi"><i class="bi bi-search"></i></button>
+                </div>
+              </div>
             </div>
           </div>
           <div class="row">
@@ -269,10 +283,17 @@
 
                 {{-- Dinonaktifkan 2026-10-22: tombol browse teks "+" diganti ikon kaca pembesar (fungsi sama). --}}
                 {{-- <button type="button" onclick="buttonAddListLokasi('AddAddLokasiAsal')" class="btn btn-primary" >+</button> --}}
-                <button type="button" onclick="buttonAddListLokasi('AddAddLokasiAsal')" class="btn btn-primary" title="Cari Lokasi"><i class="bi bi-search"></i></button>
+                {{-- Dinonaktifkan 2026-10-27: tombol kaca pembesar dipindah menempel di kanan kolom input (fungsi sama). --}}
+                {{-- <button type="button" onclick="buttonAddListLokasi('AddAddLokasiAsal')" class="btn btn-primary" title="Cari Lokasi"><i class="bi bi-search"></i></button> --}}
               </div>
               <div class="col-12">
-                <input id="AddAddLokasiAsal" type="text"  class="form-control" disabled>
+                {{-- <input id="AddAddLokasiAsal" type="text"  class="form-control" disabled> --}}
+                <div class="input-group wms-browse">
+                  <input id="AddAddLokasiAsal" type="text"  class="form-control" disabled>
+                  <div class="input-group-append">
+                    <button type="button" onclick="buttonAddListLokasi('AddAddLokasiAsal')" class="btn btn-browse" title="Cari Lokasi"><i class="bi bi-search"></i></button>
+                  </div>
+                </div>
               </div>
           </div>
 
@@ -360,10 +381,17 @@
 
                         {{-- Dinonaktifkan 2026-10-22: tombol browse teks "+" diganti ikon kaca pembesar (fungsi sama). --}}
                         {{-- <button type="button" onclick="buttonAddListLokasi('AddEditLokasiTujuan')" class="btn btn-primary" >+</button> --}}
-                        <button type="button" onclick="buttonAddListLokasi('AddEditLokasiTujuan')" class="btn btn-primary" title="Cari Lokasi"><i class="bi bi-search"></i></button>
+                        {{-- Dinonaktifkan 2026-10-27: tombol kaca pembesar dipindah menempel di kanan kolom input (fungsi sama). --}}
+                        {{-- <button type="button" onclick="buttonAddListLokasi('AddEditLokasiTujuan')" class="btn btn-primary" title="Cari Lokasi"><i class="bi bi-search"></i></button> --}}
                       </div>
                     <div class="col-12">
-                      <input id="AddEditLokasiTujuan" type="text"  class="form-control" disabled>
+                      {{-- <input id="AddEditLokasiTujuan" type="text"  class="form-control" disabled> --}}
+                      <div class="input-group wms-browse">
+                        <input id="AddEditLokasiTujuan" type="text"  class="form-control" disabled>
+                        <div class="input-group-append">
+                          <button type="button" onclick="buttonAddListLokasi('AddEditLokasiTujuan')" class="btn btn-browse" title="Cari Lokasi"><i class="bi bi-search"></i></button>
+                        </div>
+                      </div>
                     </div>
 
 
@@ -377,10 +405,17 @@
 
                           {{-- Dinonaktifkan 2026-10-22: tombol browse teks "+" diganti ikon kaca pembesar (fungsi sama). --}}
                           {{-- <button type="button" onclick="buttonAddListLokasi('AddEditLokasiAsal')" class="btn btn-primary" >+</button> --}}
-                          <button type="button" onclick="buttonAddListLokasi('AddEditLokasiAsal')" class="btn btn-primary" title="Cari Lokasi"><i class="bi bi-search"></i></button>
+                          {{-- Dinonaktifkan 2026-10-27: tombol kaca pembesar dipindah menempel di kanan kolom input (fungsi sama). --}}
+                          {{-- <button type="button" onclick="buttonAddListLokasi('AddEditLokasiAsal')" class="btn btn-primary" title="Cari Lokasi"><i class="bi bi-search"></i></button> --}}
                         </div>
                       <div class="col-12">
-                        <input id="AddEditLokasiAsal" type="text"  class="form-control" disabled>
+                        {{-- <input id="AddEditLokasiAsal" type="text"  class="form-control" disabled> --}}
+                        <div class="input-group wms-browse">
+                          <input id="AddEditLokasiAsal" type="text"  class="form-control" disabled>
+                          <div class="input-group-append">
+                            <button type="button" onclick="buttonAddListLokasi('AddEditLokasiAsal')" class="btn btn-browse" title="Cari Lokasi"><i class="bi bi-search"></i></button>
+                          </div>
+                        </div>
                       </div>
                   </div>
 

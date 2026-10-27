@@ -212,10 +212,17 @@
 
                 {{-- Dinonaktifkan 2026-10-22: tombol browse teks "+" diganti ikon kaca pembesar (fungsi sama). --}}
                 {{-- <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" >+</button> --}}
-                <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" title="Cari Barang"><i class="bi bi-search"></i></button>
+                {{-- Dinonaktifkan 2026-10-27: tombol kaca pembesar dipindah menempel di kanan kolom input (fungsi sama). --}}
+                {{-- <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" title="Cari Barang"><i class="bi bi-search"></i></button> --}}
               </div>
             <div class="col-12">
-              <input id="AddAddKodeBrg" type="text" class="form-control" disabled>
+              {{-- <input id="AddAddKodeBrg" type="text" class="form-control" disabled> --}}
+              <div class="input-group wms-browse">
+                <input id="AddAddKodeBrg" type="text" class="form-control" disabled>
+                <div class="input-group-append">
+                  <button type="button" onclick="buttonAddListBarang()" class="btn btn-browse" title="Cari Barang"><i class="bi bi-search"></i></button>
+                </div>
+              </div>
             </div>
 
           </div>

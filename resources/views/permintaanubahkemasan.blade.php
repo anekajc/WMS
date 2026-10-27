@@ -220,10 +220,17 @@
 
                 {{-- Dinonaktifkan 2026-10-21: tombol browse teks "+" diganti ikon kaca pembesar (fungsi sama). --}}
                 {{-- <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" >+</button> --}}
-                <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" title="Cari Barang"><i class="bi bi-search"></i></button>
+                {{-- Dinonaktifkan 2026-10-27: tombol kaca pembesar dipindah menempel di kanan kolom input (fungsi sama). --}}
+                {{-- <button type="button" onclick="buttonAddListBarang()" class="btn btn-primary" title="Cari Barang"><i class="bi bi-search"></i></button> --}}
               </div>
             <div class="col-12">
-              <input id="AddAddKodeBrg" type="text" class="form-control" disabled>
+              {{-- <input id="AddAddKodeBrg" type="text" class="form-control" disabled> --}}
+              <div class="input-group wms-browse">
+                <input id="AddAddKodeBrg" type="text" class="form-control" disabled>
+                <div class="input-group-append">
+                  <button type="button" onclick="buttonAddListBarang()" class="btn btn-browse" title="Cari Barang"><i class="bi bi-search"></i></button>
+                </div>
+              </div>
             </div>
 
           </div>
@@ -1795,7 +1802,10 @@ function buttonEdit (index) {
 
   document.getElementById("AddEditKodeBrg").value = itemEditObj.KODEBRG
   document.getElementById("AddEditNamaBrg").value = itemEditObj.NAMABRG
-  document.getElementById("AddEditNamaMerk").value = itemEditObj.NAMAMERK
+  // Dinonaktifkan 2026-10-27: elemen #AddEditNamaMerk tidak ada di form (sejak versi lama) -> error JS,
+  // form Edit Item tidak pernah muncul. Sekarang hanya diisi bila elemennya ada.
+  // document.getElementById("AddEditNamaMerk").value = itemEditObj.NAMAMERK
+  if (document.getElementById("AddEditNamaMerk")) document.getElementById("AddEditNamaMerk").value = itemEditObj.NAMAMERK
   // document.getElementById("AddEditLokasiAsal").value = itemEditObj.KodeLokasi
   // document.getElementById("AddEditLokasiTujuan").value = itemEditObj.KodeLokTujuan
   document.getElementById("AddEditInputQtyDB").value = Number(itemEditObj.pDebet) ? itemEditObj.QNT : '0.00'

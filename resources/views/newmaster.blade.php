@@ -1036,7 +1036,9 @@
         const crumb = document.getElementById('breadcrumb');
         if (crumb) crumb.innerHTML = `<span>Beranda</span><span class="bc-sep">›</span><span>${mod.label}</span>`;
 
-        // Halaman lama tidak punya @section('page-title') - judul header diambil dari nama menunya.
+        // Halaman lama tidak punya @@section('page-title') - judul header diambil dari nama menunya.
+        // (Diubah 2026-10-27: dulu tertulis tanpa "@@", Blade menjalankannya sebagai @@section sungguhan
+        //  sehingga halaman /home terpotong. "@@" membuat Blade menulis teksnya saja.)
         const judul = document.getElementById('pageTitleBreadcrumb');
         if (judul && judul.textContent.trim() === '') {
           const cari = (n) => nodeMatchesCurrent(n) ? n : (n.children || []).map(cari).find(Boolean);

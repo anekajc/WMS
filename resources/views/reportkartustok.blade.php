@@ -110,11 +110,18 @@
                 <div class="col-4 text-right">
                   {{-- Dinonaktifkan 2026-10-23: tombol browse teks "+" diganti ikon kaca pembesar (fungsi sama). --}}
                   {{-- <button type="button" onclick="buttonAddLokasi()" class="btn btn-primary" >+</button> --}}
-                  <button type="button" onclick="buttonAddLokasi()" class="btn btn-primary" title="Cari Lokasi"><i class="bi bi-search"></i></button>
+                  {{-- Dinonaktifkan 2026-10-27: tombol kaca pembesar dipindah menempel di kanan kolom input (fungsi sama). --}}
+                  {{-- <button type="button" onclick="buttonAddLokasi()" class="btn btn-primary" title="Cari Lokasi"><i class="bi bi-search"></i></button> --}}
                 </div>
 
                 <div class="col-12">
-                  <input type="text" class="form-control text-right bordered" id="input_lokasi" value="" readonly >
+                  {{-- <input type="text" class="form-control text-right bordered" id="input_lokasi" value="" readonly > --}}
+                  <div class="input-group wms-browse">
+                    <input type="text" class="form-control text-right bordered" id="input_lokasi" value="" readonly >
+                    <div class="input-group-append">
+                      <button type="button" onclick="buttonAddLokasi()" class="btn btn-browse" title="Cari Lokasi"><i class="bi bi-search"></i></button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -127,11 +134,18 @@
                 <div class="col-4 text-right">
                   {{-- Dinonaktifkan 2026-10-23: tombol browse teks "+" diganti ikon kaca pembesar (fungsi sama). --}}
                   {{-- <button type="button" onclick="buttonAddBarang()" class="btn btn-primary" >+</button> --}}
-                  <button type="button" onclick="buttonAddBarang()" class="btn btn-primary" title="Cari Barang"><i class="bi bi-search"></i></button>
+                  {{-- Dinonaktifkan 2026-10-27: tombol kaca pembesar dipindah menempel di kanan kolom input (fungsi sama). --}}
+                  {{-- <button type="button" onclick="buttonAddBarang()" class="btn btn-primary" title="Cari Barang"><i class="bi bi-search"></i></button> --}}
                 </div>
 
                 <div class="col-12">
-                  <input type="text" class="form-control text-right bordered" id="input_barang" value="" readonly >
+                  {{-- <input type="text" class="form-control text-right bordered" id="input_barang" value="" readonly > --}}
+                  <div class="input-group wms-browse">
+                    <input type="text" class="form-control text-right bordered" id="input_barang" value="" readonly >
+                    <div class="input-group-append">
+                      <button type="button" onclick="buttonAddBarang()" class="btn btn-browse" title="Cari Barang"><i class="bi bi-search"></i></button>
+                    </div>
+                  </div>
                 </div>
               </div>
 

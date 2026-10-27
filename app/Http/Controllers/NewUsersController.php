@@ -16,6 +16,15 @@ use Illuminate\Support\Facades\Hash;
 class NewUsersController extends Controller
 {
 
+  // Ditambahkan 2026-10-27 (keamanan): aksi di menu User dulu hanya dibatasi tombol di layar, jadi
+  // user mana pun yang login bisa memanggil route-nya langsung (mis. ganti password user lain).
+  // Sekarang hak yang sama dengan layar juga dicek di server (menu 005): tambah = ISTAMBAH,
+  // edit & ubah hak akses = ISKOREKSI, hapus = ISHAPUS, ganti password = IsOtorisasi1.
+  public static function punyaHakUser ($field) {
+    $akses = NewAksesMenu::where('USERID', \Auth::id())->where('L1', '005')->first();
+    return $akses && $akses->HASACCESS && $akses->$field;
+  }
+
 
 
 
@@ -47,16 +56,25 @@ class NewUsersController extends Controller
   }
 
   public function gantiPassword (Request $req) {
+    if (!self::punyaHakUser('IsOtorisasi1')) {
+      return 'Anda tidak punya hak ganti password user';
+    }
     User::where('username', $req->input('username'))->update(['password' => Hash::make($req->input('password'))]);
     return 1;
   }
 
   public function edit (Request $req) {
+    if (!self::punyaHakUser('ISKOREKSI')) {
+      return 'Anda tidak punya hak koreksi user';
+    }
     User::where('username', $req->input('username'))->update(['name' => $req->input('nama'), 'level' => $req->input('level') ]);
     return 1;
   }
 
   public function delete (Request $req) {
+    if (!self::punyaHakUser('ISHAPUS')) {
+      return 'Anda tidak punya hak hapus user';
+    }
     if ($req->input('username') == 'sa') {
       // code...
       return 2;
@@ -71,6 +89,9 @@ class NewUsersController extends Controller
   }
 
   public function add (Request $req) {
+    if (!self::punyaHakUser('ISTAMBAH')) {
+      return 'Anda tidak punya hak tambah user';
+    }
 
 
     $check = User::where('username', $req->input('username'))->count();

@@ -1105,6 +1105,12 @@
         $('#formKoreksiEdit').show();
       }
 
+      // Ditambahkan 2026-10-27: tombol Batal di form Edit Item koreksi memanggil hideShowhide() yang
+      // tidak pernah ada (sejak versi lama) -> error JS dan form tidak tertutup. Sama dengan Put Away.
+      function hideShowhide () {
+        $('.showhide').hide();
+      }
+
 
         function submitEditKoreksi () {
           let _token = $("#_token").val();

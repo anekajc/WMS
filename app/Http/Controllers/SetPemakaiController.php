@@ -72,6 +72,10 @@ class SetPemakaiController extends Controller
 
 
   public function spUpdateAkses (Request $req) {
+    // Ditambahkan 2026-10-27 (keamanan): hanya user dengan hak koreksi menu User (005), sama dengan layar.
+    if (!NewUsersController::punyaHakUser('ISKOREKSI')) {
+      return response('Anda tidak punya hak mengubah akses user', 403);
+    }
 
     $username = $req->input('userid');
 
@@ -109,6 +113,10 @@ class SetPemakaiController extends Controller
   }
 
   public function spUpdateAksesReport (Request $req) {
+    // Ditambahkan 2026-10-27 (keamanan): hanya user dengan hak koreksi menu User (005), sama dengan layar.
+    if (!NewUsersController::punyaHakUser('ISKOREKSI')) {
+      return response('Anda tidak punya hak mengubah akses user', 403);
+    }
 
     $username = $req->input('userid');
 
@@ -136,6 +144,10 @@ class SetPemakaiController extends Controller
   }
 
   public function spUpdateAksesHeader (Request $req) {
+    // Ditambahkan 2026-10-27 (keamanan): hanya user dengan hak koreksi menu User (005), sama dengan layar.
+    if (!NewUsersController::punyaHakUser('ISKOREKSI')) {
+      return response('Anda tidak punya hak mengubah akses user', 403);
+    }
 
     // $username = $req->input('username');
 
@@ -161,6 +173,10 @@ class SetPemakaiController extends Controller
   }
 
   public function spUpdateAksesReportHeader (Request $req) {
+    // Ditambahkan 2026-10-27 (keamanan): hanya user dengan hak koreksi menu User (005), sama dengan layar.
+    if (!NewUsersController::punyaHakUser('ISKOREKSI')) {
+      return response('Anda tidak punya hak mengubah akses user', 403);
+    }
 
     // $username = $req->input('username');
 
